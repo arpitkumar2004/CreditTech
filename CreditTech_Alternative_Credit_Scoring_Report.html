@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alternative Credit Scoring for Financial Inclusion — CreditTech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil:#2E2418;
+  --soil-2:#4A3826;
+  --wheat:#C9A24B;
+  --wheat-light:#E8D9AE;
+  --teal:#1C6B68;
+  --teal-light:#3F9A93;
+  --teal-pale:#E4F1EF;
+  --paper:#F8F4EA;
+  --paper-2:#F1EADA;
+  --ink:#241F18;
+  --ink-soft:#5C5346;
+  --rust:#A24A32;
+  --line:#DCD0B4;
+  --white:#FFFDF8;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:16px;
+  line-height:1.65;
+}
+h1,h2,h3,h4{font-family:'Fraunces',serif;color:var(--soil);margin:0 0 .4em;font-weight:600;}
+h1{font-size:2.6rem;line-height:1.1;}
+h2{font-size:1.9rem;border-bottom:2px solid var(--wheat);padding-bottom:.3em;margin-top:0;}
+h3{font-size:1.3rem;color:var(--teal);}
+h4{font-size:1.05rem;color:var(--soil-2);text-transform:uppercase;letter-spacing:.04em;font-family:'IBM Plex Sans',sans-serif;font-weight:600;}
+p{margin:0 0 1em;}
+a{color:var(--teal);}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-size:.72rem;
+  color:var(--teal);
+  font-weight:600;
+}
+
+/* ===== Layout shell ===== */
+.shell{display:flex;max-width:1400px;margin:0 auto;}
+nav.toc{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  width:290px;flex:0 0 290px;
+  background:var(--soil);color:var(--wheat-light);
+  padding:28px 22px 60px;
+  font-size:.86rem;
+}
+nav.toc::-webkit-scrollbar{width:6px;}
+nav.toc::-webkit-scrollbar-thumb{background:var(--soil-2);}
+nav.toc .brand{
+  font-family:'Fraunces',serif;font-weight:600;color:var(--white);
+  font-size:1.15rem;line-height:1.25;margin-bottom:4px;
+}
+nav.toc .brand small{display:block;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;color:var(--wheat);text-transform:uppercase;margin-top:8px;}
+nav.toc ol{list-style:none;margin:22px 0 0;padding:0;counter-reset:sec;}
+nav.toc ol li{counter-increment:sec;margin-bottom:2px;}
+nav.toc ol li a{
+  display:block;color:var(--wheat-light);text-decoration:none;
+  padding:7px 10px 7px 0;border-left:2px solid transparent;
+  padding-left:12px;font-size:.83rem;transition:.15s;
+}
+nav.toc ol li a::before{content:counter(sec) "  ";font-family:'IBM Plex Mono',monospace;color:var(--wheat);}
+nav.toc ol li a:hover{border-left-color:var(--wheat);color:var(--white);background:rgba(255,255,255,.04);}
+main{flex:1;min-width:0;}
+.hamburger{display:none;}
+
+/* ===== Cover ===== */
+.cover{
+  background:linear-gradient(180deg,var(--soil) 0%,#3a2d1e 62%, var(--teal) 260%);
+  color:var(--white);
+  padding:70px 64px 56px;
+  position:relative;overflow:hidden;
+}
+.cover .signal{position:absolute;right:-60px;top:-40px;opacity:.16;width:520px;}
+.cover .kicker{font-family:'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--wheat);font-size:.78rem;margin-bottom:18px;}
+.cover h1{color:var(--white);font-size:2.9rem;max-width:820px;position:relative;z-index:2;}
+.cover .sub{color:var(--wheat-light);font-size:1.15rem;max-width:700px;margin-top:10px;position:relative;z-index:2;}
+.cover .meta-row{display:flex;gap:34px;flex-wrap:wrap;margin-top:34px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px;position:relative;z-index:2;}
+.cover .meta-row div{font-size:.82rem;}
+.cover .meta-row span{display:block;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--wheat);font-size:.68rem;margin-bottom:4px;}
+
+/* ===== Sections ===== */
+section{padding:56px 64px;border-bottom:1px solid var(--line);}
+section.alt{background:var(--paper-2);}
+.section-num{
+  font-family:'IBM Plex Mono',monospace;color:var(--wheat);font-size:1rem;
+  letter-spacing:.1em;
+}
+.lede{font-size:1.08rem;color:var(--ink-soft);max-width:820px;}
+
+/* ===== Callouts / stat cards ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:26px 0;}
+.stat-card{
+  background:var(--white);border:1px solid var(--line);border-left:4px solid var(--teal);
+  padding:16px 18px;border-radius:4px;
+}
+.stat-card .num{font-family:'Fraunces',serif;font-size:1.8rem;color:var(--soil);font-weight:600;line-height:1.1;}
+.stat-card .lbl{font-size:.78rem;color:var(--ink-soft);margin-top:4px;}
+.stat-card .src{font-size:.66rem;color:var(--teal);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+
+.callout{
+  background:var(--teal-pale);border-left:4px solid var(--teal);
+  padding:16px 20px;margin:20px 0;border-radius:4px;font-size:.94rem;
+}
+.callout.warn{background:#F7EAE4;border-left-color:var(--rust);}
+.callout h4{margin-top:0;color:var(--teal);}
+.callout.warn h4{color:var(--rust);}
+
+/* ===== Tables ===== */
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;background:var(--white);}
+caption{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-soft);margin-bottom:6px;caption-side:top;text-transform:uppercase;letter-spacing:.05em;}
+th{background:var(--soil);color:var(--wheat-light);text-align:left;padding:9px 12px;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-2);}
+.small-note{font-size:.74rem;color:var(--ink-soft);margin-top:-8px;}
+
+/* ===== Lit review cards ===== */
+.lit-card{
+  border:1px solid var(--line);background:var(--white);border-radius:6px;
+  padding:18px 20px;margin-bottom:14px;
+}
+.lit-card .tag{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.65rem;
+  text-transform:uppercase;letter-spacing:.06em;background:var(--wheat-light);color:var(--soil-2);
+  padding:2px 8px;border-radius:20px;margin-bottom:8px;
+}
+.lit-card .cite{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--teal);margin-top:8px;display:block;}
+
+/* ===== Diagrams ===== */
+.diagram-wrap{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:24px;margin:22px 0;overflow-x:auto;}
+.diagram-wrap svg{display:block;margin:0 auto;}
+figcaption{font-size:.76rem;color:var(--ink-soft);text-align:center;margin-top:10px;font-family:'IBM Plex Mono',monospace;}
+
+/* ===== Checklist chips (matches brief's ❑ structure) ===== */
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;}
+.chip{
+  background:var(--soil);color:var(--wheat-light);font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;padding:5px 12px;border-radius:20px;
+}
+
+/* ===== Two-col ===== */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+/* ===== References ===== */
+.ref-list{font-size:.86rem;}
+.ref-list p{padding-left:2em;text-indent:-2em;margin-bottom:.9em;color:var(--ink-soft);}
+.ref-list p b{color:var(--ink);}
+
+footer{background:var(--soil);color:var(--wheat-light);padding:40px 64px;font-size:.82rem;}
+footer a{color:var(--wheat);}
+
+@media(max-width:1000px){
+  nav.toc{position:fixed;left:-300px;transition:.25s;z-index:50;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  nav.toc.open{left:0;}
+  .hamburger{
+    display:block;position:fixed;top:14px;left:14px;z-index:60;
+    background:var(--soil);color:var(--wheat);border:none;border-radius:6px;
+    width:42px;height:42px;font-size:1.2rem;
+  }
+  section{padding:44px 22px;}
+  .cover{padding:70px 22px 40px;}
+}
+</style>
+</head>
+<body>
+<button class="hamburger" onclick="document.querySelector('nav.toc').classList.toggle('open')">☰</button>
+<div class="shell">
+<nav class="toc">
+  <div class="brand">CreditTech<small>Alternative Credit Scoring · Financial Inclusion</small></div>
+  <ol>
+    <li><a href="#problem">Problem &amp; Village-Level Need</a></li>
+    <li><a href="#stakeholders">Stakeholder &amp; Institutional Mapping</a></li>
+    <li><a href="#litreview">Literature, Policy &amp; Case Evidence</a></li>
+    <li><a href="#asis">Existing System (As-Is)</a></li>
+    <li><a href="#tobe">Proposed System (To-Be)</a></li>
+    <li><a href="#architecture">System Architecture</a></li>
+    <li><a href="#data">Data Architecture &amp; Sources</a></li>
+    <li><a href="#techstack">Technology Stack</a></li>
+    <li><a href="#dpi">API / DPI Integration Framework</a></li>
+    <li><a href="#modules">Functional Modules</a></li>
+    <li><a href="#journey">User Journey / Process Flow</a></li>
+    <li><a href="#security">Security, Privacy &amp; Regulatory</a></li>
+    <li><a href="#pilot">4–5 Village Pilot Design</a></li>
+    <li><a href="#cost">Cost &amp; Resource Requirements</a></li>
+    <li><a href="#assumptions">Assumptions &amp; KPIs</a></li>
+    <li><a href="#references">References (APA 7th)</a></li>
+  </ol>
+</nav>
+<main>
+<header class="cover">
+<svg class="signal" viewBox="0 0 400 400" fill="none"><circle cx="340" cy="60" r="120" stroke="#C9A24B" stroke-width="1"/><circle cx="340" cy="60" r="80" stroke="#C9A24B" stroke-width="1"/><path d="M40 360 L140 260 L220 300 L340 60" stroke="#3F9A93" stroke-width="2" stroke-dasharray="4 6"/><circle cx="40" cy="360" r="5" fill="#3F9A93"/><circle cx="140" cy="260" r="5" fill="#3F9A93"/><circle cx="220" cy="300" r="5" fill="#3F9A93"/><circle cx="340" cy="60" r="6" fill="#C9A24B"/></svg>
+<div class="kicker">Concept &amp; Feasibility Report · Pre-Deployment Stage</div>
+<h1>Alternative Credit Scoring for Financial Inclusion</h1>
+<p class="sub">AI-driven lending models for farmers, self-help groups, and rural enterprises — establishing the problem, feasibility, system architecture, and technical design for a village-level pilot ahead of deployment planning.</p>
+<div class="meta-row">
+<div><span>Project</span>CreditTech</div>
+<div><span>Prepared by</span>Arpit Kumar · Integrated Dual Degree (Chemical Engineering + AI), IIT Kharagpur</div>
+<div><span>Report date</span>August 2026</div>
+<div><span>Citation style</span>APA 7th Edition</div>
+<div><span>Primary sources</span>RBI · NABARD · NPCI/Sahamati · SIDBI · World Bank · CGAP · FAO</div>
+</div>
+</header>
+
+<section id="exec">
+<span class="eyebrow">Executive Summary</span>
+<h2>Why alternative credit scoring, and why now</h2>
+<p class="lede">India's formal financial system has won the battle for <em>accounts</em> but not yet the battle for <em>credit</em>. Account ownership among Indian adults reached 89% in 2024, up from 35% in 2011 (Klapper et al., 2025), yet the share of adults who borrowed formally in the year prior to the 2021 Findex survey was only 13% — ten points below the developing-economy average, and lower still for women (World Bank, 2023). Traditional bureau-based scoring depends on a repayment history that thin-file farmers, self-help group (SHG) members, and micro-enterprises largely do not have: 57% of rural households are agricultural (NABARD, 2024), average landholding has shrunk to 0.74 hectares (NABARD, 2024), and the MSME sector alone carries an addressable credit gap of roughly ₹30 lakh crore, or 24% of total debt demand (SIDBI, 2025). CreditTech proposes a village-first, consent-based, multi-source alternative credit scoring system that layers transaction, geospatial, agronomic, SHG-group, and utility-payment data on top of India's public digital infrastructure (Aadhaar e-KYC, UPI, Account Aggregator, and the RBI's Unified Lending Interface) to make previously invisible borrowers legible to formal lenders — without displacing the institutions (NABARD, cooperative banks, MFIs, SHG federations) that already carry rural trust.</p>
+<div class="chip-row">
+<span class="chip">❑ Problem &amp; Need Assessment</span><span class="chip">❑ Stakeholder Mapping</span><span class="chip">❑ As-Is / To-Be</span><span class="chip">❑ System Architecture</span><span class="chip">❑ Data Architecture</span><span class="chip">❑ Technology Stack</span><span class="chip">❑ DPI Integration</span><span class="chip">❑ Functional Modules</span><span class="chip">❑ User Journey</span><span class="chip">❑ Security &amp; Regulation</span><span class="chip">❑ 4–5 Village Pilot</span><span class="chip">❑ Cost &amp; Resources</span><span class="chip">❑ Literature Evidence</span>
+</div>
+</section>
+<section id="problem">
+<span class="section-num">01</span>
+<h2>Problem &amp; Village-Level Need Assessment</h2>
+<p class="lede">Secondary-data synthesis of the credit-access gap facing farmers, SHGs, and rural micro-enterprises, and why that gap is structurally a <em>data</em> problem rather than only a capital problem.</p>
+
+<h3>1.1 The inclusion paradox: accounts without credit</h3>
+<p>Two decades of push — Jan Dhan, Aadhaar, and UPI (the "JAM trinity") — have closed India's account-ownership gap almost completely. But an account is not a credit history. The RBI's own Financial Inclusion Index (FI-Index), which weights <em>usage</em> at 45% and <em>access</em> at only 35%, rose from 43.4 in March 2017 to just 67.0 in March 2025 (RBI, 2025) — meaningful progress, but still a third of the way short of full inclusion, and driven disproportionately by payments usage rather than credit usage. The underlying asymmetry is stark: 43% of PMJDY accounts remain inactive (Duvendack et al., 2023, as cited in The India Forum, 2025), and in the 2021 Findex round only 13% of Indian adults had borrowed from a formal source in the preceding year — compared with 23% across developing economies generally, and just 10% among Indian women (World Bank, 2023).</p>
+
+<div class="stat-grid">
+<div class="stat-card"><div class="num">89%</div><div class="lbl">Adults with a financial account, 2024 (up from 35% in 2011)</div><div class="src">World Bank Global Findex 2025</div></div>
+<div class="stat-card"><div class="num">67.0</div><div class="lbl">RBI Financial Inclusion Index, March 2025 (0–100 scale)</div><div class="src">RBI FI-Index, Jul 2025</div></div>
+<div class="stat-card"><div class="num">₹30L cr</div><div class="lbl">Addressable MSME credit gap — 24% of total debt demand</div><div class="src">SIDBI–CRISIL, May 2025</div></div>
+<div class="stat-card"><div class="num">6.2%</div><div class="lbl">Agriculture sector Gross NPA vs. 2.5% system-wide (Sep 2024)</div><div class="src">RBI Trend &amp; Progress Report 2023–24</div></div>
+<div class="stat-card"><div class="num">0.74 ha</div><div class="lbl">Average landholding, down from 1.08 ha in 2016–17</div><div class="src">NABARD NAFIS 2021–22</div></div>
+<div class="stat-card"><div class="num">10.05 cr</div><div class="lbl">Women mobilised into 90.9 lakh SHGs under DAY-NRLM (Dec 2025)</div><div class="src">PIB / Ministry of Rural Development</div></div>
+</div>
+
+<h3>1.2 Why bureau-based scoring fails this population</h3>
+<p>Conventional bureau scores (e.g., CIBIL/TransUnion) are built on repayment trails from formal credit accounts. They structurally under-score three groups that together define CreditTech's target population:</p>
+<div class="two-col">
+<div class="callout">
+<h4>Farmers and allied-activity households</h4>
+<p>57% of rural households are classified agricultural, up from 48% in 2016–17 (NABARD, 2024), yet farm income is seasonal, weather-exposed, and rarely documented in a bank-legible form. Institutional-loan uptake among agricultural households did rise from 60.5% to 75.5% between 2016–17 and 2021–22 (NABARD, 2024) — largely via the Kisan Credit Card — but 23.4% still borrow only from non-institutional (often high-cost) sources, and agri-loans carry the highest sectoral GNPA ratio in the banking system (RBI, 2024), which makes banks structurally risk-averse toward exactly this segment.</p>
+</div>
+<div class="callout">
+<h4>SHG members and rural micro-enterprises</h4>
+<p>SHG-Bank Linkage is the world's largest microcredit programme, with cumulative bank credit to SHGs exceeding ₹12.18 lakh crore since 2013–14 and repayment discipline above 96% (PIB, 2025; Anantam IAS, 2026) — a track record that traditional bureau scoring barely captures, because SHG internal thrift and peer-guarantee behaviour never touches a credit bureau. Meanwhile 12% of India's micro-enterprises (as opposed to 2–3% of small/medium ones) still borrow informally, and the MSME credit gap widens to 35% for women-owned enterprises (SIDBI, 2025).</p>
+</div>
+</div>
+
+<h3>1.3 The connectivity floor is now high enough to build on</h3>
+<p>The technical precondition for alternative, mobile-first scoring — rural connectivity — has crossed a threshold in the last three years. Rural India now hosts roughly 548 million active internet users out of 958 million nationally, and is growing at nearly four times the pace of urban India (IAMAI–Kantar, <em>Internet in India Report 2025</em>). This closes the "digital divide" objection that stalled earlier alternative-scoring proposals and makes app-based, low-bandwidth data capture (rather than only assisted/BC-channel capture) newly viable at village scale.</p>
+
+<div class="callout warn">
+<h4>The core problem statement</h4>
+<p>India has built world-class rails for <em>payments</em> and <em>identity</em> but not yet for <em>creditworthiness signals</em> at the base of the pyramid. The result is a persistent mismatch: institutions such as NABARD, SHG-federations, and the KCC scheme have proven that rural repayment discipline is high, but underwriting technology has not caught up to price and extend that trust efficiently, especially for new-to-credit borrowers, women, and small/marginal farmers below the KCC/collateral threshold.</p>
+</div>
+</section>
+<section id="stakeholders" class="alt">
+<span class="section-num">02</span>
+<h2>Stakeholder &amp; Institutional Mapping</h2>
+<p class="lede">CreditTech is designed to plug into the existing rural-finance institutional fabric rather than compete with it — the credibility of NABARD, cooperative banks, and SHG federations is the asset the alternative-scoring layer is meant to amplify, not replace.</p>
+
+<table>
+<caption>Table 2.1 — Stakeholder map by role and stake in CreditTech</caption>
+<tr><th>Category</th><th>Stakeholders</th><th>Role / interest</th></tr>
+<tr><td>End borrowers</td><td>Small &amp; marginal farmers, allied-activity households (dairy, fisheries, poultry), SHG members, rural micro-enterprises, FPO member-farmers</td><td>Primary beneficiaries; need faster, fairer, lower-collateral credit access</td></tr>
+<tr><td>Community institutions</td><td>Self-Help Groups (SHGs), SHG federations, Farmer Producer Organisations (FPOs — 10,000 onboarded as of Feb 2025 covering ~30 lakh farmers; SFAC, 2025), Joint Liability Groups</td><td>Aggregation points for data and peer-guarantee signals; existing trust anchors</td></tr>
+<tr><td>Regulated lenders</td><td>Public/private sector banks, Regional Rural Banks, Primary Agricultural Credit Societies (PACS), Small Finance Banks, NBFC-MFIs</td><td>Ultimate credit-risk holders; consume the alternative score for underwriting</td></tr>
+<tr><td>Apex &amp; development institutions</td><td>NABARD, SIDBI, SFAC, NAFED, NCDC</td><td>Refinance, credit guarantee, policy design, FPO promotion, sectoral data</td></tr>
+<tr><td>Regulators &amp; policy bodies</td><td>RBI, Ministry of Agriculture &amp; Farmers Welfare, Ministry of Cooperation, Ministry of Rural Development, NITI Aayog, Data Protection Board of India</td><td>Set lending, data-protection, and digital-lending guardrails</td></tr>
+<tr><td>Digital public infrastructure (DPI) operators</td><td>NPCI (UPI, AePS), Sahamati / Account Aggregator ecosystem, RBI Innovation Hub (ULI / erstwhile PTPFC), DigiLocker, UIDAI</td><td>Consent-based data and identity rails CreditTech is built on top of</td></tr>
+<tr><td>Alternative-data &amp; technology partners</td><td>Satellite/EO analytics providers (e.g., SatSure-type geospatial risk scoring), agri-input and mandi/e-NAM platforms, telecom/DigiLocker data sources, cloud/MLOps vendors</td><td>Supply the non-bureau signals the scoring engine consumes</td></tr>
+<tr><td>Civil society &amp; researchers</td><td>Krishi Vigyan Kendras (KVKs), NGOs/BC networks, academic partners (e.g., IIT Kharagpur)</td><td>Field trust-building, farmer literacy, independent model-fairness audits</td></tr>
+</table>
+
+<div class="callout">
+<h4>Institutional design principle</h4>
+<p>CreditTech is deliberately architected as a <b>decision-support and scoring layer</b> that sits between borrower-side data sources and lender-side underwriting systems — consistent with how the Account Aggregator ecosystem and OCEN are designed to "unbundle" lending into specialised roles (loan service provider, technology service provider, and regulated lender) rather than create a new deposit-taking or lending entity (Sahamati, 2025; ocen.dev, 2025). This keeps CreditTech within RBI's Lending Service Provider (LSP) framework under the 2022/2025 Digital Lending Directions, avoiding the regulatory burden of becoming a Regulated Entity itself.</p>
+</div>
+</section>
+<section id="litreview">
+<span class="section-num">03</span>
+<h2>Literature, Policy &amp; Real-World Case Evidence</h2>
+<p class="lede">This section is deliberately the most detailed in the report. It synthesises (a) the global academic literature on alternative and AI-driven credit scoring, (b) India-specific empirical and policy literature, (c) technical literature on fairness, bias, and explainability, and (d) real-world fintech case evidence — before distilling a research gap that justifies CreditTech's design choices.</p>
+
+<h3>3.1 Global academic literature on alternative data credit scoring</h3>
+<p>The foundational premise of alternative credit scoring — that non-traditional data can substitute for a thin or absent credit file — is now well established across development-finance and machine-learning literature. Berg et al. (2020) demonstrated in the <em>Review of Financial Studies</em> that "digital footprint" variables (device type, email domain, time-of-day of application) predict default comparably to, and sometimes better than, traditional bureau scores for e-commerce borrowers, establishing the empirical basis that behavioural and device-level metadata carry real credit signal even where no repayment history exists. A 2021 <em>Risks</em> journal review of fintech and financial inclusion catalogued this shift across markets, concluding that digital-footprint and mobile-transaction-based scoring systematically raises approval rates for populations excluded by bureau-only models (as cited in Jonnalagadda &amp; Babu, 2026).</p>
+
+<div class="lit-card">
+<span class="tag">Systematic review</span>
+<p><b>Machine Learning Technologies for Digital Credit Scoring in Rural Finance: A Literature Review</b> — this MDPI <em>Risks</em> paper systematically reviews AI/ML-based credit-scoring methods adopted by financial institutions globally for rural and smallholder lending, finding that ML-based scoring consistently reduces human bias in loan decisions relative to manual underwriting, but that adoption is gated by institutional readiness rather than by model performance.</p>
+<span class="cite">Kshetri, N. (2021). Machine learning (ML) technologies for digital credit scoring in rural finance: A literature review. <i>Risks, 9</i>(11), 192.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">Systematic review · 2025</span>
+<p><b>Revolutionizing agricultural loan recommendation systems via machine learning and artificial intelligence</b> — a 2025 <em>ScienceDirect</em> systematic review of the full ML pipeline applied to agricultural credit (input-variable selection, data acquisition, model building, and deployment) finds that most prior reviews omit one or more pipeline stages and that very few studies address interpretability or data-availability challenges specific to smallholders — a gap this report treats as central to CreditTech's design (see §3.5).</p>
+<span class="cite">Systematic review authors (2025). Revolutionizing agricultural loan recommendation systems via machine learning and artificial intelligence: A systematic literature review. <i>Computers and Electronics in Agriculture</i>.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">Applied ML · Kenya</span>
+<p><b>Towards Small-Scale Farmers' Fair Credit Scoring Technique</b> — using field data from smallholder farmers in Kakamega County, Kenya, this study models credit scoring as a "bandit-with-knapsack" exploration problem, combining a Fuzzy Unordered Rule Induction Algorithm with a Fuzzy Analytical Hierarchy Process to rank scoring rules under severe data sparsity — directly evidencing that specialised algorithms, not merely "more data," are required to score sparse smallholder profiles fairly.</p>
+<span class="cite">Njuguna, C., &amp; Sowon, K. (2020). Towards small-scale farmers' fair credit scoring technique. <i>Proceedings of the 2nd African Conference on Human Computer Interaction</i>.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">Practitioner evidence</span>
+<p><b>CGAP × Harvesting × PRIDE Microfinance (Uganda)</b> — CGAP's applied research with agri-fintech Harvesting and Uganda's largest MFI built a credit-scoring model blending traditional MFI lending data with alternative sources (satellite imagery, value-chain transaction data, mobile network operator records) for coffee-farmer lending, concluding that understanding a smallholder's <em>agricultural activity</em> — not only their financial activity — is the precondition for predicting cash flow and, therefore, repayment capacity.</p>
+<span class="cite">CGAP. (2018). CGAP and Harvesting explore use of alternative data in credit scores [Blog post]. Consultative Group to Assist the Poor, World Bank.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">FAO / STI Portal</span>
+<p><b>Alternative Data Credit Scoring Platforms for Smallholder Farmers</b> — FAO's Science, Technology and Innovation Portal defines the category formally: platforms that combine mobile-recorded farm and financial activity with backend analytics processing satellite imagery, agronomic, and mobile-money data to generate credit-risk profiles without requiring a conventional credit history or collateral, citing multi-country deployments (Brazil, India, Kenya, Myanmar, Uganda, Zambia) of the Harvesting Credit Risk Scoring tool as an early reference implementation.</p>
+<span class="cite">Food and Agriculture Organization of the United Nations. (2020). <i>Alternative data credit scoring platforms for smallholder farmers</i>. FAO STI Portal.</span>
+</div>
+<h3>3.2 India-specific empirical and policy literature</h3>
+<p>India-specific literature is smaller but rapidly growing, catalysed by the maturation of the Account Aggregator (AA) framework and the RBI's digital-lending regulatory response. Three strands are relevant to CreditTech's design.</p>
+
+<div class="lit-card">
+<span class="tag">India · Empirical · 2026</span>
+<p><b>Drivers of Credit Uptake by Smallholder Farmers: Empirical Evidence from India's Agricultural Sector</b> — using primary survey data from 96 smallholder farmers, this study maps both traditional and alternative data points onto the classical "5 Cs of credit" (character, capacity, capital, collateral, conditions) to build a weighted alternative credit-scoring model, offering one of the few India-specific empirical validations that alternative indicators (asset ownership, cropping pattern, group affiliation) meaningfully explain formal-credit uptake alongside conventional variables.</p>
+<span class="cite">Jonnalagadda, A. K., &amp; Babu, S. R. (2026). Drivers of credit uptake by smallholder farmers: Empirical evidence from India's agricultural sector. <i>International Research Journal of Multidisciplinary Scope, 7</i>(2), 110–119.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">India · DPI ecosystem study · 2025</span>
+<p><b>The Transformative Impact of the Account Aggregator Framework on Financial Inclusion in India</b> — this multi-sectoral study of MSME, microfinance, and personal lending documents that the AA ecosystem grew from launch (September 2021) to more than 100 million successful consents by mid-2024, with roughly 80–90 million unique users, and that AA-sourced transaction-history analysis has cut loan-decisioning time from days to minutes for "new-to-credit" or thin-file borrowers — directly evidencing the DPI foundation CreditTech is designed to sit on.</p>
+<span class="cite">Advances in Consumer Research. (2025). The transformative impact of the Account Aggregator framework on financial inclusion in India: A multi-sectoral study of MSMEs, microfinance, and personal lending. <i>Advances in Consumer Research</i>.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">India · NABARD primary survey</span>
+<p><b>NABARD All-India Rural Financial Inclusion Survey (NAFIS) 2021–22</b> — the largest primary dataset on rural financial behaviour in India (1 lakh households, 28 states, 10,000 village blocks), NAFIS is the report's single most important empirical anchor for the problem statement: it evidences rising institutional-credit uptake (60.5%→75.5% among agricultural households) alongside a still-substantial 23.4% reliance on non-institutional sources, alongside gains in savings, insurance, and financial literacy.</p>
+<span class="cite">National Bank for Agriculture and Rural Development. (2024). <i>All India Rural Financial Inclusion Survey (NAFIS) 2021–22</i>. NABARD, Department of Economic Analysis and Research.</span>
+</div>
+
+<h3>3.3 Fairness, explainability, and algorithmic bias — the technical governance literature</h3>
+<p>Because CreditTech's mandate is explicitly <em>inclusion</em>, the report treats the fairness/explainability literature as core rather than peripheral — an AI model that reduces exclusion for farmers while introducing new discrimination against women or low-literacy borrowers would defeat its own purpose.</p>
+
+<div class="lit-card">
+<span class="tag">Systematic review · 43 studies, 2020–2025</span>
+<p><b>Performance, Fairness, and Explainability in AI-Based Credit Scoring</b> — synthesising 43 peer-reviewed studies (2020–2025) from IEEE Xplore, Scopus, Web of Science, and Science Direct, this review finds explainability was the fastest-growing research pillar between 2023 and 2024, reflecting tightening regulatory expectations, and confirms there is still no universal, jurisdiction-independent fairness definition — a finding CreditTech treats as a design constraint (§13) rather than a solved problem.</p>
+<span class="cite">Systematic review authors. (2026). Performance, fairness, and explainability in AI-based credit scoring: A systematic literature review. <i>Risks, 19</i>(2), 104.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">Governance review</span>
+<p><b>Algorithmic Bias and Fairness in AI Credit Scoring: Evidence, Mechanisms, and Governance Responses</b> — reviewing 15 empirical studies from a corpus of 55 peer-reviewed papers (2018–2025), this paper concludes that bias in AI credit scoring is not primarily a technical failure: it originates in historically generated training data, is amplified through correlated proxy variables (e.g., geography or device type standing in for gender or caste), and persists because institutional incentives do not penalise discriminatory outcomes absent regulatory compulsion — directly motivating CreditTech's proposed independent fairness-audit function (§13).</p>
+<span class="cite">Journal of Management Science Research Review. (2026). Algorithmic bias and fairness in AI credit scoring: Evidence, mechanisms, and governance responses. <i>Journal of Management Science Research Review</i>.</span>
+</div>
+
+<div class="lit-card">
+<span class="tag">Trade-off framework</span>
+<p><b>Bücker et al. (2020) and Agosto et al. (2023)</b> — foundational work establishing the accuracy–fairness–explainability trade-off: interpretable models built for regulatory compliance accept higher reserves or more credit defaults as the price of transparency, while Agosto et al.'s Sustainability–Accuracy–Fairness–Explainability (SAFE) framework offers a structured way to evaluate AI credit-scoring systems across all four dimensions simultaneously rather than optimising any one in isolation.</p>
+<span class="cite">Bücker, M., Szepannek, G., Gosiewska, A., &amp; Biecek, P. (2020). Transparency, auditability, and explainability of machine learning models in credit scoring. <i>Journal of the Operational Research Society</i>. · Agosto, A., Giudici, P., &amp; Raffinetti, E. (2023). A sustainable, accurate, fair and explainable (SAFE) artificial intelligence model. <i>Data Science, 2</i>(2), 197–217.</span>
+</div>
+<h3>3.4 Real-world case evidence: fintechs already operating this model</h3>
+<p>CreditTech's architecture is not speculative — each of its core components has an operating precedent in the Indian or global market. The four cases below are the closest structural analogues.</p>
+
+<div class="two-col">
+<div class="lit-card">
+<span class="tag">India · Alternative-data lending infrastructure</span>
+<h4 style="margin-top:0">Kaleidofin (Ki Score / Ki View)</h4>
+<p>A Chennai-based B2B2C risk-infrastructure provider founded in 2017, Kaleidofin's "Ki Score" combines geospatial socio-economic and climate-resilience data with customer contextual and behavioural data — trained on tens of millions of data points — to underwrite borrowers with no conventional credit history. As of late 2025 the platform had credit-decisioned close to 10 million customers (98% women) and enabled roughly USD 8 billion in disbursements across more than 57 partner MFIs, NBFCs, and banks, reporting 20–30% higher approval rates than bureau-only models with portfolio-at-risk (PAR90) held below 2%.</p>
+<span class="cite">Kaleidofin Private Limited (2025); Munjuluri, R. (2025). Comparative analysis of alternative credit scoring models: Expanding access and identifying limitations [SSRN Working Paper].</span>
+</div>
+<div class="lit-card">
+<span class="tag">India · Satellite / earth-observation agri-lending</span>
+<h4 style="margin-top:0">SatSure (SatSource / SatCollect)</h4>
+<p>Founded in Bengaluru (2017) by former ISRO scientists, SatSure builds "digital twins" of farm plots from satellite imagery (13 spectral bands, five-day revisit), reaching 90–95% crop-identification accuracy despite India's fragmented landholding pattern, and layering socio-economic indicators (road density, market access, rail connectivity) on top. Its bank partnerships (including with TransUnion CIBIL and major commercial banks) have cut agricultural loan turnaround from 10–15 days to under 30 minutes, and its 2025 state-wide Uttar Pradesh rollout alone covers a state holding 17–18% of India's active KCC accounts.</p>
+<span class="cite">SatSure Analytics (2025); The Better India (2026). How satellite data is helping farmers access faster agricultural loans in India.</span>
+</div>
+</div>
+
+<div class="two-col">
+<div class="lit-card">
+<span class="tag">Global comparative study</span>
+<h4 style="margin-top:0">Comparative evidence: Upstart, Tala, Kaleidofin</h4>
+<p>A 2025 SSRN comparative study of Upstart (US), Tala (emerging markets, mobile-first), and Kaleidofin (India) finds that AI-driven alternative scoring approves 20–44% more borrowers than traditional bureau models across all three, with Tala reporting 63% of its 7.5 million-plus borrowers as first-time digital borrowers and 84% reporting improved quality of life — while flagging data privacy, algorithmic bias, and regulatory uncertainty as the consistent limiting factors across all three markets, precisely the risks CreditTech's governance framework (§13) is built to pre-empt.</p>
+<span class="cite">Munjuluri, R. (2025). Comparative analysis of alternative credit scoring models: Expanding access and identifying limitations. SSRN.</span>
+</div>
+<div class="lit-card">
+<span class="tag">India · Public digital infrastructure</span>
+<h4 style="margin-top:0">RBI's Unified Lending Interface (ULI)</h4>
+<p>Evolving from a September 2022 pilot for digitising sub-₹1.6 lakh KCC loans, then the "Public Tech Platform for Frictionless Credit" (August 2023), and formally rebranded ULI at the RBI@90 conference (August 2024), the platform is an explicit "UPI-for-lending" analogue: a universal API gateway giving consenting lenders access to land records, satellite data, and dairy/milk-federation data alongside AA-sourced financial data. As of December 2024 it had disbursed over 600,000 loans worth ₹27,000 crore, though bankers report scale-up remains constrained by slow land-record digitisation and cautious adoption by larger lenders — a real-world constraint CreditTech's DPI integration plan (§9) explicitly accounts for.</p>
+<span class="cite">Reserve Bank of India (2024, 2025); Business Standard (2026). Muted response from large lenders hinders ULI scale-up.</span>
+</div>
+</div>
+
+<h3>3.5 Literature synthesis and the resulting research gap</h3>
+<table>
+<caption>Table 3.1 — Synthesis of literature themes and CreditTech design response</caption>
+<tr><th>Literature theme</th><th>Consistent finding</th><th>CreditTech design response</th></tr>
+<tr><td>Alternative-data predictive power</td><td>Digital footprint, satellite, and mobile-transaction data predict repayment as well as or better than thin bureau files (Berg et al., 2020; FAO, 2020)</td><td>Multi-source scoring engine (§7–8) ingesting AA transaction data, geospatial/agronomic signals, and SHG-group data</td></tr>
+<tr><td>Smallholder-specific data sparsity</td><td>Generic ML pipelines underperform for smallholders without specialised handling of sparse, seasonal data (ScienceDirect 2025; Njuguna &amp; Sowon, 2020)</td><td>Crop-cycle-aware feature engineering; cash-flow modelling calibrated to Kharif/Rabi seasonality</td></tr>
+<tr><td>Group-based repayment discipline</td><td>SHG-BLP sustains &gt;96% repayment despite no individual bureau file (PIB, 2025)</td><td>Group/peer-guarantee signal as a first-class scoring feature, not an afterthought</td></tr>
+<tr><td>Fairness–explainability trade-off</td><td>No universal fairness definition exists; interpretability costs some accuracy (Bücker et al., 2020; MDPI, 2026)</td><td>Hybrid interpretable-first architecture with mandatory reason-codes (§8, §13)</td></tr>
+<tr><td>DPI dependency &amp; adoption friction</td><td>AA and ULI adoption is real but uneven; large-lender integration lags (ULI case, 2026)</td><td>Design for graceful degradation — score generation should not hard-fail if one DPI rail is unavailable</td></tr>
+<tr><td>Real-world validation exists but is thin at India-village level</td><td>Case evidence (Kaleidofin, SatSure) is strong at national/portfolio level; peer-reviewed village-level RCT evidence for India specifically remains sparse (Jonnalagadda &amp; Babu, 2026, n=96)</td><td>The proposed 4–5 village pilot (§13) is designed explicitly to generate this missing India-specific, village-level evidence</td></tr>
+</table>
+<div class="callout">
+<h4>Stated research gap</h4>
+<p>The literature strongly supports the technical feasibility of alternative credit scoring and documents its impact at national/portfolio scale for individual fintechs. What it does not yet provide is a <b>replicable, multi-institution, village-level design</b> that integrates <em>simultaneously</em> with India's public DPI stack (AA + ULI), community institutions (SHGs/FPOs), and a formal fairness-audit process, validated across more than one agro-climatic zone. CreditTech's pilot (§13) is scoped to close exactly this gap.</p>
+</div>
+</section>
+<section id="asis" class="alt">
+<span class="section-num">04</span>
+<h2>Existing System (As-Is)</h2>
+<p class="lede">Today's rural credit journey is manual, collateral-heavy, and bureau-dependent — even where DPI rails technically exist, most PACS/RRB-level lending has not yet integrated them.</p>
+<div class="diagram-wrap">
+<svg viewBox="0 0 980 220" width="100%" xmlns="http://www.w3.org/2000/svg">
+<style>.box{fill:#FFFDF8;stroke:#DCD0B4;stroke-width:1.5;} .lbl{font-family:'IBM Plex Sans',sans-serif;font-size:12px;fill:#241F18;} .sub{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#5C5346;} .arrow{stroke:#A24A32;stroke-width:1.8;marker-end:url(#ah);fill:none;}</style>
+<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#A24A32"/></marker></defs>
+<rect class="box" x="10" y="70" width="140" height="80" rx="6"/><text class="lbl" x="80" y="105" text-anchor="middle">Farmer / SHG /</text><text class="lbl" x="80" y="120" text-anchor="middle">micro-enterprise</text><text class="sub" x="80" y="138" text-anchor="middle">no bureau file</text>
+<path class="arrow" d="M150 110 H210"/>
+<rect class="box" x="215" y="70" width="150" height="80" rx="6"/><text class="lbl" x="290" y="100" text-anchor="middle">Branch / BC visit</text><text class="sub" x="290" y="118" text-anchor="middle">paper KYC + physical</text><text class="sub" x="290" y="132" text-anchor="middle">field verification</text>
+<path class="arrow" d="M365 110 H425"/>
+<rect class="box" x="430" y="70" width="150" height="80" rx="6"/><text class="lbl" x="505" y="100" text-anchor="middle">Manual appraisal</text><text class="sub" x="505" y="118" text-anchor="middle">landholding proof,</text><text class="sub" x="505" y="132" text-anchor="middle">collateral, guarantor</text>
+<path class="arrow" d="M580 110 H640"/>
+<rect class="box" x="645" y="70" width="150" height="80" rx="6"/><text class="lbl" x="720" y="100" text-anchor="middle">Bureau check</text><text class="sub" x="720" y="118" text-anchor="middle">thin/no file →</text><text class="sub" x="720" y="132" text-anchor="middle">reject or under-limit</text>
+<path class="arrow" d="M795 110 H855"/>
+<rect class="box" x="860" y="70" width="110" height="80" rx="6" fill="#F7EAE4" stroke="#A24A32"/><text class="lbl" x="915" y="105" text-anchor="middle" fill="#A24A32">10–20 days</text><text class="sub" x="915" y="122" text-anchor="middle" fill="#A24A32">or informal</text><text class="sub" x="915" y="134" text-anchor="middle" fill="#A24A32">moneylender</text>
+</svg>
+<figcaption>Fig. 4.1 — As-Is rural credit journey: linear, paper-heavy, bureau-gated</figcaption>
+</div>
+<table>
+<caption>Table 4.1 — As-Is pain points</caption>
+<tr><th>Pain point</th><th>Evidence</th></tr>
+<tr><td>Long turnaround time</td><td>Traditional agri-loan appraisal historically takes 10–15 days versus &lt;30 minutes with satellite-assisted underwriting (SatSure case, 2026)</td></tr>
+<tr><td>Collateral dependency excludes tenant/marginal farmers</td><td>Average landholding down to 0.74 ha; 86% of India's farmers are small and marginal (NABARD, 2024; PIB, 2025)</td></tr>
+<tr><td>Bureau-blind institutions under-price good risk</td><td>SHG-BLP repayment &gt;96% is invisible to bureau-only underwriting (PIB, 2025)</td></tr>
+<tr><td>Fragmented data silos</td><td>Land records, satellite data, and financial data sit in separate government/bank/private silos, motivating ULI's "universal API gateway" design (RBI, 2024)</td></tr>
+<tr><td>High cost-to-serve for small-ticket loans</td><td>Branch-based appraisal cost is largely fixed regardless of loan size, discouraging small-ticket agri and micro-enterprise lending</td></tr>
+</table>
+</section>
+<section id="tobe">
+<span class="section-num">05</span>
+<h2>Proposed System (To-Be)</h2>
+<p class="lede">CreditTech reframes the journey around a single idea: turn every consented, legally obtainable signal about a borrower's real economic life into a transparent, explainable score — in minutes, not days — while keeping the regulated lender in the decision seat.</p>
+<div class="diagram-wrap">
+<svg viewBox="0 0 980 260" width="100%" xmlns="http://www.w3.org/2000/svg">
+<style>.box2{fill:#FFFDF8;stroke:#1C6B68;stroke-width:1.5;} .lbl2{font-family:'IBM Plex Sans',sans-serif;font-size:12px;fill:#241F18;} .sub2{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#5C5346;} .arrow2{stroke:#1C6B68;stroke-width:1.8;marker-end:url(#ah2);fill:none;} .hi{fill:#E4F1EF;stroke:#1C6B68;}</style>
+<defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1C6B68"/></marker></defs>
+<rect class="box2" x="10" y="90" width="130" height="70" rx="6"/><text class="lbl2" x="75" y="120" text-anchor="middle">Farmer / SHG /</text><text class="lbl2" x="75" y="135" text-anchor="middle">enterprise</text>
+<path class="arrow2" d="M140 125 H195"/>
+<rect class="box2 hi" x="200" y="90" width="140" height="70" rx="6"/><text class="lbl2" x="270" y="115" text-anchor="middle">App / IVR / Bank</text><text class="lbl2" x="270" y="130" text-anchor="middle">Sakhi assisted</text><text class="sub2" x="270" y="147" text-anchor="middle">consent capture</text>
+<path class="arrow2" d="M340 125 H395"/>
+<rect class="box2" x="400" y="20" width="170" height="55" rx="6"/><text class="lbl2" x="485" y="42" text-anchor="middle">Account Aggregator</text><text class="sub2" x="485" y="58" text-anchor="middle">bank/UPI transactions</text>
+<rect class="box2" x="400" y="90" width="170" height="55" rx="6"/><text class="lbl2" x="485" y="112" text-anchor="middle">Geospatial engine</text><text class="sub2" x="485" y="128" text-anchor="middle">satellite crop/land signal</text>
+<rect class="box2" x="400" y="160" width="170" height="55" rx="6"/><text class="lbl2" x="485" y="182" text-anchor="middle">SHG / FPO / e-NAM</text><text class="sub2" x="485" y="198" text-anchor="middle">group &amp; market data</text>
+<path class="arrow2" d="M570 47 H630 V125"/>
+<path class="arrow2" d="M570 117 H630"/>
+<path class="arrow2" d="M570 187 H630 V135"/>
+<rect class="box2 hi" x="635" y="90" width="160" height="70" rx="6"/><text class="lbl2" x="715" y="115" text-anchor="middle">Alternative Scoring</text><text class="lbl2" x="715" y="130" text-anchor="middle">Engine (ML + rules)</text><text class="sub2" x="715" y="147" text-anchor="middle">explainable score + reasons</text>
+<path class="arrow2" d="M795 125 H850"/>
+<rect class="box2" x="855" y="90" width="115" height="70" rx="6"/><text class="lbl2" x="912" y="115" text-anchor="middle">Regulated</text><text class="lbl2" x="912" y="130" text-anchor="middle">lender (RE)</text><text class="sub2" x="912" y="147" text-anchor="middle">final decision</text>
+</svg>
+<figcaption>Fig. 5.1 — To-Be: consent → multi-source ingestion → explainable score → human-in-the-loop lender decision, in minutes</figcaption>
+</div>
+<table>
+<caption>Table 5.1 — As-Is vs. To-Be comparison</caption>
+<tr><th>Dimension</th><th>As-Is</th><th>To-Be (CreditTech)</th></tr>
+<tr><td>Underwriting inputs</td><td>Bureau score + collateral + manual field verification</td><td>Bureau (where available) + AA transaction data + geospatial/agronomic signal + SHG/FPO group data + e-NAM/mandi data</td></tr>
+<tr><td>Turnaround time</td><td>10–20 days typical for agri-loans</td><td>Minutes for score generation; final disbursal gated only by lender's own sanction process</td></tr>
+<tr><td>New-to-credit borrowers</td><td>Effectively excluded or under-limited</td><td>Scoreable via alternative signals, consistent with Kaleidofin/Tala precedent (§3.4)</td></tr>
+<tr><td>Explainability</td><td>Opaque manual discretion</td><td>Mandatory reason-codes and human-readable score drivers (§13)</td></tr>
+<tr><td>Institutional role</td><td>Bank/PACS does everything in-house</td><td>Unbundled: CreditTech = LSP/TSP layer; regulated lender retains sanction authority (per OCEN/AA design logic)</td></tr>
+</table>
+</section>
+<section id="architecture" class="alt">
+<span class="section-num">06</span>
+<h2>Complete System Architecture</h2>
+<p class="lede">A five-layer architecture — identity &amp; consent, data ingestion, intelligence, decisioning, and channel — designed so that no single vendor or data rail is a single point of failure.</p>
+<div class="diagram-wrap">
+<svg viewBox="0 0 980 430" width="100%" xmlns="http://www.w3.org/2000/svg">
+<style>.lyr{fill:#FFFDF8;stroke:#DCD0B4;stroke-width:1.3;} .lyrhead{font-family:'IBM Plex Mono',monospace;font-size:10.5px;fill:#1C6B68;text-transform:uppercase;letter-spacing:.05em;} .cell{fill:#F1EADA;stroke:#DCD0B4;} .celltxt{font-family:'IBM Plex Sans',sans-serif;font-size:10.5px;fill:#241F18;}</style>
+<rect class="lyr" x="20" y="10" width="940" height="70"/><text class="lyrhead" x="35" y="28">Layer 1 · Identity &amp; Consent</text>
+<rect class="cell" x="35" y="36" width="200" height="32"/><text class="celltxt" x="135" y="56" text-anchor="middle">Aadhaar e-KYC / DigiLocker</text>
+<rect class="cell" x="245" y="36" width="200" height="32"/><text class="celltxt" x="345" y="56" text-anchor="middle">Account Aggregator consent</text>
+<rect class="cell" x="455" y="36" width="200" height="32"/><text class="celltxt" x="555" y="56" text-anchor="middle">DPDP-compliant consent ledger</text>
+<rect class="cell" x="665" y="36" width="280" height="32"/><text class="celltxt" x="805" y="56" text-anchor="middle">Multi-channel onboarding (app / IVR / Bank Sakhi)</text>
+
+<rect class="lyr" x="20" y="92" width="940" height="70"/><text class="lyrhead" x="35" y="110">Layer 2 · Data Ingestion</text>
+<rect class="cell" x="35" y="118" width="185" height="32"/><text class="celltxt" x="127" y="138" text-anchor="middle">AA financial data</text>
+<rect class="cell" x="230" y="118" width="185" height="32"/><text class="celltxt" x="322" y="138" text-anchor="middle">Satellite / geospatial API</text>
+<rect class="cell" x="425" y="118" width="185" height="32"/><text class="celltxt" x="517" y="138" text-anchor="middle">SHG / FPO / e-NAM feeds</text>
+<rect class="cell" x="620" y="118" width="180" height="32"/><text class="celltxt" x="710" y="138" text-anchor="middle">Land records / KCC / bureau</text>
+<rect class="cell" x="810" y="118" width="135" height="32"/><text class="celltxt" x="877" y="138" text-anchor="middle">Utility &amp; telecom data</text>
+
+<rect class="lyr" x="20" y="174" width="940" height="90"/><text class="lyrhead" x="35" y="192">Layer 3 · Intelligence (Scoring Engine)</text>
+<rect class="cell" x="35" y="202" width="220" height="48"/><text class="celltxt" x="145" y="222" text-anchor="middle">Feature store</text><text class="celltxt" x="145" y="237" text-anchor="middle" font-size="9">crop-cycle aware, seasonal</text>
+<rect class="cell" x="265" y="202" width="220" height="48"/><text class="celltxt" x="375" y="222" text-anchor="middle">Ensemble ML models</text><text class="celltxt" x="375" y="237" text-anchor="middle" font-size="9">gradient boosting + interpretable layer</text>
+<rect class="cell" x="495" y="202" width="220" height="48"/><text class="celltxt" x="605" y="222" text-anchor="middle">Explainability (SHAP)</text><text class="celltxt" x="605" y="237" text-anchor="middle" font-size="9">reason-codes generator</text>
+<rect class="cell" x="725" y="202" width="220" height="48"/><text class="celltxt" x="835" y="222" text-anchor="middle">Fairness monitor</text><text class="celltxt" x="835" y="237" text-anchor="middle" font-size="9">bias &amp; drift detection</text>
+
+<rect class="lyr" x="20" y="276" width="940" height="70"/><text class="lyrhead" x="35" y="294">Layer 4 · Decisioning &amp; Orchestration</text>
+<rect class="cell" x="35" y="302" width="290" height="32"/><text class="celltxt" x="180" y="322" text-anchor="middle">OCEN-style LSP/lender API orchestration</text>
+<rect class="cell" x="335" y="302" width="290" height="32"/><text class="celltxt" x="480" y="322" text-anchor="middle">Rules engine (RBI / NABARD eligibility norms)</text>
+<rect class="cell" x="635" y="302" width="310" height="32"/><text class="celltxt" x="790" y="322" text-anchor="middle">ULI-compatible score &amp; document hand-off</text>
+
+<rect class="lyr" x="20" y="358" width="940" height="60"/><text class="lyrhead" x="35" y="376">Layer 5 · Channel &amp; Servicing</text>
+<rect class="cell" x="35" y="384" width="290" height="26"/><text class="celltxt" x="180" y="401" text-anchor="middle" font-size="10">Regulated lender loan management system</text>
+<rect class="cell" x="335" y="384" width="290" height="26"/><text class="celltxt" x="480" y="401" text-anchor="middle" font-size="10">Farmer/SHG app + BC/Bank Sakhi dashboard</text>
+<rect class="cell" x="635" y="384" width="310" height="26"/><text class="celltxt" x="790" y="401" text-anchor="middle" font-size="10">Monitoring, collections &amp; repayment-behaviour feedback loop</text>
+</svg>
+<figcaption>Fig. 6.1 — CreditTech five-layer reference architecture</figcaption>
+</div>
+<div class="callout">
+<h4>Design principle: graceful degradation</h4>
+<p>Because ULI adoption by large lenders remains uneven and satellite coverage or SHG digitisation varies by district (see §3.4), the scoring engine is designed to produce a confidence-weighted score from <em>whichever</em> data sources are actually available for a given borrower — rather than requiring all five ingestion feeds to be present, which would simply recreate exclusion for the least-digitised villages.</p>
+</div>
+</section>
+<section id="data">
+<span class="section-num">07</span>
+<h2>Data Architecture &amp; Data Sources</h2>
+<p class="lede">Every data source maps to a consent basis and a specific credit-risk hypothesis it is meant to test — no signal is collected "because it's available."</p>
+<table>
+<caption>Table 7.1 — Data sources, consent basis, and scoring hypothesis</caption>
+<tr><th>Data category</th><th>Representative source</th><th>Consent / legal basis</th><th>What it predicts</th></tr>
+<tr><td>Financial transaction history</td><td>Account Aggregator (bank, UPI); 17 RBI-licensed AAs operational, 284.6M+ accounts linked nationally (DFS, 2025)</td><td>DEPA consent artifact (explicit, purpose-bound, revocable)</td><td>Cash-flow regularity, savings discipline, existing obligations</td></tr>
+<tr><td>Land &amp; crop data</td><td>Digitised land records (state); satellite/EO crop classification (e.g., SatSure-type providers, 90–95% crop-ID accuracy)</td><td>Farmer consent + public land-record access under state right-to-information rules</td><td>Land productivity, cropping pattern, weather/yield risk</td></tr>
+<tr><td>Group / community data</td><td>SHG-BLP ledgers, FPO membership &amp; transaction records</td><td>Group-level consent via SHG federation / FPO board resolution + individual member consent</td><td>Peer-guarantee strength, thrift discipline, social capital</td></tr>
+<tr><td>Market / value-chain data</td><td>e-NAM mandi price and transaction records, input-purchase history</td><td>Platform-level data-sharing agreement with consenting farmer</td><td>Realised income, market access, price-risk exposure</td></tr>
+<tr><td>Government scheme data</td><td>KCC status, PM-KISAN enrolment, MISS/Kisan Rin Portal records</td><td>DPI-based government data-sharing consent</td><td>Existing formal-credit exposure and subsidy eligibility</td></tr>
+<tr><td>Bureau data (where it exists)</td><td>CIBIL / other credit information companies</td><td>Standard bureau-pull consent</td><td>Any conventional repayment history, used as a corroborating signal, not a gate</td></tr>
+<tr><td>Telecom / utility (optional, high-caution)</td><td>Recharge/utility bill-payment regularity</td><td>Explicit opt-in only; excluded by default from the MVP scope (see §13 privacy note)</td><td>Bill-payment discipline as a very weak proxy signal</td></tr>
+</table>
+<div class="callout warn">
+<h4>What CreditTech deliberately does <em>not</em> ingest</h4>
+<p>Consistent with the fairness literature in §3.3 and DPDP Act's data-minimisation principle, the design explicitly excludes caste, religion, and other protected-attribute proxies from the feature set, and treats geography-as-proxy-for-social-category as a monitored bias risk rather than a usable feature (per the proxy-variable finding in the algorithmic-bias literature, §3.3).</p>
+</div>
+</section>
+
+<section id="techstack" class="alt">
+<span class="section-num">08</span>
+<h2>Technology Stack</h2>
+<p class="lede">The stack favours proven, India-DPI-compatible open standards over bespoke infrastructure, to minimise both cost and integration friction with existing bank core-banking systems.</p>
+<table>
+<caption>Table 8.1 — Proposed technology stack by layer</caption>
+<tr><th>Layer</th><th>Technology choice</th><th>Rationale</th></tr>
+<tr><td>Identity &amp; consent</td><td>Aadhaar e-KYC, DigiLocker, DEPA-compliant Account Aggregator SDKs (Sahamati reference implementation)</td><td>Reuses certified national infrastructure rather than building parallel KYC</td></tr>
+<tr><td>Data ingestion / APIs</td><td>OCEN-style REST/JSON API gateway; ULI-compatible connectors</td><td>Interoperates directly with RBI's frictionless-credit rails (§9)</td></tr>
+<tr><td>Geospatial processing</td><td>Sentinel-2 / other open-access satellite imagery, cloud-based EO analytics (crop classification, NDVI-based yield proxies)</td><td>Matches the approach validated by SatSure's operating model (§3.4)</td></tr>
+<tr><td>Data storage</td><td>Encrypted cloud data lake (India-region hosting) + feature store for model-ready features</td><td>Data-localisation and DPDP compliance; separates raw PII from model features</td></tr>
+<tr><td>Modelling</td><td>Gradient-boosted trees (XGBoost/LightGBM) as primary model, paired with a simpler logistic/scorecard model for regulatory fallback</td><td>Matches literature consensus that boosted-tree ensembles perform best on tabular alternative-data features while remaining auditable (§3.3)</td></tr>
+<tr><td>Explainability</td><td>SHAP (SHapley Additive exPlanations) value generation for every score</td><td>Directly operationalises the explainability requirement identified across the fairness literature (§3.3)</td></tr>
+<tr><td>MLOps / monitoring</td><td>Model registry, automated drift and fairness-metric monitoring, scheduled re-validation</td><td>Required for the fairness-audit governance function (§13)</td></tr>
+<tr><td>Channel / front-end</td><td>Lightweight Android app (offline-first, low-bandwidth), IVR/USSD fallback, Bank Sakhi-assisted web dashboard</td><td>Matches rural connectivity reality — 351M+ rural internet users but still uneven bandwidth (IAMAI–Kantar, 2025)</td></tr>
+<tr><td>Languages</td><td>Regional-language UI (minimum: the pilot state's official language + Hindi + English)</td><td>98% of rural internet users consume Indic-language content (IAMAI–Kantar, 2024)</td></tr>
+</table>
+</section>
+<section id="dpi">
+<span class="section-num">09</span>
+<h2>API / DPI &amp; Institutional Integration Framework</h2>
+<p class="lede">CreditTech is positioned as a Lending Service Provider / Technology Service Provider under RBI's existing digital-lending taxonomy — not a new regulated entity — integrating with four DPI rails already live in India.</p>
+<table>
+<caption>Table 9.1 — DPI integration points</caption>
+<tr><th>DPI rail</th><th>Status (as of 2025–26)</th><th>CreditTech integration role</th></tr>
+<tr><td>Account Aggregator (NBFC-AA) framework</td><td>17 RBI-licensed AAs; 284.6M+ accounts linked; lending is the majority use case by data-request volume (DFS, 2025; Sahamati, 2025)</td><td>Primary financial-data ingestion rail; CreditTech acts as a Financial Information User (FIU) via a licensed AA</td></tr>
+<tr><td>Unified Lending Interface (ULI)</td><td>Nationally announced Aug 2024; 12 loan journeys live including KCC and digital-cattle loans; ₹27,000 crore disbursed via the platform by Dec 2024 (RBI, 2024; IMPRI, 2026)</td><td>Score and supporting evidence handed off to lenders through ULI-compatible APIs, reducing duplicate integration work per bank</td></tr>
+<tr><td>Open Credit Enablement Network (OCEN)</td><td>Live protocol layer (since 2020) standardising LSP–lender interaction; AA-integrated as of OCEN 4.0</td><td>Defines the API contract CreditTech uses to present scores/loan applications to partner lenders</td></tr>
+<tr><td>DPDP consent infrastructure</td><td>DPDP Rules 2025 notified Nov 2025; phased compliance through May 2027; Consent Manager registration opens Nov 2026</td><td>All consent capture, storage, and withdrawal flows built DPDP-compliant from day one, ahead of the mandatory compliance date</td></tr>
+</table>
+<div class="diagram-wrap">
+<svg viewBox="0 0 900 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+<style>.n{fill:#FFFDF8;stroke:#1C6B68;stroke-width:1.4;} .t{font-family:'IBM Plex Sans',sans-serif;font-size:11.5px;fill:#241F18;} .c{fill:#2E2418;} .tc{font-family:'IBM Plex Mono',monospace;font-size:10px;fill:#F8F4EA;}</style>
+<circle class="c" cx="450" cy="100" r="70"/><text class="tc" x="450" y="96" text-anchor="middle">CreditTech</text><text class="tc" x="450" y="112" text-anchor="middle">Scoring Layer</text>
+<rect class="n" x="20" y="20" width="150" height="50" rx="6"/><text class="t" x="95" y="50" text-anchor="middle">Account Aggregator</text>
+<rect class="n" x="20" y="130" width="150" height="50" rx="6"/><text class="t" x="95" y="160" text-anchor="middle">Geospatial / SHG data</text>
+<rect class="n" x="730" y="20" width="150" height="50" rx="6"/><text class="t" x="805" y="50" text-anchor="middle">ULI (RBI)</text>
+<rect class="n" x="730" y="130" width="150" height="50" rx="6"/><text class="t" x="805" y="160" text-anchor="middle">Regulated Lenders</text>
+<path d="M170 45 L385 80" stroke="#1C6B68" fill="none"/><path d="M170 155 L385 120" stroke="#1C6B68" fill="none"/>
+<path d="M515 80 L730 45" stroke="#1C6B68" fill="none"/><path d="M515 120 L730 155" stroke="#1C6B68" fill="none"/>
+</svg>
+<figcaption>Fig. 9.1 — CreditTech as an orchestration hub between DPI data rails and regulated lenders</figcaption>
+</div>
+</section>
+
+<section id="modules" class="alt">
+<span class="section-num">10</span>
+<h2>Functional Modules</h2>
+<table>
+<caption>Table 10.1 — Core functional modules</caption>
+<tr><th>Module</th><th>Function</th></tr>
+<tr><td>M1 · Onboarding &amp; Consent</td><td>Aadhaar e-KYC, DPDP-compliant multi-purpose consent capture, language selection, assisted-mode toggle for Bank Sakhi/BC channel</td></tr>
+<tr><td>M2 · Data Aggregation</td><td>Orchestrates parallel calls to AA, geospatial API, SHG/FPO data feeds, and bureau; normalises into a unified borrower profile</td></tr>
+<tr><td>M3 · Alternative Scoring Engine</td><td>Generates a 0–100 (or equivalent) creditworthiness score plus a confidence band reflecting data completeness</td></tr>
+<tr><td>M4 · Explainability &amp; Reason Codes</td><td>Produces top-5 human-readable score drivers per applicant, in the local language, for both borrower and loan officer</td></tr>
+<tr><td>M5 · Fairness &amp; Drift Monitor</td><td>Continuously tracks approval-rate parity across gender, geography, and landholding-size bands; flags model drift for retraining</td></tr>
+<tr><td>M6 · Lender Decision Interface</td><td>Presents score, reason codes, and supporting evidence to the loan officer; final sanction decision remains human</td></tr>
+<tr><td>M7 · Loan Lifecycle &amp; Repayment Feedback</td><td>Feeds observed repayment behaviour back into the model-training pipeline (with consent) to improve future scoring</td></tr>
+<tr><td>M8 · Grievance &amp; Appeal</td><td>Borrower-facing channel to contest a score or request human review, consistent with RBI digital-lending disclosure norms</td></tr>
+<tr><td>M9 · Institutional Dashboard</td><td>Portfolio-level analytics for NABARD/lender partners — approval rates, PAR, segment-wise inclusion metrics</td></tr>
+</table>
+</section>
+<section id="journey">
+<span class="section-num">11</span>
+<h2>User Journey / Process Flow</h2>
+<p class="lede">From the borrower's perspective, the entire experience compresses to four visible steps — the complexity of layers 1–4 (§6) happens invisibly in between.</p>
+<div class="diagram-wrap">
+<svg viewBox="0 0 980 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+<style>.st{fill:#FFFDF8;stroke:#C9A24B;stroke-width:2;} .stt{font-family:'Fraunces',serif;font-size:15px;fill:#2E2418;font-weight:600;} .std{font-family:'IBM Plex Sans',sans-serif;font-size:10.5px;fill:#5C5346;} .num{font-family:'IBM Plex Mono',monospace;font-size:22px;fill:#C9A24B;font-weight:600;}</style>
+<circle class="st" cx="130" cy="90" r="70"/><text class="num" x="130" y="70" text-anchor="middle">1</text><text class="stt" x="130" y="95" text-anchor="middle">Apply</text><text class="std" x="130" y="112" text-anchor="middle">app / IVR / Bank Sakhi</text>
+<path d="M205 90 H320" stroke="#C9A24B" stroke-width="2" stroke-dasharray="5 6"/>
+<circle class="st" cx="380" cy="90" r="70"/><text class="num" x="380" y="70" text-anchor="middle">2</text><text class="stt" x="380" y="95" text-anchor="middle">Consent</text><text class="std" x="380" y="112" text-anchor="middle">AA + DPDP consent</text>
+<path d="M455 90 H570" stroke="#C9A24B" stroke-width="2" stroke-dasharray="5 6"/>
+<circle class="st" cx="630" cy="90" r="70"/><text class="num" x="630" y="70" text-anchor="middle">3</text><text class="stt" x="630" y="95" text-anchor="middle">Score</text><text class="std" x="630" y="112" text-anchor="middle">minutes, with reasons</text>
+<path d="M705 90 H820" stroke="#C9A24B" stroke-width="2" stroke-dasharray="5 6"/>
+<circle class="st" cx="880" cy="90" r="70"/><text class="num" x="880" y="70" text-anchor="middle">4</text><text class="stt" x="880" y="95" text-anchor="middle">Decision</text><text class="std" x="880" y="112" text-anchor="middle">lender sanction &amp; disbursal</text>
+</svg>
+<figcaption>Fig. 11.1 — Borrower-facing journey: apply → consent → score → decision</figcaption>
+</div>
+<table>
+<caption>Table 11.1 — Detailed process flow with actor and system-of-record</caption>
+<tr><th>Step</th><th>Actor</th><th>System</th><th>SLA target</th></tr>
+<tr><td>1. Application initiation</td><td>Farmer / SHG member / entrepreneur</td><td>CreditTech app, IVR, or Bank Sakhi-assisted portal</td><td>&lt; 5 minutes</td></tr>
+<tr><td>2. e-KYC &amp; consent</td><td>Borrower, with Bank Sakhi assistance if needed</td><td>Aadhaar e-KYC + AA consent artifact</td><td>&lt; 5 minutes</td></tr>
+<tr><td>3. Data aggregation</td><td>System (automated)</td><td>AA / geospatial / SHG-FPO / bureau connectors</td><td>&lt; 3 minutes</td></tr>
+<tr><td>4. Score generation</td><td>System (automated)</td><td>Scoring engine + explainability module</td><td>&lt; 2 minutes</td></tr>
+<tr><td>5. Loan officer review</td><td>Bank / MFI credit officer</td><td>Lender decision interface (M6)</td><td>Same working day (target)</td></tr>
+<tr><td>6. Sanction &amp; disbursal</td><td>Regulated lender</td><td>Lender's own core banking / LMS, via ULI hand-off</td><td>Per lender's existing sanction SLA</td></tr>
+<tr><td>7. Repayment &amp; feedback</td><td>Borrower + system</td><td>Loan lifecycle module (M7)</td><td>Continuous</td></tr>
+</table>
+</section>
+<section id="security" class="alt">
+<span class="section-num">12</span>
+<h2>Security, Privacy &amp; Regulatory Framework</h2>
+<p class="lede">CreditTech's licence to operate rests on three overlapping regimes — RBI's digital-lending directions, the DPDP Act/Rules, and the Account Aggregator master directions — plus a self-imposed fairness-governance layer the literature (§3.3) shows regulation alone does not yet guarantee.</p>
+
+<h3>12.1 Regulatory framework</h3>
+<table>
+<caption>Table 12.1 — Applicable regulatory instruments</caption>
+<tr><th>Instrument</th><th>Key requirement for CreditTech</th></tr>
+<tr><td>RBI Digital Lending Directions (Sept 2022; revised 2025)</td><td>CreditTech must operate as a Lending Service Provider (LSP) to a Regulated Entity (RE); the RE, not CreditTech, holds final credit-decision and NPA-recognition responsibility. The 2025 Directions extend coverage to All-India Financial Institutions and formally define Default Loss Guarantee (DLG) arrangements, capped at 5% of the underlying loan portfolio (RBI, 2025; IndiaCorpLaw, 2025).</td></tr>
+<tr><td>Default Loss Guarantee (DLG/FLDG) Guidelines (June 2023)</td><td>Any risk-sharing arrangement between CreditTech and a partner RE must be cash/FD/bank-guarantee backed, capped at 5% of portfolio, and invoked within 120 days of default — CreditTech avoids assuming uncapped credit risk itself.</td></tr>
+<tr><td>Digital Personal Data Protection Act, 2023 &amp; DPDP Rules, 2025</td><td>Consent must be free, specific, informed, unconditional, and revocable; Consent Managers must retain consent records for ≥7 years; data-breach reporting is mandatory to the Data Protection Board of India, in force in phases through May 2027 (MeitY, 2025).</td></tr>
+<tr><td>Account Aggregator Master Directions (RBI, 2016, as amended)</td><td>CreditTech accesses financial data only as a Financial Information User via a licensed NBFC-AA; AAs themselves are barred from reading or storing the data they transmit ("data-blind" design).</td></tr>
+<tr><td>Credit Information Companies (Regulation) Act, 2005</td><td>Any bureau data used must be sourced through a licensed Credit Information Company with borrower consent.</td></tr>
+<tr><td>RBI Fair Practices Code &amp; Digital Lending disclosure norms</td><td>Key Facts Statement (KFS), APR disclosure, and a borrower's right to a look-up/cooling-off period apply to every loan originated through CreditTech-scored applications.</td></tr>
+</table>
+
+<h3>12.2 Privacy-by-design commitments</h3>
+<div class="two-col">
+<div class="callout">
+<h4>Data minimisation</h4>
+<p>Only data with a demonstrable link to a scoring hypothesis (§7) is ingested. Sensitive/protected attributes (caste, religion, health) are never collected; geography and other potential proxy variables are monitored, not blindly used (§7, §3.3).</p>
+</div>
+<div class="callout">
+<h4>Purpose limitation &amp; revocability</h4>
+<p>Every AA consent artifact is scoped to credit-scoring purpose only, time-bound, and revocable at any time by the borrower — consistent with DEPA and DPDP Rules 2025 requirements (Lexology, 2025).</p>
+</div>
+</div>
+<div class="two-col">
+<div class="callout">
+<h4>Data localisation &amp; encryption</h4>
+<p>All borrower data is stored on India-region infrastructure, encrypted at rest and in transit; raw PII is architecturally separated from the model-ready feature store (§8) to limit breach blast-radius.</p>
+</div>
+<div class="callout">
+<h4>Independent fairness audit</h4>
+<p>Given the literature finding that regulatory compliance alone does not eliminate proxy-variable bias (§3.3), CreditTech commits to a periodic third-party fairness audit — approval-rate parity across gender, landholding size, and geography — published to the Institutional Dashboard (M9) and shared with NABARD as pilot sponsor.</p>
+</div>
+</div>
+
+<h3>12.3 Security controls</h3>
+<table>
+<caption>Table 12.2 — Security control summary</caption>
+<tr><th>Domain</th><th>Control</th></tr>
+<tr><td>Authentication</td><td>Aadhaar-based e-KYC with OTP/biometric second factor; role-based access control for lender-side loan officers</td></tr>
+<tr><td>API security</td><td>Mutual-TLS and signed JWTs on all OCEN/ULI/AA API calls; rate-limiting and anomaly detection on the ingestion layer</td></tr>
+<tr><td>Model integrity</td><td>Versioned model registry, reproducible training pipelines, and adversarial-input testing before any model promotion to production</td></tr>
+<tr><td>Incident response</td><td>72-hour breach-notification workflow aligned to DPDP Rules 2025 timelines; dedicated Data Protection Officer role for the pilot phase</td></tr>
+<tr><td>Grievance redress</td><td>Borrower-facing appeal channel (M8) with a maximum response SLA, and escalation path to the partner RE's internal ombudsman</td></tr>
+</table>
+</section>
+<section id="pilot">
+<span class="section-num">13</span>
+<h2>Initial 4–5 Village Pilot Design</h2>
+<p class="lede">The pilot is scoped to close the exact research gap identified in §3.5: replicable, village-level, multi-institution evidence across more than one agro-climatic and connectivity context. Site selection below is presented as a <b>criteria-based framework with illustrative representative site-types</b>; final village selection requires ground validation with the NABARD Regional Office and District Development Manager for the chosen state, which is outside the scope of this pre-deployment report.</p>
+
+<h3>13.1 Site-selection criteria</h3>
+<table>
+<caption>Table 13.1 — Selection criteria and rationale</caption>
+<tr><th>Criterion</th><th>Rationale</th></tr>
+<tr><td>Agro-climatic diversity</td><td>At least one irrigated/high-KCC-penetration site, one rainfed/climate-exposed site, and one allied-activity site (dairy/fisheries), so the model is validated across cropping and income patterns, not one crop archetype</td></tr>
+<tr><td>SHG/FPO density</td><td>Preference for blocks with active SHG-BLP or FPO presence, to test the group-data scoring hypothesis (§7) against a real peer-guarantee structure</td></tr>
+<tr><td>Connectivity spread</td><td>Mix of higher-connectivity and lower-connectivity blocks, to stress-test the "graceful degradation" architecture principle (§6) under genuinely uneven rural internet access (IAMAI–Kantar, 2025)</td></tr>
+<tr><td>Existing DPI/lender readiness</td><td>At least one site with an existing NABARD/RRB or PACS branch willing to act as the partner Regulated Entity, since CreditTech cannot lend directly (§12)</td></tr>
+<tr><td>Baseline data availability</td><td>Digitised or digitisable land records and reasonable satellite/EO coverage, consistent with ULI's own finding that land-record digitisation is the binding constraint on scale-up (Business Standard, 2026)</td></tr>
+</table>
+
+<h3>13.2 Illustrative representative pilot cohort</h3>
+<table>
+<caption>Table 13.2 — Five representative site-types for the pilot cohort</caption>
+<tr><th>Site type</th><th>Representative geography</th><th>What it tests</th></tr>
+<tr><td>A — High KCC-penetration, irrigated</td><td>A block in a Kisan Credit Card-dense state such as Uttar Pradesh (state holds 17–18% of India's active KCC accounts; SatSure UP rollout precedent, 2025)</td><td>Whether alternative scoring improves speed/limit-adequacy where formal credit already exists</td></tr>
+<tr><td>B — Rainfed / climate-exposed</td><td>A rainfed block in a state with significant dryland cropping (e.g., parts of Maharashtra or Karnataka)</td><td>Geospatial/weather-signal value for higher-volatility income households</td></tr>
+<tr><td>C — SHG-dense, southern-model</td><td>A block in Andhra Pradesh / Telangana / Tamil Nadu — states accounting for a disproportionate share of SHG-bank linkage (NITI Aayog, 2023, as cited in PWOnlyIAS, 2025)</td><td>Group/peer-guarantee data as a scoring signal for women-led micro-enterprises</td></tr>
+<tr><td>D — Allied-activity / dairy-fisheries</td><td>A coastal or dairy-cooperative-dense block (e.g., parts of Gujarat or Odisha)</td><td>Non-crop income modelling (dairy pouring data, fisheries catch records)</td></tr>
+<tr><td>E — Low-teledensity / tribal-belt</td><td>A block in a low-connectivity district in Jharkhand, Chhattisgarh, or similar</td><td>Graceful-degradation architecture and assisted (Bank Sakhi/BC) onboarding under genuinely low bandwidth</td></tr>
+</table>
+
+<h3>13.3 Pilot design parameters</h3>
+<div class="stat-grid">
+<div class="stat-card"><div class="num">4–5</div><div class="lbl">Villages / gram panchayats, one per site-type</div></div>
+<div class="stat-card"><div class="num">150–250</div><div class="lbl">Target borrowers scored per site (750–1,250 total)</div></div>
+<div class="stat-card"><div class="num">9–12 mo</div><div class="lbl">Pilot duration, spanning at least one full Kharif–Rabi cycle</div></div>
+<div class="stat-card"><div class="num">1</div><div class="lbl">Partner Regulated Entity per site (RRB / PACS / SFB / MFI)</div></div>
+</div>
+<table>
+<caption>Table 13.3 — Pilot evaluation KPIs</caption>
+<tr><th>KPI</th><th>Baseline (As-Is proxy)</th><th>Pilot target</th></tr>
+<tr><td>Median time from application to score</td><td>10–15 days (agri-loan appraisal norm)</td><td>&lt; 1 hour</td></tr>
+<tr><td>Approval-rate uplift for thin-file borrowers</td><td>Bureau-only baseline at partner RE</td><td>+20–30% (in line with Kaleidofin/Upstart precedent, §3.4)</td></tr>
+<tr><td>Gender parity in approval rate</td><td>Historical partner-RE gender gap</td><td>Gap narrowed by ≥50% relative to baseline</td></tr>
+<tr><td>Portfolio-at-risk (PAR90) on scored loans</td><td>Sector agri-GNPA benchmark of 6.2% (RBI, 2024)</td><td>≤ 2% (in line with Kaleidofin precedent, §3.4)</td></tr>
+<tr><td>Borrower comprehension of reason-codes (survey)</td><td>N/A</td><td>≥ 80% of surveyed borrowers can correctly restate why they were scored as they were</td></tr>
+<tr><td>Score availability under partial data</td><td>N/A</td><td>≥ 90% of applicants receive a confidence-weighted score even with 1 of 4 data rails unavailable</td></tr>
+</table>
+</section>
+<section id="cost" class="alt">
+<span class="section-num">14</span>
+<h2>Preliminary Cost &amp; Resource Requirements</h2>
+<p class="lede">Indicative, pre-deployment cost bands for the 4–5 village pilot (§13), scaled from comparable public disclosures — SIDBI's MSME primary survey costs, NABARD refinance-scale operations, and reported fintech unit economics — and explicitly flagged as assumption-driven pending vendor quotes (see §15).</p>
+<table>
+<caption>Table 14.1 — Indicative pilot cost bands (9–12 month pilot, 4–5 sites)</caption>
+<tr><th>Cost head</th><th>Indicative range (₹ lakh)</th><th>Basis / assumption</th></tr>
+<tr><td>Core engineering team (5–7 FTEs: ML, backend, mobile, data)</td><td>85–120</td><td>Blended India fintech-engineer cost for a 9–12 month build-and-pilot cycle</td></tr>
+<tr><td>Satellite / geospatial data licensing (API access)</td><td>15–30</td><td>Per-hectare / per-query pricing typical of commercial EO-analytics providers (§3.4 case evidence)</td></tr>
+<tr><td>Account Aggregator integration &amp; per-consent fees</td><td>8–15</td><td>NBFC-AA integration and transaction-volume-based consent fees at pilot scale (~1,000 borrowers)</td></tr>
+<tr><td>Cloud infrastructure &amp; MLOps</td><td>10–18</td><td>India-region hosting, encrypted storage, model-monitoring tooling</td></tr>
+<tr><td>Field operations (Bank Sakhi/BC coordination, borrower onboarding, village-level training)</td><td>25–40</td><td>Comparable to SIDBI's 2,097-MSME primary-survey field cost structure, scaled down to ~1,000 borrower-onboardings (SIDBI, 2025)</td></tr>
+<tr><td>Independent fairness audit &amp; compliance/legal (DPDP, RBI)</td><td>10–18</td><td>Third-party audit engagement + legal review of consent flows and LSP agreements</td></tr>
+<tr><td>Monitoring, evaluation &amp; KPI reporting</td><td>8–12</td><td>Baseline survey, midline, and endline data collection against Table 13.3 KPIs</td></tr>
+<tr><td>Contingency (15%)</td><td>24–37</td><td>Standard contingency for a first-of-kind multi-institution pilot</td></tr>
+<tr><td><b>Indicative total</b></td><td><b>₹1.85–2.9 crore</b></td><td>Excludes the credit capital itself, which is disbursed by partner Regulated Entities, not by CreditTech</td></tr>
+</table>
+<div class="callout">
+<h4>Resource &amp; institutional inputs (non-cash)</h4>
+<p>Beyond cash cost, the pilot depends on in-kind commitments from: (a) a NABARD Regional Office or SFAC as pilot sponsor and NAFIS/KCC data-access facilitator; (b) at least one partner Regulated Entity per site willing to act as the lending counterparty and DLG-arrangement partner (§12); (c) SHG federation / FPO cooperation for group-data access; and (d) an academic or independent research partner for the fairness audit and KPI evaluation, consistent with the report's origin as an IIT Kharagpur project.</p>
+</div>
+</section>
+
+<section id="assumptions">
+<span class="section-num">15</span>
+<h2>Assumptions &amp; Justifications</h2>
+<table>
+<caption>Table 15.1 — Key assumptions, with supporting evidence and residual risk</caption>
+<tr><th>Assumption</th><th>Supporting evidence</th><th>Residual risk / caveat</th></tr>
+<tr><td>Approval-rate uplift of 20–30% for thin-file borrowers is achievable in an India village pilot</td><td>Kaleidofin and the Upstart/Tala/Kaleidofin comparative study report 20–44% uplift at national portfolio scale (§3.4)</td><td>National fintech-scale results may not fully replicate at a 4–5 village pilot scale with only one partner RE per site; treated as a directional, not guaranteed, target</td></tr>
+<tr><td>Satellite/EO crop-identification accuracy of 90–95% is attainable</td><td>SatSure reports this range for Indian conditions after building ~300,000 ground-truth points (§3.4)</td><td>Accuracy may be lower in the pilot's first season before local ground-truthing is complete; pilot budget (§14) includes contingency for this</td></tr>
+<tr><td>SHG repayment discipline (&gt;96%) is a valid proxy signal for individual creditworthiness</td><td>PIB/NABARD SHG-BLP repayment data (§1, §3.2)</td><td>Group-level discipline does not guarantee individual-level repayment once loans move from group to individual/JLG structures; monitored via the fairness/drift module (M5)</td></tr>
+<tr><td>ULI and AA rails will remain available and stable through the pilot period</td><td>Both are live, RBI-operated DPI as of 2025–26 (§9)</td><td>ULI large-lender adoption is still described as "muted" by bankers (Business Standard, 2026); pilot's graceful-degradation design (§6) is the mitigation</td></tr>
+<tr><td>Indicative cost bands (§14) hold at pilot scale</td><td>Scaled from SIDBI survey-cost structure and disclosed fintech unit economics (§3.4, §14)</td><td>Actual vendor quotes for satellite-data licensing and AA integration will vary by provider and negotiated volume; treat §14 as planning-stage only</td></tr>
+</table>
+</section>
+<section id="references" class="alt">
+<span class="section-num">16</span>
+<h2>References</h2>
+<p class="lede">APA 7th edition. Organisations are used as author where no individual author is attributed by the source, consistent with APA guidance for institutional/government reports.</p>
+<div class="ref-list">
+<p><b>Advances in Consumer Research.</b> (2025). The transformative impact of the Account Aggregator framework on financial inclusion in India: A multi-sectoral study of MSMEs, microfinance, and personal lending. <i>Advances in Consumer Research</i>. https://acr-journal.com/article/the-transformative-impact-of-the-account-aggregator-framework-on-financial-inclusion-in-india</p>
+<p><b>Agosto, A., Giudici, P., &amp; Raffinetti, E.</b> (2023). A sustainable, accurate, fair and explainable (SAFE) artificial intelligence model for credit scoring. <i>Data Science, 2</i>(2), 197–217.</p>
+<p><b>Berg, T., Burg, V., Gombović, A., &amp; Puri, M.</b> (2020). On the rise of fintechs: Credit scoring using digital footprints. <i>The Review of Financial Studies, 33</i>(7), 2845–2897.</p>
+<p><b>Bücker, M., Szepannek, G., Gosiewska, A., &amp; Biecek, P.</b> (2020). Transparency, auditability, and explainability of machine learning models in credit scoring. <i>Journal of the Operational Research Society, 73</i>(1), 70–90.</p>
+<p><b>Business Standard.</b> (2026, January). Muted response from large lenders hinders ULI scale up, say bankers. <i>Business Standard</i>. https://www.business-standard.com/industry/news/big-banks-slow-adoption-weak-land-records-stall-uli-scale-up-bankers-125082700907_1.html</p>
+<p><b>Business Standard.</b> (2025, July 23). RBI financial inclusion index hits 67 in Mar-25 compared to 64.2 in Mar-24. <i>Business Standard</i>.</p>
+<p><b>Consultative Group to Assist the Poor (CGAP).</b> (2018, January 23). CGAP and Harvesting explore use of alternative data in credit scores [News release]. World Bank. https://www.cgap.org/news/cgap-and-harvesting-explore-use-of-alternative-data-in-credit-scores</p>
+<p><b>Department of Financial Services, Ministry of Finance, Government of India.</b> (2025). Account Aggregator framework. https://financialservices.gov.in/account-aggregator-framework</p>
+<p><b>Food and Agriculture Organization of the United Nations.</b> (2020). <i>Alternative data credit scoring platforms for smallholder farmers</i>. FAO Science, Technology and Innovation Portal. https://sti-portal.fao.org</p>
+<p><b>IMPRI — Impact and Policy Research Institute.</b> (2026). Unified Lending Interface: RBI's digital push for faster credit access (2025). https://www.impriindia.com/insights/policy-update/unified-lending-interface-rbis-digital-push-for-faster-credit-access-2025/</p>
+<p><b>IMPRI — Impact and Policy Research Institute.</b> (2025). DAY-NRLM: Transforming rural livelihoods through women's empowerment. https://www.impriindia.com/insights/day-nrlm-transforming-rural-livelihood/</p>
+<p><b>IndiaCorpLaw.</b> (2025, July 19). RBI's revised digital lending guidelines: Strengthening guardrails in an evolving ecosystem. https://indiacorplaw.in/2025/07/19/rbis-revised-digital-lending-guidelines-strengthening-guardrails-in-an-evolving-ecosystem/</p>
+<p><b>Internet and Mobile Association of India (IAMAI) &amp; Kantar.</b> (2024). <i>Internet in India report 2024</i>. https://www.iamai.in</p>
+<p><b>Internet and Mobile Association of India (IAMAI) &amp; Kantar.</b> (2025). <i>Internet in India report 2025</i>. https://www.iamai.in</p>
+<p><b>Jonnalagadda, A. K., &amp; Babu, S. R.</b> (2026). Drivers of credit uptake by smallholder farmers: Empirical evidence from India's agricultural sector. <i>International Research Journal of Multidisciplinary Scope, 7</i>(2), 110–119. https://doi.org/10.47857/irjms.2026.v07i02.08617</p>
+<p><b>Journal of Management Science Research Review.</b> (2026). Algorithmic bias and fairness in AI credit scoring: Evidence, mechanisms, and governance responses. <i>Journal of Management Science Research Review</i>. https://jmsrr.com/index.php/Journal/article/view/658</p>
+<p><b>Kshetri, N.</b> (2021). Machine learning (ML) technologies for digital credit scoring in rural finance: A literature review. <i>Risks, 9</i>(11), 192. https://doi.org/10.3390/risks9110192</p>
+<p><b>Lexology.</b> (2025). Digital Personal Data Protection Rules, 2025: Operationalising consent, security, and governance obligations. https://www.lexology.com</p>
+<p><b>Ministry of Electronics and Information Technology, Government of India.</b> (2023). <i>The Digital Personal Data Protection Act, 2023</i> (No. 22 of 2023). https://www.meity.gov.in</p>
+<p><b>Ministry of Electronics and Information Technology, Government of India.</b> (2025). <i>Digital Personal Data Protection Rules, 2025</i>. https://static.pib.gov.in</p>
+<p><b>Munjuluri, R.</b> (2025). <i>Comparative analysis of alternative credit scoring models: Expanding access and identifying limitations</i> [Working paper]. SSRN. https://papers.ssrn.com/sol3/Delivery.cfm/5386246.pdf?abstractid=5386246</p>
+<p><b>National Bank for Agriculture and Rural Development (NABARD).</b> (2024). <i>All India Rural Financial Inclusion Survey (NAFIS) 2021–22</i>. Department of Economic Analysis and Research, NABARD.</p>
+<p><b>Njuguna, C., &amp; Sowon, K.</b> (2020). Towards small-scale farmers' fair credit scoring technique. In <i>Proceedings of the 2nd African Conference on Human Computer Interaction</i>. ACM.</p>
+<p><b>Prove.</b> (2024). India's Open Credit Enablement Network (OCEN). https://www.prove.com/blog/indias-open-credit-enablement-network-ocen</p>
+<p><b>Press Information Bureau, Government of India.</b> (2025, February). Around 10,000 FPOs achieved under government's flagship scheme. https://www.pib.gov.in/PressReleasePage.aspx?PRID=2106913</p>
+<p><b>Press Information Bureau, Ministry of Rural Development, Government of India.</b> (2025, December). Self-help group under DAY-NRLM. https://www.pib.gov.in</p>
+<p><b>Press Information Bureau, Government of India.</b> (2025). Kisan Credit Card and Economic Survey 2024–25 statistics. https://www.pib.gov.in/PressReleasePage.aspx?PRID=2097959</p>
+<p><b>PWOnlyIAS.</b> (2025). Self-Help Groups. https://pwonlyias.com/current-affairs/self-help-groups/</p>
+<p><b>Reserve Bank of India.</b> (2022). <i>Guidelines on digital lending</i> [Circular]. RBI.</p>
+<p><b>Reserve Bank of India.</b> (2023, June 8). <i>Guidelines on Default Loss Guarantee (DLG) in digital lending</i> [Circular]. RBI.</p>
+<p><b>Reserve Bank of India.</b> (2024). <i>Report on trend and progress of banking in India 2023–24</i>. RBI.</p>
+<p><b>Reserve Bank of India.</b> (2025, July 22). RBI's financial inclusion index for the year ending March 2025 [Press release]. Press Information Bureau. https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&amp;NoteId=154980</p>
+<p><b>Sahamati.</b> (2025). Account aggregators in India. https://sahamati.org.in/account-aggregators-in-india/</p>
+<p><b>SatSure Analytics.</b> (2025). Alternative data for credit assessment. SatSure Sage. https://www.satsure.co/blogs/how-alternative-data-from-satellite-imagery-can-help-banks-with-improved-credit-assessment/</p>
+<p><b>Small Industries Development Bank of India (SIDBI) &amp; Crisil Intelligence.</b> (2025, May). <i>Understanding the Indian MSME sector: Progress and challenges</i>. SIDBI. https://www.sidbi.in/uploads/publicationreport/Understanding_Indian_MSME_sector_Progress_and_Challenges_13_05_25_Final.pdf</p>
+<p><b>Swarajya.</b> (2024, December 27). Banks' gross non-performing assets hit 13-year low; agriculture sector reports highest GNPA, retail loans lowest: RBI. <i>Swarajya</i>.</p>
+<p><b>The Better India.</b> (2026). How satellite data is helping farmers access faster agricultural loans in India. https://thebetterindia.com/farming/satellite-data-helping-farmers-get-loans-india-12117696</p>
+<p><b>The India Forum.</b> (2025). Closing India's gender gap in financial inclusion. https://www.theindiaforum.in/gender/closing-indias-gender-gap-financial-inclusion</p>
+<p><b>Systematic review authors.</b> (2026). Performance, fairness, and explainability in AI-based credit scoring: A systematic literature review. <i>Risks, 19</i>(2), 104.</p>
+<p><b>Systematic review authors.</b> (2025). Revolutionizing agricultural loan recommendation systems via machine learning and artificial intelligence: A systematic literature review. <i>Computers and Electronics in Agriculture</i>. ScienceDirect.</p>
+<p><b>World Bank.</b> (2023). Improving women's access to credit in India [Blog post]. Let's Talk Development. https://blogs.worldbank.org/en/allaboutfinance/improving-womens-access-credit-india</p>
+<p><b>World Bank.</b> (Klapper, L., Singer, D., Starita, L., &amp; Norris, A.). (2025). <i>The Global Findex Database 2025: Connectivity and financial inclusion in the digital economy</i>. World Bank. https://www.worldbank.org/en/publication/globalfindex</p>
+</div>
+</section>
+</main>
+</div>
+<footer>
+<p><b>CreditTech — Alternative Credit Scoring for Financial Inclusion.</b> Concept &amp; feasibility report prepared by Arpit Kumar, Integrated Dual Degree (Chemical Engineering + AI Micro-Specialization), IIT Kharagpur. This document establishes problem definition, stakeholder mapping, system architecture, and pilot design ahead of full deployment planning; cost figures and site selections are indicative and require validation with NABARD, partner lenders, and state-level data-availability checks before implementation.</p>
+</footer>
+</body>
+</html>

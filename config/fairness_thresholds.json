@@ -1,0 +1,27 @@
+{
+  "version": "2026.09.01",
+  "ratified_by": "CreditTech External Fairness Auditor Panel (pilot)",
+  "ratified_at": "2026-09-01T00:00:00Z",
+  "notes": [
+    "Pilot-scale ratified thresholds per §8.3. Descriptive gate only.",
+    "Groups persisted as INSUFFICIENT_SAMPLE are excluded from gate evaluation.",
+    "Approval-gap is max-min approval rate across groups within a dimension."
+  ],
+  "thresholds": {
+    "GENDER": {
+      "min_approval_rate": 0.35,
+      "max_approval_gap": 0.20
+    },
+    "LANDHOLDING": {
+      "min_approval_rate": 0.30,
+      "max_approval_gap": 0.25
+    },
+    "GEOGRAPHY": {
+      "min_approval_rate": 0.25,
+      "max_approval_gap": 0.30
+    },
+    "OFFICER": {
+      "max_override_rate": 0.50
+    }
+  }
+}

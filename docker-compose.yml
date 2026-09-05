@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - APP_ENV=development
+      - APP_DEBUG=true
+      - DATABASE_URL=postgresql+asyncpg://credittech:credittech_dev@db:5432/credittech
+      - SECRET_KEY=development_secret_key_64_characters_long_for_testing_purposes
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=console
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn services.core.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=credittech
+      - POSTGRES_PASSWORD=credittech_dev
+      - POSTGRES_DB=credittech
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U credittech -d credittech"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

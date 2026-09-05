@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+pip-wheel-metadata/
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.log
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.local
+
+# Database / migrations state
+*.db
+*.sqlite3
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code workspace
+.claude/
+
+# Alembic local artifacts (keep alembic/ folder, ignore state)
+alembic/versions/__pycache__/

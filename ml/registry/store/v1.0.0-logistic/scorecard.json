@@ -1,0 +1,28 @@
+{
+  "feature_version": "v1.0.0",
+  "intercept": -8.489463305152807,
+  "model_version": "v1.0.0-logistic",
+  "weights": {
+    "asset_score": 1.1723766102513047,
+    "bank_balance_avg_6m": 2.3990665900134054e-05,
+    "crop_insurance_enrolled": 0.3603902620044225,
+    "estimated_crop_income_kharif": 9.979482409943046e-06,
+    "estimated_crop_income_rabi": 7.196351644818919e-06,
+    "income_stability_cv": -1.9753736697923723,
+    "irrigation_access": 0.7197811851086965,
+    "land_holding_acres": 0.17952114665745214,
+    "land_quality_ndvi_avg": 1.2735961171499293,
+    "monthly_avg_credit_inflow": 3.789038068502321e-05,
+    "ndvi_trend_2season": 0.10407726616648356,
+    "pm_kisan_regularity": 0.35923841043782073,
+    "rainfall_deviation_pct": -0.009501975382375143,
+    "shg_cumulative_savings": 3.387664221992086e-05,
+    "shg_grade": 1.1973807039376148,
+    "shg_meeting_attendance_pct": 0.02047567145861367,
+    "shg_membership_years": 0.06532730769424341,
+    "shg_repayment_rate": 3.6192508250087303,
+    "shg_savings_consistency": -1.3121518294405023,
+    "upi_transaction_regularity": -0.6330989142322949,
+    "utility_payment_ontime_pct": 0.01468067987765177
+  }
+}

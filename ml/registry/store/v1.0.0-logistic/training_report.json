@@ -1,0 +1,207 @@
+{
+  "auc": 0.7825907636744658,
+  "brier": 0.18936582176954506,
+  "calibration_bins": [
+    {
+      "bin_hi": 0.1,
+      "bin_lo": 0.0,
+      "count": 40,
+      "mean_predicted": 0.062133507766045495,
+      "observed_rate": 0.05
+    },
+    {
+      "bin_hi": 0.2,
+      "bin_lo": 0.1,
+      "count": 63,
+      "mean_predicted": 0.1538307156080158,
+      "observed_rate": 0.09523809523809523
+    },
+    {
+      "bin_hi": 0.30000000000000004,
+      "bin_lo": 0.2,
+      "count": 60,
+      "mean_predicted": 0.25267574781614216,
+      "observed_rate": 0.3333333333333333
+    },
+    {
+      "bin_hi": 0.4,
+      "bin_lo": 0.30000000000000004,
+      "count": 81,
+      "mean_predicted": 0.3519660126252673,
+      "observed_rate": 0.32098765432098764
+    },
+    {
+      "bin_hi": 0.5,
+      "bin_lo": 0.4,
+      "count": 74,
+      "mean_predicted": 0.44826117078739397,
+      "observed_rate": 0.43243243243243246
+    },
+    {
+      "bin_hi": 0.6000000000000001,
+      "bin_lo": 0.5,
+      "count": 74,
+      "mean_predicted": 0.545763303037077,
+      "observed_rate": 0.5405405405405406
+    },
+    {
+      "bin_hi": 0.7000000000000001,
+      "bin_lo": 0.6000000000000001,
+      "count": 64,
+      "mean_predicted": 0.6514512535869306,
+      "observed_rate": 0.6875
+    },
+    {
+      "bin_hi": 0.8,
+      "bin_lo": 0.7000000000000001,
+      "count": 63,
+      "mean_predicted": 0.7499737145267386,
+      "observed_rate": 0.7777777777777778
+    },
+    {
+      "bin_hi": 0.9,
+      "bin_lo": 0.8,
+      "count": 66,
+      "mean_predicted": 0.8424270884338944,
+      "observed_rate": 0.7727272727272727
+    },
+    {
+      "bin_hi": 1.0,
+      "bin_lo": 0.9,
+      "count": 15,
+      "mean_predicted": 0.9216868138004258,
+      "observed_rate": 0.8666666666666667
+    }
+  ],
+  "class_balance_train": {
+    "0": 0.5275,
+    "1": 0.4725
+  },
+  "fairness": [
+    {
+      "attribute": "gender",
+      "groups": {
+        "F": {
+          "approval_rate": 0.5140679953106683,
+          "n": 1706.0
+        },
+        "M": {
+          "approval_rate": 0.4785373608903021,
+          "n": 1258.0
+        },
+        "OTHER": {
+          "approval_rate": 0.5,
+          "n": 36.0
+        }
+      },
+      "limitations": [
+        "computed on proxy/synthetic data \u2014 sample sizes and generator biases limit interpretation",
+        "no ratified fairness tolerance yet \u2014 threshold decision pending governance"
+      ],
+      "max_disparity": 0.03553063442036619,
+      "ratified_tolerance": null,
+      "reference_group": "F",
+      "reference_rate": 0.5140679953106683,
+      "status": "pending_governance",
+      "threshold": 0.5
+    },
+    {
+      "attribute": "landholding_band",
+      "groups": {
+        "LANDLESS": {
+          "approval_rate": 0.47101449275362317,
+          "n": 138.0
+        },
+        "LARGE": {
+          "approval_rate": 0.4429530201342282,
+          "n": 149.0
+        },
+        "MARGINAL": {
+          "approval_rate": 0.498046875,
+          "n": 1024.0
+        },
+        "MEDIUM": {
+          "approval_rate": 0.48,
+          "n": 300.0
+        },
+        "SEMI_MEDIUM": {
+          "approval_rate": 0.5421166306695464,
+          "n": 463.0
+        },
+        "SMALL": {
+          "approval_rate": 0.4978401727861771,
+          "n": 926.0
+        }
+      },
+      "limitations": [
+        "computed on proxy/synthetic data \u2014 sample sizes and generator biases limit interpretation",
+        "no ratified fairness tolerance yet \u2014 threshold decision pending governance"
+      ],
+      "max_disparity": 0.055093854865771785,
+      "ratified_tolerance": null,
+      "reference_group": "MARGINAL",
+      "reference_rate": 0.498046875,
+      "status": "pending_governance",
+      "threshold": 0.5
+    }
+  ],
+  "feature_means": {
+    "asset_score": 0.4003354128857627,
+    "bank_balance_avg_6m": 5611.691622212506,
+    "crop_insurance_enrolled": 0.364,
+    "estimated_crop_income_kharif": 34955.81357827663,
+    "estimated_crop_income_rabi": 39516.93490323372,
+    "income_stability_cv": 0.4869522971968904,
+    "irrigation_access": 0.56,
+    "land_holding_acres": 2.4219376865817575,
+    "land_quality_ndvi_avg": 0.546028508354015,
+    "monthly_avg_credit_inflow": 5930.522698009537,
+    "ndvi_trend_2season": 0.017494830967347372,
+    "pm_kisan_regularity": 0.7101630460285023,
+    "rainfall_deviation_pct": -0.2723845116191967,
+    "shg_cumulative_savings": 4660.087264974693,
+    "shg_grade": 0.6866999999999999,
+    "shg_meeting_attendance_pct": 75.2075942983476,
+    "shg_membership_years": 5.445666666666667,
+    "shg_repayment_rate": 0.7533494726135538,
+    "shg_savings_consistency": 0.45981730465869053,
+    "upi_transaction_regularity": 0.4023350602628575,
+    "utility_payment_ontime_pct": 84.57962107092429
+  },
+  "feature_version": "v1.0.0",
+  "gini": 0.5651815273489316,
+  "intercept": -8.489463305152807,
+  "ks": 0.44198593260581204,
+  "model_version": "v1.0.0-logistic",
+  "n_train": 2400,
+  "n_val": 600,
+  "notes": [
+    "trained on proxy/synthetic data \u2014 NOT real repayment outcomes",
+    "L2 logistic regression, class_weight=balanced, 80/20 stratified split",
+    "no per-feature standardisation (runtime uses raw units)",
+    "missing values imputed with per-feature train-set median"
+  ],
+  "weights": {
+    "asset_score": 1.1723766102513047,
+    "bank_balance_avg_6m": 2.3990665900134054e-05,
+    "crop_insurance_enrolled": 0.3603902620044225,
+    "estimated_crop_income_kharif": 9.979482409943046e-06,
+    "estimated_crop_income_rabi": 7.196351644818919e-06,
+    "income_stability_cv": -1.9753736697923723,
+    "irrigation_access": 0.7197811851086965,
+    "land_holding_acres": 0.17952114665745214,
+    "land_quality_ndvi_avg": 1.2735961171499293,
+    "monthly_avg_credit_inflow": 3.789038068502321e-05,
+    "ndvi_trend_2season": 0.10407726616648356,
+    "pm_kisan_regularity": 0.35923841043782073,
+    "rainfall_deviation_pct": -0.009501975382375143,
+    "shg_cumulative_savings": 3.387664221992086e-05,
+    "shg_grade": 1.1973807039376148,
+    "shg_meeting_attendance_pct": 0.02047567145861367,
+    "shg_membership_years": 0.06532730769424341,
+    "shg_repayment_rate": 3.6192508250087303,
+    "shg_savings_consistency": -1.3121518294405023,
+    "upi_transaction_regularity": -0.6330989142322949,
+    "utility_payment_ontime_pct": 0.01468067987765177
+  }
+}

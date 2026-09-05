@@ -1,0 +1,57 @@
+name: Deploy — staging
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform init (staging)
+        working-directory: infra/envs/staging
+        run: terraform init -input=false
+
+      - name: Terraform plan
+        working-directory: infra/envs/staging
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform apply
+        working-directory: infra/envs/staging
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Smoke test — /health
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS "${STAGING_BASE_URL}/health" > /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 6
+          done
+          echo "Health check failed after retries" >&2
+          exit 1
+        env:
+          STAGING_BASE_URL: ${{ vars.STAGING_BASE_URL }}
+
+  promote-production:
+    name: Manual promote to production
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_BASE_URL }}
+    steps:
+      - run: echo "Production promotion requires manual approval on the 'production' environment."

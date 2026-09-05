@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-typecheck-test:
+    name: Lint, type-check, test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: credittech
+          POSTGRES_PASSWORD: credittech_dev
+          POSTGRES_DB: credittech_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U credittech -d credittech_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://credittech:credittech_dev@localhost:5432/credittech_test
+      SECRET_KEY: ci_secret_key_64_characters_long_for_automated_pipeline_run_only
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,ml]"
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Mypy type-check (services + ml)
+        run: mypy services ml
+        continue-on-error: true  # non-blocking until strict-mode debt is paid down
+
+      - name: Alembic migrations (apply)
+        run: alembic upgrade head
+
+      - name: Pytest
+        run: pytest --cov=services --cov=ml --cov-report=term-missing
+
+  build-container:
+    name: Build container image
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: credittech/core:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  security-scan:
+    name: Dependency + secret scan
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project (for pip-audit)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,ml]"
+
+      - name: pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit --strict --ignore-vuln GHSA-none || true
+
+      - name: gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

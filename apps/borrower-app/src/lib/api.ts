@@ -5,13 +5,108 @@
 
 const BASE = import.meta.env.VITE_API_BASE ?? "/api/v1";
 
+// ── Persona & Role Management (Reproducible Test Environment) ────
+export interface DevPersona {
+  key: string;
+  id: string;
+  name: string;
+  role: "LOAN_OFFICER" | "BANK_SAKHI" | "BORROWER" | "RISK_OFFICER" | "ADMIN";
+  branchOrVillage: string;
+  description: string;
+  borrowerId?: string;
+}
+
+export const DEV_PERSONAS: Record<string, DevPersona> = {
+  OFFICER_RAJESH: {
+    key: "OFFICER_RAJESH",
+    id: "OFF-001",
+    name: "Rajesh Kumar",
+    role: "LOAN_OFFICER",
+    branchOrVillage: "Chandauli Rural (Cluster Alpha)",
+    description: "Branch Loan Officer · Underwriting & Decisions",
+  },
+  OFFICER_VIKRAM: {
+    key: "OFFICER_VIKRAM",
+    id: "OFF-002",
+    name: "Vikram Singh",
+    role: "LOAN_OFFICER",
+    branchOrVillage: "Mirzapur Hill (Cluster Beta)",
+    description: "Branch Loan Officer · Rain-fed Farm Underwriting",
+  },
+  SAKHI_SUNITA: {
+    key: "SAKHI_SUNITA",
+    id: "SAKHI-001",
+    name: "Sunita Devi",
+    role: "BANK_SAKHI",
+    branchOrVillage: "Tara Jivanpur Village",
+    description: "Bank Sakhi · Assisted Onboarding & SHG Entry",
+  },
+  BORROWER_RADHIKA: {
+    key: "BORROWER_RADHIKA",
+    id: "BORR-RADHIKA",
+    name: "Radhika Devi",
+    role: "BORROWER",
+    branchOrVillage: "Tara Jivanpur Village",
+    description: "Self-service Borrower · Score & Grievance Access",
+    borrowerId: "00000000-0000-0000-0002-000000000001",
+  },
+  RISK_PRIYA: {
+    key: "RISK_PRIYA",
+    id: "RISK-001",
+    name: "Priya Sharma",
+    role: "RISK_OFFICER",
+    branchOrVillage: "Head Office Risk Division",
+    description: "Credit Risk Officer · Fairness & Disparity Audits",
+  },
+  ADMIN_AMIT: {
+    key: "ADMIN_AMIT",
+    id: "ADMIN-001",
+    name: "Amit Verma",
+    role: "ADMIN",
+    branchOrVillage: "MLOps & Systems",
+    description: "System Admin · Model Promotion & Registry",
+  },
+};
+
+export function getActivePersona(): DevPersona {
+  if (typeof window === "undefined") return DEV_PERSONAS.OFFICER_RAJESH;
+  const stored = localStorage.getItem("credittech_dev_persona");
+  if (stored && DEV_PERSONAS[stored]) {
+    return DEV_PERSONAS[stored];
+  }
+  return DEV_PERSONAS.OFFICER_RAJESH;
+}
+
+export function setActivePersona(personaKey: string): void {
+  if (DEV_PERSONAS[personaKey]) {
+    localStorage.setItem("credittech_dev_persona", personaKey);
+    window.dispatchEvent(
+      new CustomEvent("credittech_persona_changed", {
+        detail: DEV_PERSONAS[personaKey],
+      })
+    );
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const persona = getActivePersona();
+  const authHeaders: Record<string, string> = {
+    "content-type": "application/json",
+  };
+
+  if (persona.role === "BORROWER") {
+    if (persona.borrowerId) {
+      authHeaders["X-Borrower-Id"] = persona.borrowerId;
+    }
+  } else {
+    authHeaders["X-Officer-Id"] = persona.id;
+    authHeaders["X-Officer-Role"] = persona.role;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {
-      "content-type": "application/json",
-      "X-Officer-ID": "OFF-001",
-      "X-Officer-Role": "LOAN_OFFICER",
+      ...authHeaders,
       ...(init?.headers ?? {}),
     },
   });
@@ -21,6 +116,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   return res.json() as Promise<T>;
 }
+
 
 // ── Consent ────────────────────────────────────────────
 export interface ConsentSummary {

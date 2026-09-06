@@ -1,11 +1,12 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import TopNav from "./TopNav";
+import DevPersonaSwitcher from "./DevPersonaSwitcher";
 
 export default function Layout() {
   const location = useLocation();
   return (
-    <div className="min-h-full flex flex-col">
+    <div className="min-h-full flex flex-col relative">
       <TopNav />
 
       <main className="mx-auto max-w-7xl w-full px-6 lg:px-8 py-8 flex-1">
@@ -28,6 +29,9 @@ export default function Layout() {
           <span>DPDP · AA · offline-first</span>
         </div>
       </footer>
+
+      <DevPersonaSwitcher />
     </div>
   );
 }
+

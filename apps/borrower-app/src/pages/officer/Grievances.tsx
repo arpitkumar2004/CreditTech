@@ -11,30 +11,42 @@ import { useToast } from "@/components/ui/toast";
 import { grievances as mockGrievances, type Grievance } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
 import { grievanceApi, decisionApi } from "@/lib/api";
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
 
 type Status = "ALL" | Grievance["status"];
 const filters: Status[] = ["ALL", "OPEN", "IN_REVIEW", "ESCALATED", "RESOLVED"];
 
-const tabs = [
-  { id: "queue", label: "Queue" },
-  { id: "file", label: "File new" },
-] as const;
-type Tab = typeof tabs[number]["id"];
-
 const categories = ["Score dispute", "Data accuracy", "Consent issue", "Officer conduct", "Other"];
 
 export default function Grievances() {
+  const persona = usePersona();
+  const isBorrower = persona.role === "BORROWER";
+
+  const tabs = isBorrower
+    ? ([{ id: "file", label: "File appeal / dispute" }] as const)
+    : ([
+        { id: "queue", label: "Underwriting Grievance Queue" },
+        { id: "file", label: "File new" },
+      ] as const);
+
+  type Tab = "queue" | "file";
+
   const [params, setParams] = useSearchParams();
-  const initial: Tab = params.get("tab") === "file" ? "file" : "queue";
+  const initial: Tab = isBorrower ? "file" : (params.get("tab") === "file" ? "file" : "queue");
   const [tab, setTab] = useState<Tab>(initial);
 
   useEffect(() => {
+    if (isBorrower && tab !== "file") {
+      setTab("file");
+      return;
+    }
     setParams((prev) => {
       const next = new URLSearchParams(prev);
       if (tab === "file") next.set("tab", "file"); else next.delete("tab");
       return next;
     }, { replace: true });
-  }, [tab, setParams]);
+  }, [tab, isBorrower, setParams]);
 
   return (
     <div className="space-y-6">
@@ -70,10 +82,21 @@ export default function Grievances() {
 }
 
 function Queue() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN", "BANK_SAKHI"])) {
+    return (
+      <AccessDenied
+        resourceName="Institutional Grievance Queue"
+        allowedRoles={["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN"]}
+      />
+    );
+  }
+
   const [f, setF] = useState<Status>("ALL");
 
   const { data: apiGrievances, isLoading } = useQuery({
-    queryKey: ["grievancesList"],
+    queryKey: ["grievancesList", persona.id],
     queryFn: () => grievanceApi.list().catch(() => null),
   });
 
@@ -177,10 +200,12 @@ function Queue() {
 }
 
 function FileNew({ onCreated }: { onCreated?: () => void }) {
+  const persona = usePersona();
   const { toast } = useToast();
   const { data: apiApps } = useQuery({
-    queryKey: ["applicationsList"],
+    queryKey: ["applicationsList", persona.id],
     queryFn: () => decisionApi.listApplications().catch(() => null),
+    enabled: persona.role !== "BORROWER",
   });
   const [cat, setCat] = useState(categories[0]);
   const [summary, setSummary] = useState("");
@@ -201,7 +226,10 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
         "Officer conduct": "OTHER",
         "Other": "OTHER",
       };
-      const borrowerId = apiApps?.[0]?.borrower_id ?? "00000000-0000-0000-0000-000000000001";
+      const borrowerId =
+        persona.borrowerId ||
+        apiApps?.[0]?.borrower_id ||
+        "00000000-0000-0000-0002-000000000001";
       const res = await grievanceApi.create({
         borrower_id: borrowerId,
         category: catMap[cat] || "OTHER",
@@ -213,17 +241,8 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
       toast({
         variant: "success",
         title: "Grievance filed",
-        description: `Appeal ticket ${assignedId} queued under SLA tracking.`,
+        description: `Appeal ticket ${assignedId} queued under statutory 168h SLA tracking.`,
       });
-    } catch (err) {
-      console.warn("Using local grievance submission acknowledgment:", err);
-      setTicketId("GRV-LOCAL");
-      toast({
-        variant: "info",
-        title: "Grievance queued locally",
-        description: "Recorded to local audit log while backend is syncing.",
-      });
-    } finally {
       setIsSubmitting(false);
       setSubmitted(true);
       setTimeout(() => {
@@ -232,6 +251,13 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
         if (onCreated) onCreated();
       }, 2000);
       setSummary("");
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast({
+        variant: "error",
+        title: "Grievance Submission Blocked",
+        description: err?.message || "Failed to submit grievance to backend.",
+      });
     }
   }
 

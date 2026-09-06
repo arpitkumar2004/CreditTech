@@ -14,14 +14,27 @@ import { isOverride, validateDecisionForm } from "@/lib/decisionLogic";
 import type { OfficerDecision } from "@/lib/types";
 import { decisionApi } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
 
 export default function ApplicationDetail() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["LOAN_OFFICER", "SUPERVISOR", "ADMIN"])) {
+    return (
+      <AccessDenied
+        resourceName="Branch Loan Underwriting Pack & Decision"
+        allowedRoles={["LOAN_OFFICER", "SUPERVISOR", "ADMIN"]}
+      />
+    );
+  }
+
   const { id } = useParams();
   const nav = useNavigate();
   const { toast } = useToast();
 
   const { data: apiApps } = useQuery({
-    queryKey: ["applicationsList"],
+    queryKey: ["applicationsList", persona.id],
     queryFn: () => decisionApi.listApplications().catch(() => null),
   });
 
@@ -98,17 +111,16 @@ export default function ApplicationDetail() {
         title: "Decision recorded",
         description: `Decision ${decision} recorded for ${app.borrower_name}.`,
       });
-    } catch {
-      // Graceful fallback for offline demo
-      toast({
-        variant: "info",
-        title: "Decision logged locally",
-        description: "Recorded to local audit log while offline.",
-      });
-    } finally {
       setIsSubmitting(false);
       setSubmitted(true);
       setTimeout(() => nav("/applications"), 1200);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast({
+        variant: "error",
+        title: "Decision Failed / Blocked",
+        description: err?.message || "Failed to record decision on the server.",
+      });
     }
   }
 

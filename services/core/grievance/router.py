@@ -83,7 +83,11 @@ async def get_grievance(
     except GrievanceError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-    officer_ok = bool(x_officer_id and x_officer_role and x_officer_role.upper() in {"LOAN_OFFICER", "SUPERVISOR"})
+    officer_ok = bool(
+        x_officer_id
+        and x_officer_role
+        and x_officer_role.upper() in {"LOAN_OFFICER", "SUPERVISOR", "ADMIN", "RISK_OFFICER"}
+    )
     borrower_ok = x_borrower_id is not None and x_borrower_id.strip() == str(g.borrower_id)
     if not (officer_ok or borrower_ok):
         raise HTTPException(

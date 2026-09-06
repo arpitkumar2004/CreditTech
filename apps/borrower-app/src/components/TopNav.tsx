@@ -8,22 +8,57 @@ import {
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn, formatDateShort } from "@/lib/utils";
-import { officerProfile, applications, grievances } from "@/lib/mockData";
+import { usePersona } from "@/lib/usePersona";
+import { applications, grievances } from "@/lib/mockData";
 
-const primaryNav = [
-  { to: "/", label: "Overview", end: true },
-  { to: "/applications", label: "Applications" },
-  { to: "/fairness", label: "Fairness" },
-  { to: "/models", label: "Model Registry" },
-  { to: "/grievances", label: "Grievances" },
-];
+function getNavForRole(role: string) {
+  if (role === "BORROWER") {
+    return [
+      { to: "/", label: "My Portal", end: true },
+      { to: "/consent", label: "My Consents" },
+      { to: "/grievances", label: "My Appeals" },
+    ];
+  }
+  if (role === "BANK_SAKHI") {
+    return [
+      { to: "/", label: "Overview", end: true },
+      { to: "/applications/new", label: "Sakhi Entry" },
+      { to: "/borrowers", label: "Field Ingest" },
+      { to: "/consent", label: "Consent Lookup" },
+      { to: "/grievances", label: "Grievances" },
+    ];
+  }
+  if (role === "RISK_OFFICER") {
+    return [
+      { to: "/", label: "Overview", end: true },
+      { to: "/fairness", label: "Fairness Audits" },
+      { to: "/models", label: "Model Registry" },
+      { to: "/grievances", label: "Grievances" },
+    ];
+  }
+  return [
+    { to: "/", label: "Overview", end: true },
+    { to: "/applications", label: "Applications" },
+    { to: "/fairness", label: "Fairness" },
+    { to: "/models", label: role === "ADMIN" ? "Model Registry (Admin)" : "Model Registry" },
+    { to: "/grievances", label: "Grievances" },
+  ];
+}
 
-const quickActions = [
-  { to: "/applications/new", icon: FilePlus2, label: "New application", sub: "Sakhi entry form" },
-  { to: "/borrowers", icon: User2, label: "Aggregate borrower", sub: "Trigger 4-rail ingest" },
-  { to: "/consent", icon: ScrollText, label: "Lookup consent", sub: "Verify hash-chain" },
-  { to: "/grievances?tab=file", icon: MessageSquareWarning, label: "File grievance", sub: "On behalf of borrower" },
-];
+function getQuickActionsForRole(role: string) {
+  if (role === "BORROWER") {
+    return [
+      { to: "/consent", icon: ScrollText, label: "My consent records", sub: "DPDP hash-chain verification" },
+      { to: "/grievances?tab=file", icon: MessageSquareWarning, label: "File score dispute", sub: "168h SLA appeal clock" },
+    ];
+  }
+  return [
+    { to: "/applications/new", icon: FilePlus2, label: "New application", sub: "Sakhi entry form" },
+    { to: "/borrowers", icon: User2, label: "Aggregate borrower", sub: "Trigger 4-rail ingest" },
+    { to: "/consent", icon: ScrollText, label: "Lookup consent", sub: "Verify hash-chain" },
+    { to: "/grievances?tab=file", icon: MessageSquareWarning, label: "File grievance", sub: "On behalf of borrower" },
+  ];
+}
 
 function usePopover<T extends HTMLElement>() {
   const [open, setOpen] = useState(false);
@@ -45,11 +80,15 @@ function usePopover<T extends HTMLElement>() {
 }
 
 export default function TopNav() {
+  const persona = usePersona();
   const nav = useNavigate();
   const [q, setQ] = useState("");
   const quick = usePopover<HTMLDivElement>();
   const notif = usePopover<HTMLDivElement>();
   const profile = usePopover<HTMLDivElement>();
+
+  const primaryNav = getNavForRole(persona.role);
+  const quickActions = getQuickActionsForRole(persona.role);
 
   const searchResults = q.trim().length >= 1
     ? applications
@@ -258,7 +297,7 @@ export default function TopNav() {
               className="rounded-full ring-2 ring-transparent hover:ring-white transition"
               aria-label="Profile"
             >
-              <Avatar name={officerProfile.name} size={36} />
+              <Avatar name={persona.name} size={36} />
             </button>
             <AnimatePresence>
               {profile.open && (
@@ -267,13 +306,17 @@ export default function TopNav() {
                   className="glass absolute right-0 mt-2 w-64 rounded-2xl p-2"
                 >
                   <div className="px-3 py-3 flex items-center gap-3 border-b border-slate-200/40">
-                    <Avatar name={officerProfile.name} size={40} />
+                    <Avatar name={persona.name} size={40} />
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold truncate">{officerProfile.name}</div>
-                      <div className="text-[11px] text-muted-foreground truncate">{officerProfile.role}</div>
+                      <div className="text-sm font-semibold truncate">{persona.name}</div>
+                      <div className="text-[11px] font-bold text-primary truncate tracking-wide">
+                        {persona.role.replace("_", " ")}
+                      </div>
                     </div>
                   </div>
-                  <div className="px-3 py-2 text-[11px] text-muted-foreground">{officerProfile.branch}</div>
+                  <div className="px-3 py-2 text-[11px] text-muted-foreground truncate">
+                    {persona.id} · {persona.branchOrVillage}
+                  </div>
                   <button className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white text-sm">
                     <Settings className="h-4 w-4" /> Settings
                   </button>

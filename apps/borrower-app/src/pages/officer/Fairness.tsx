@@ -7,12 +7,25 @@ import { LoadingState } from "@/components/ui/loading";
 import { EmptyState } from "@/components/ui/empty";
 import { fairnessSlices as fallbackSlices } from "@/lib/mockData";
 import { dashboardApi, adminApi } from "@/lib/api";
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
 
 export default function Fairness() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["RISK_OFFICER", "LOAN_OFFICER", "ADMIN", "SUPERVISOR"])) {
+    return (
+      <AccessDenied
+        resourceName="Fairness & Demographic Parity Audits"
+        allowedRoles={["RISK_OFFICER", "LOAN_OFFICER", "ADMIN"]}
+      />
+    );
+  }
+
   const [showCharts, setShowCharts] = useState(false);
 
   const { data: fairnessData, isLoading } = useQuery({
-    queryKey: ["fairness-audit"],
+    queryKey: ["fairness-audit", persona.id],
     queryFn: () => dashboardApi.fairness().catch(() => null),
   });
 

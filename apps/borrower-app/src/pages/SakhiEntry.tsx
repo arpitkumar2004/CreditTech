@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ingestApi, type SakhiEntryPayload } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
 
 const schema = z.object({
   borrower_id: z.string().uuid("Must be a valid UUID"),
@@ -42,6 +44,17 @@ const selectCls =
   "flex h-11 w-full rounded-xl border border-white/70 bg-white/70 backdrop-blur px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:ring-2 focus:ring-ring/40";
 
 export default function SakhiEntry() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["BANK_SAKHI", "LOAN_OFFICER", "ADMIN"])) {
+    return (
+      <AccessDenied
+        resourceName="Bank Sakhi Field Assisted Onboarding"
+        allowedRoles={["BANK_SAKHI", "LOAN_OFFICER", "ADMIN"]}
+      />
+    );
+  }
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
     defaultValues: { nabard_grade: "A", land_ownership: "OWN", irrigation_access: "yes" },
   });

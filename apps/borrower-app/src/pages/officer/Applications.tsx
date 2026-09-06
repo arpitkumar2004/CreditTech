@@ -10,15 +10,29 @@ import { applications as mockApplications, type Application } from "@/lib/mockDa
 import { formatINR, formatDateShort } from "@/lib/utils";
 import { decisionApi } from "@/lib/api";
 
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
+
 type Filter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "REFERRED";
 const filters: Filter[] = ["ALL", "PENDING", "APPROVED", "REJECTED", "REFERRED"];
 
 export default function Applications() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["LOAN_OFFICER", "SUPERVISOR", "ADMIN"])) {
+    return (
+      <AccessDenied
+        resourceName="Branch Loan Underwriting Queue"
+        allowedRoles={["LOAN_OFFICER", "SUPERVISOR", "ADMIN"]}
+      />
+    );
+  }
+
   const [filter, setFilter] = useState<Filter>("ALL");
   const [q, setQ] = useState("");
 
   const { data: apiApps, isLoading } = useQuery({
-    queryKey: ["applicationsList"],
+    queryKey: ["applicationsList", persona.id],
     queryFn: () => decisionApi.listApplications().catch(() => null),
   });
 

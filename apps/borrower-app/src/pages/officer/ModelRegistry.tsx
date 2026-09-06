@@ -8,11 +8,46 @@ import { models as mockModels } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
 import { adminApi } from "@/lib/api";
 
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
+import { Lock, Play } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+
 export default function ModelRegistry() {
-  const { data: apiModels, isLoading } = useQuery({
-    queryKey: ["modelsList"],
+  const persona = usePersona();
+  const { toast } = useToast();
+
+  if (!isAllowed(persona.role, ["ADMIN", "LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR"])) {
+    return (
+      <AccessDenied
+        resourceName="MLOps Model Registry & Promotion"
+        allowedRoles={["ADMIN", "RISK_OFFICER", "LOAN_OFFICER"]}
+      />
+    );
+  }
+
+  const { data: apiModels, isLoading, refetch } = useQuery({
+    queryKey: ["modelsList", persona.id],
     queryFn: () => adminApi.listModels().catch(() => null),
   });
+
+  const handlePromote = async (version: string) => {
+    try {
+      await adminApi.promote(version);
+      toast({
+        variant: "success",
+        title: "Model Promoted to Active",
+        description: `Successfully promoted ${version} to active champion.`,
+      });
+      refetch();
+    } catch (err: any) {
+      toast({
+        variant: "error",
+        title: "Promotion Failed / Gate Blocked",
+        description: err?.message || "Model did not meet promotion criteria or insufficient permissions.",
+      });
+    }
+  };
 
   const sourceModels = useMemo(() => {
     if (apiModels && apiModels.length > 0) {
@@ -98,7 +133,8 @@ export default function ModelRegistry() {
                   <th>KS</th>
                   <th>Brier</th>
                   <th>Fairness</th>
-                  <th className="last">Trained</th>
+                  <th>Trained</th>
+                  <th className="last">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -121,7 +157,35 @@ export default function ModelRegistry() {
                         ? <Badge tone="success"><Dot tone="success" /> passed</Badge>
                         : <Badge tone="warning"><Clock className="h-3 w-3" /> pending</Badge>}
                     </td>
-                    <td className="last text-xs text-muted-foreground">{formatDate(m.trained_at)}</td>
+                    <td className="text-xs text-muted-foreground">{formatDate(m.trained_at)}</td>
+                    <td className="last">
+                      {m.status === "candidate" ? (
+                        persona.role === "ADMIN" ? (
+                          <button
+                            onClick={() => handlePromote(m.version)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-sm"
+                          >
+                            <Play className="h-3 w-3 fill-current" />
+                            Promote
+                          </button>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800"
+                            title="Model promotion requires ADMIN role"
+                          >
+                            <Lock className="h-3 w-3" />
+                            Admin only
+                          </span>
+                        )
+                      ) : m.status === "active" ? (
+                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Champion
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Archived</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

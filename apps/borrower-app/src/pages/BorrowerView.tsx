@@ -8,8 +8,21 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ingestApi } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
+import { usePersona, isAllowed } from "@/lib/usePersona";
+import AccessDenied from "@/components/AccessDenied";
 
 export default function BorrowerView() {
+  const persona = usePersona();
+
+  if (!isAllowed(persona.role, ["BANK_SAKHI", "LOAN_OFFICER", "ADMIN"])) {
+    return (
+      <AccessDenied
+        resourceName="Four-Rail Data Aggregation Trigger"
+        allowedRoles={["BANK_SAKHI", "LOAN_OFFICER", "ADMIN"]}
+      />
+    );
+  }
+
   const { toast } = useToast();
   const [borrowerId, setBorrowerId] = useState("");
   const trigger = useMutation({

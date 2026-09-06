@@ -8,10 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { consentApi, type ConsentSummary } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
+import { usePersona } from "@/lib/usePersona";
 
 export default function ConsentView() {
+  const persona = usePersona();
   const { toast } = useToast();
-  const [consentId, setConsentId] = useState("");
+  const [consentId, setConsentId] = useState(
+    persona.role === "BORROWER" ? "00000000-0000-0000-0005-000000000001" : ""
+  );
   const [detail, setDetail] = useState<ConsentSummary | null>(null);
 
   const load = useMutation({
@@ -42,32 +46,67 @@ export default function ConsentView() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl sm:text-3xl font-semibold display">Consent</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold display">Consent & DPDP Records</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Look up a hash-chained consent record and verify its integrity end-to-end (ADR-6).
+          Look up a hash-chained consent record and verify its cryptographic integrity end-to-end (ADR-6).
         </p>
       </header>
       <Card>
       <CardHeader>
-        <CardTitle>Lookup</CardTitle>
+        <CardTitle>Lookup & Verification</CardTitle>
         <CardDescription>
-          Provide the consent UUID to fetch the record and validate its chain.
+          Provide the consent UUID to fetch the record and validate its SHA-256 tamper-evident chain.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto,auto] gap-2 items-end">
-          <div className="space-y-1.5">
-            <Label htmlFor="cid">Consent ID</Label>
-            <Input id="cid" value={consentId} onChange={(e) => setConsentId(e.target.value)} placeholder="UUID" />
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+            <span className="font-medium">Quick sample records:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setConsentId("00000000-0000-0000-0005-000000000001");
+                load.mutate("00000000-0000-0000-0005-000000000001");
+              }}
+              className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition text-[11px]"
+            >
+              Radhika (Active Valid)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setConsentId("00000000-0000-0000-0009-000000000087");
+                load.mutate("00000000-0000-0000-0009-000000000087");
+              }}
+              className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition text-[11px]"
+            >
+              Tripwire (Revoked)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setConsentId("00000000-0000-0000-0009-000000000076");
+                load.mutate("00000000-0000-0000-0009-000000000076");
+              }}
+              className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition text-[11px]"
+            >
+              Tripwire (Expired)
+            </button>
           </div>
-          <Button size="lg" onClick={() => load.mutate(consentId)} disabled={!consentId || load.isPending}>
-            {load.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Load
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => verify.mutate(consentId)} disabled={!consentId || verify.isPending}>
-            {verify.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-            Verify chain
-          </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto,auto] gap-2 items-end">
+            <div className="space-y-1.5">
+              <Label htmlFor="cid">Consent ID</Label>
+              <Input id="cid" value={consentId} onChange={(e) => setConsentId(e.target.value)} placeholder="UUID" />
+            </div>
+            <Button size="lg" onClick={() => load.mutate(consentId)} disabled={!consentId || load.isPending}>
+              {load.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              Load
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => verify.mutate(consentId)} disabled={!consentId || verify.isPending}>
+              {verify.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              Verify chain
+            </Button>
+          </div>
         </div>
 
         {verify.data && (

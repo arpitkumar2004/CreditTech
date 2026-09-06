@@ -3,7 +3,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -65,6 +65,9 @@ async def generate_score(
 )
 async def get_historical_score(
     score_id: uuid.UUID,
+    x_borrower_id: str | None = Header(default=None, alias="X-Borrower-Id"),
+    x_officer_id: str | None = Header(default=None, alias="X-Officer-Id"),
+    x_officer_role: str | None = Header(default=None, alias="X-Officer-Role"),
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Retrieve a previously generated credit score along with its reason codes."""
@@ -80,6 +83,17 @@ async def get_historical_score(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Score {score_id} not found",
         )
+
+    # Horizontal isolation check: Borrowers can only view their own score
+    is_officer = bool(
+        x_officer_id and x_officer_role and x_officer_role.upper() in {"LOAN_OFFICER", "SUPERVISOR", "RISK_OFFICER", "ADMIN", "ML_ENGINEER"}
+    )
+    if x_borrower_id and not is_officer:
+        if str(score_record.borrower_id) != x_borrower_id.strip():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Borrower not authorized to view another borrower's score",
+            )
 
     # Re-calculate 900 score dynamically for display (not stored in DB).
     # Use the model_version that was used at scoring time so calibration matches.

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.core.database import get_db
-from services.core.decisioning.auth import require_officer
+from services.core.decisioning.auth import require_admin, require_officer
 from services.core.monitoring.governance import (
     FairnessGate,
     ManifestError,
@@ -49,7 +49,7 @@ async def evaluate_gate(
 @router.post("/models/{model_version}/promote", summary="Promote a model to active (gated)")
 async def promote_model(
     model_version: str,
-    _: str = Depends(require_officer),
+    _: str = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     svc = ModelPromotionService(db)

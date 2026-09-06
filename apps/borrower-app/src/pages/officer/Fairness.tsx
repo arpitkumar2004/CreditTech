@@ -3,13 +3,15 @@ import { ShieldCheck, Download, Info, ChevronDown, AlertTriangle } from "lucide-
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Dot } from "@/components/ui/badge";
+import { LoadingState } from "@/components/ui/loading";
+import { EmptyState } from "@/components/ui/empty";
 import { fairnessSlices as fallbackSlices } from "@/lib/mockData";
 import { dashboardApi, adminApi } from "@/lib/api";
 
 export default function Fairness() {
   const [showCharts, setShowCharts] = useState(false);
 
-  const { data: fairnessData } = useQuery({
+  const { data: fairnessData, isLoading } = useQuery({
     queryKey: ["fairness-audit"],
     queryFn: () => dashboardApi.fairness().catch(() => null),
   });
@@ -106,36 +108,46 @@ export default function Fairness() {
       <section>
         <p className="section-heading mb-3">Group comparison</p>
         <div className="glass rounded-3xl overflow-hidden">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th className="first">Dimension</th>
-                <th>Group</th>
-                <th>Sample (n)</th>
-                <th>Approval</th>
-                <th>Δ vs baseline</th>
-                <th className="last">Verdict</th>
-              </tr>
-            </thead>
-            <tbody>
-              {flatRows.map((r, i) => (
-                <tr key={`${r.dim}-${r.g}-${i}`}>
-                  <td className="first text-xs text-muted-foreground uppercase tracking-wide">{r.dim}</td>
-                  <td className="font-medium">{r.g}</td>
-                  <td className="tabular">{r.n}</td>
-                  <td className="tabular font-medium">{(r.approval * 100).toFixed(1)}%</td>
-                  <td className={"tabular " + (r.delta >= 0 ? "text-emerald-600" : "text-rose-600")}>
-                    {r.delta !== 0 ? `${r.delta >= 0 ? "+" : ""}${(r.delta * 100).toFixed(1)}pt` : "—"}
-                  </td>
-                  <td className="last">
-                    {r.status === "OK" || (!r.status && Math.abs(r.delta) <= 0.1)
-                      ? <Badge tone="success"><Dot tone="success" /> pass</Badge>
-                      : <Badge tone="danger"><Dot tone="danger" /> {r.status?.toLowerCase() || "breach"}</Badge>}
-                  </td>
+          {isLoading ? (
+            <LoadingState text="Loading fairness audit slices…" />
+          ) : flatRows.length === 0 ? (
+            <EmptyState
+              icon={ShieldCheck}
+              title="No fairness records found"
+              subtitle="Fairness parity metrics will appear as loan applications are audited."
+            />
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className="first">Dimension</th>
+                  <th>Group</th>
+                  <th>Sample (n)</th>
+                  <th>Approval</th>
+                  <th>Δ vs baseline</th>
+                  <th className="last">Verdict</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {flatRows.map((r, i) => (
+                  <tr key={`${r.dim}-${r.g}-${i}`}>
+                    <td className="first text-xs text-muted-foreground uppercase tracking-wide">{r.dim}</td>
+                    <td className="font-medium">{r.g}</td>
+                    <td className="tabular">{r.n}</td>
+                    <td className="tabular font-medium">{(r.approval * 100).toFixed(1)}%</td>
+                    <td className={"tabular " + (r.delta >= 0 ? "text-emerald-600" : "text-rose-600")}>
+                      {r.delta !== 0 ? `${r.delta >= 0 ? "+" : ""}${(r.delta * 100).toFixed(1)}pt` : "—"}
+                    </td>
+                    <td className="last">
+                      {r.status === "OK" || (!r.status && Math.abs(r.delta) <= 0.1)
+                        ? <Badge tone="success"><Dot tone="success" /> pass</Badge>
+                        : <Badge tone="danger"><Dot tone="danger" /> {r.status?.toLowerCase() || "breach"}</Badge>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 

@@ -7,17 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { consentApi, type ConsentSummary } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
 
 export default function ConsentView() {
+  const { toast } = useToast();
   const [consentId, setConsentId] = useState("");
   const [detail, setDetail] = useState<ConsentSummary | null>(null);
 
   const load = useMutation({
     mutationFn: (id: string) => consentApi.get(id),
-    onSuccess: (d) => setDetail(d),
-    onError: () => setDetail(null),
+    onSuccess: (d) => {
+      setDetail(d);
+      toast({ variant: "success", title: "Consent record loaded", description: `Purpose: ${d.purpose}` });
+    },
+    onError: (err: any) => {
+      setDetail(null);
+      toast({ variant: "error", title: "Record not found", description: err?.message || "Invalid or missing consent ID." });
+    },
   });
-  const verify = useMutation({ mutationFn: (id: string) => consentApi.verify(id) });
+  const verify = useMutation({
+    mutationFn: (id: string) => consentApi.verify(id),
+    onSuccess: (d) => {
+      toast({
+        variant: d.valid ? "success" : "error",
+        title: d.valid ? "Integrity verified" : "Integrity check failed",
+        description: d.valid ? "SHA-256 hash chain is intact." : (d.reason ?? "Chain mismatch detected."),
+      });
+    },
+    onError: (err: any) => {
+      toast({ variant: "error", title: "Verification failed", description: err?.message || "Could not verify chain." });
+    },
+  });
 
   return (
     <div className="space-y-6">

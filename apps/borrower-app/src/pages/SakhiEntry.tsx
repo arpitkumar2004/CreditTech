@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ingestApi, type SakhiEntryPayload } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
 
 const schema = z.object({
   borrower_id: z.string().uuid("Must be a valid UUID"),
@@ -41,17 +42,31 @@ const selectCls =
   "flex h-11 w-full rounded-xl border border-white/70 bg-white/70 backdrop-blur px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:ring-2 focus:ring-ring/40";
 
 export default function SakhiEntry() {
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
     defaultValues: { nabard_grade: "A", land_ownership: "OWN", irrigation_access: "yes" },
   });
   const [banner, setBanner] = useState<{ kind: "ok" | "err" | "queued"; text: string } | null>(null);
+  const { toast } = useToast();
+
+  // B6: Warn on browser close / tab switch when form has unsaved data
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   const mutation = useMutation({
     mutationFn: (payload: SakhiEntryPayload) => ingestApi.submitSakhiEntry(payload),
-    onSuccess: () => { setBanner({ kind: "ok", text: "Entry recorded successfully." }); reset(); },
+    onSuccess: () => {
+      setBanner({ kind: "ok", text: "Entry recorded successfully." });
+      toast({ variant: "success", title: "Entry recorded", description: "SHG/FPO data submitted to the backend." });
+      reset();
+    },
     onError: (err: Error, payload) => {
       queueOffline(payload);
       setBanner({ kind: "queued", text: `Network unavailable — entry queued locally (${err.message}).` });
+      toast({ variant: "warning", title: "Queued offline", description: "Entry saved locally; will sync when online." });
     },
   });
 

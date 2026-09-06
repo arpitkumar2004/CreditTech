@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     bureau_base_url: str = "http://localhost:8001/mock/bureau"
     bureau_api_key: str = "mock_api_key"
 
+    # ── CORS ─────────────────────────────────────────────────
+    cors_origins: str = "*"  # Comma-separated; restrict in production
+
     # ── Logging ──────────────────────────────────────────────
     log_level: str = "INFO"
     log_format: str = "json"
@@ -64,6 +67,11 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        """Parse comma-separated CORS origins into a list."""
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
 @lru_cache

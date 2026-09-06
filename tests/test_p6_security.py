@@ -51,3 +51,24 @@ async def test_rate_limit_kicks_in(monkeypatch) -> None:
         codes = [(await ac.get("/ok")).status_code for _ in range(8)]
     assert codes.count(429) >= 1
     assert codes[:5] == [200] * 5
+
+
+@pytest.mark.asyncio
+async def test_request_id_header_applied(client: AsyncClient) -> None:
+    """A1: Verify X-Request-ID is generated and returned in response headers."""
+    r = await client.get("/health")
+    assert r.status_code == 200
+    assert "x-request-id" in r.headers
+    custom_id = "test-client-req-999"
+    r2 = await client.get("/health", headers={"X-Request-ID": custom_id})
+    assert r2.headers.get("x-request-id") == custom_id
+
+
+@pytest.mark.asyncio
+async def test_readiness_probe_healthy(client: AsyncClient) -> None:
+    """A2: Verify /ready checks DB connectivity and reports ready=True."""
+    r = await client.get("/ready")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["ready"] is True
+    assert data["db"] == "ok"

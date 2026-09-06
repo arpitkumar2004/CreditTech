@@ -2,12 +2,14 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
+import { LoadingState } from "@/components/ui/loading";
+import { EmptyState } from "@/components/ui/empty";
 import { models as mockModels } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
 import { adminApi } from "@/lib/api";
 
 export default function ModelRegistry() {
-  const { data: apiModels } = useQuery({
+  const { data: apiModels, isLoading } = useQuery({
     queryKey: ["modelsList"],
     queryFn: () => adminApi.listModels().catch(() => null),
   });
@@ -76,45 +78,55 @@ export default function ModelRegistry() {
       <section>
         <p className="section-heading mb-3">Performance · all models</p>
         <div className="glass rounded-3xl overflow-hidden overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th className="first">Version</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>AUC</th>
-                <th>Gini</th>
-                <th>KS</th>
-                <th>Brier</th>
-                <th>Fairness</th>
-                <th className="last">Trained</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sourceModels.map((m: any) => (
-                <tr key={m.version}>
-                  <td className="first">
-                    <div className="flex items-center gap-2">
-                      <GitBranch className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium font-mono text-xs">{m.version}</span>
-                    </div>
-                  </td>
-                  <td className="text-xs">{m.type}</td>
-                  <td><StatusBadge status={m.status} /></td>
-                  <td className="tabular font-medium">{m.auc.toFixed(3)}</td>
-                  <td className="tabular">{m.gini.toFixed(3)}</td>
-                  <td className="tabular">{m.ks.toFixed(3)}</td>
-                  <td className="tabular">{m.brier.toFixed(3)}</td>
-                  <td>
-                    {m.fairness_gate === "PASSED"
-                      ? <Badge tone="success"><Dot tone="success" /> passed</Badge>
-                      : <Badge tone="warning"><Clock className="h-3 w-3" /> pending</Badge>}
-                  </td>
-                  <td className="last text-xs text-muted-foreground">{formatDate(m.trained_at)}</td>
+          {isLoading ? (
+            <LoadingState text="Loading models from registry…" />
+          ) : sourceModels.length === 0 ? (
+            <EmptyState
+              icon={Boxes}
+              title="No models in registry"
+              subtitle="Trained and registered models will appear here."
+            />
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className="first">Version</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>AUC</th>
+                  <th>Gini</th>
+                  <th>KS</th>
+                  <th>Brier</th>
+                  <th>Fairness</th>
+                  <th className="last">Trained</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sourceModels.map((m: any) => (
+                  <tr key={m.version}>
+                    <td className="first">
+                      <div className="flex items-center gap-2">
+                        <GitBranch className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium font-mono text-xs">{m.version}</span>
+                      </div>
+                    </td>
+                    <td className="text-xs">{m.type}</td>
+                    <td><StatusBadge status={m.status} /></td>
+                    <td className="tabular font-medium">{m.auc.toFixed(3)}</td>
+                    <td className="tabular">{m.gini.toFixed(3)}</td>
+                    <td className="tabular">{m.ks.toFixed(3)}</td>
+                    <td className="tabular">{m.brier.toFixed(3)}</td>
+                    <td>
+                      {m.fairness_gate === "PASSED"
+                        ? <Badge tone="success"><Dot tone="success" /> passed</Badge>
+                        : <Badge tone="warning"><Clock className="h-3 w-3" /> pending</Badge>}
+                    </td>
+                    <td className="last text-xs text-muted-foreground">{formatDate(m.trained_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 

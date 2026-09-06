@@ -8,10 +8,67 @@ CreditTech is an AI-driven digital lending decision-support system serving farme
 
 ## Status
 
-- **Backend:** P0–P6 delivered — consent, ingestion (4 rails w/ graceful degradation), scoring, SHAP explainability, officer decisioning, RE handoff, fairness/grievance, institutional dashboard, DR, security middleware, PDF report, fairness gate, model promotion pipeline, load harness.
-- **Frontend:** React + Vite web apps under `apps/` — borrower / Sakhi entry app and loan officer dashboard.
-- **Tests:** 110 backend tests passing (baseline) + P6 load harness (`tests/test_p6_load.py`).
+- **Backend:** P0–P6 delivered — consent, ingestion (4 rails w/ graceful degradation), scoring, SHAP explainability, officer decisioning, RE handoff, fairness/grievance, institutional dashboard, DR, security middleware, Request-ID tracing, `/ready` probe, PDF report, fairness gate, model promotion pipeline, load harness.
+- **Frontend:** React + Vite web apps under `apps/` — borrower / Sakhi entry app and loan officer dashboard with toast notifications, global error boundary, 404 handler, and accessible design.
+- **Machine Learning:** Champion model `v1.1.0-woe-scorecard` (AUC: 0.7823, Gini: 0.5646, KS: 0.4623) & Challenger `v1.1.0-gbm-challenger` (AUC: 0.7506) with Spatial GroupKFold validation and WoE/IV transformation engine.
+- **Tests:** 120 backend tests passing across all suites + P6 load harness (`tests/test_p6_load.py`).
 - **Remaining before real pilot go-live:** external items only (see [`docs/phase7/pre_launch_gate.md`](docs/phase7/pre_launch_gate.md) — production credentials, signed vendor contracts, live borrower onboarding).
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Clients["Frontend Clients (React + Vite)"]
+        Sakhi["Bank Sakhi / Borrower App<br/>(Assisted Onboarding & SHG Entry)"]
+        OfficerUI["Loan Officer Portal<br/>(Decisions, Fairness & Model Registry)"]
+    end
+
+    subgraph Gateway["API & Security Layer (FastAPI)"]
+        MW["Security Middleware<br/>(Rate Limit, Body Cap, Request-ID, Headers)"]
+        Probes["Health & Readiness Probes<br/>(/health, /ready)"]
+    end
+
+    subgraph Monolith["Core Services Layer (services/core)"]
+        Consent["Consent Engine<br/>(Cryptographic SHA-256 Hash Chaining)"]
+        Ingest["Parallel Ingestion Orchestrator<br/>(AA, Geospatial, Bureau, SHG/FPO)"]
+        ScoringSvc["Scoring & Explainability<br/>(Exact Shapley Values & EN/HI Reasons)"]
+        DecisionSvc["Officer Decisioning & Overrides"]
+        HandoffSvc["Regulated Entity (RE) Handoff"]
+        FairnessSvc["Fairness Auditor & Grievance SLA Clock"]
+    end
+
+    subgraph MLPipeline["ML Pipeline & Registry (ml/)"]
+        WoE["WoE & IV Feature Engine<br/>(Monotonic Binning & Laplace Smoothing)"]
+        Champ["Champion Scorecard (v1.1.0-woe-scorecard)<br/>AUC: 0.782 | Gini: 0.565 | KS: 0.462"]
+        Chall["Challenger GBDT (v1.1.0-gbm-challenger)<br/>AUC: 0.751 | Monotonic Constraints"]
+        Gate["FairnessGate Promotion Check<br/>(Manifest v2026.09.01)"]
+    end
+
+    subgraph Storage["Persistence & Audit (PostgreSQL / SQLite)"]
+        DB[(Core Database<br/>PII Separation Enforced)]
+        AppendOnly[(Append-Only Audit Logs<br/>Decisions, Grievances, Consents)]
+    end
+
+    Sakhi --> MW
+    OfficerUI --> MW
+    MW --> Consent
+    MW --> Ingest
+    MW --> ScoringSvc
+    MW --> DecisionSvc
+    MW --> FairnessSvc
+    Ingest --> WoE
+    WoE --> Champ
+    Champ --> ScoringSvc
+    ScoringSvc --> DecisionSvc
+    DecisionSvc --> HandoffSvc
+    DecisionSvc --> AppendOnly
+    Consent --> AppendOnly
+    FairnessSvc --> Gate
+    Gate --> Champ
+    Monolith --> DB
+```
 
 ---
 
@@ -24,6 +81,7 @@ CreditTech is an AI-driven digital lending decision-support system serving farme
 - **SHAP explainability** — exact Shapley contributions on the logistic scorecard; top-5 reason codes rendered in English + Hindi.
 - **Fairness gate** — ratified manifest (`config/fairness_thresholds.json`) with `manifest_hash`; blocks model promotion on threshold breach.
 - **Model promotion pipeline** — performance minimums (AUC ≥ 0.60, Gini ≥ 0.20, KS ≥ 0.15, Brier ≤ 0.30) plus fairness gate. `409` on block.
+- **Request-ID correlation & observability** — `RequestIdMiddleware` injects `X-Request-ID` across structured logs; `/ready` probe tests live DB availability.
 - **DR** — `sqlite3.Connection.backup()` for safe snapshots; parity-verified restore via `scripts/backup.py` and `scripts/restore.py`.
 - **PDF report** — 3-tier fallback (WeasyPrint → ReportLab → hand-rolled minimal PDF) so `application/pdf` is guaranteed even without WeasyPrint installed.
 - **Security middleware** — security headers, 1 MiB body cap, 240 req/min in-process rate limit.
@@ -87,13 +145,14 @@ credittech/
 │   └── fairness_thresholds.json    # Ratified manifest (v2026.09.01)
 ├── scripts/
 │   ├── backup.py  restore.py  train_scorecard.py
-├── tests/                     # 110 tests + load harness
+├── tests/                     # 120 tests + load harness
 ├── docs/
 │   ├── phase0/ … phase6/      # Phase docs
 │   └── research/              # External benchmarks
 ├── infra/                     # Terraform modules (staging/production)
 ├── alembic/                   # Migrations
 ├── docker-compose.yml
+├── CONTRIBUTING.md            # Developer & evaluator setup guide
 └── Dockerfile
 ```
 
@@ -124,14 +183,17 @@ credittech/
 | `/api/v1/admin/models/{v}/promotion-check` | `GET` | Dry-run promotion gate |
 | `/api/v1/admin/models/{v}/promote` | `POST` | Promote model (fairness + perf gated) |
 | `/api/v1/ops/smoke/integrations` | `POST` | Smoke-test AA / geospatial / bureau |
-| `/api/v1/health` | `GET` | Health check |
+| `/ready` | `GET` | Readiness probe (verifies DB connectivity) |
+| `/health` | `GET` | Health check (includes `X-Request-ID` correlation) |
 
 ---
 
 ## How to Run Locally
 
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full development environment setup, coding guidelines, and verification procedures.
+
 ### 1. Backend — Python virtualenv
-Python 3.11+ required.
+Python 3.10+ required.
 
 ```bash
 python -m venv .venv
@@ -147,7 +209,7 @@ pip install -e ".[dev,ml]"
 
 ```bash
 python -m pytest
-# 110 tests + load harness
+# 120 tests + load harness
 ```
 
 ### 3. Docker Compose (Postgres + FastAPI live-reload)

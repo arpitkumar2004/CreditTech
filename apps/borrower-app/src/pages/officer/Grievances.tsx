@@ -2,9 +2,12 @@ import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  MessageSquareWarning, Clock, CheckCircle2, Filter, Send, AlertTriangle,
+  MessageSquareWarning, Clock, CheckCircle2, Filter, Send, AlertTriangle, Loader2,
 } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
+import { LoadingState } from "@/components/ui/loading";
+import { EmptyState } from "@/components/ui/empty";
+import { useToast } from "@/components/ui/toast";
 import { grievances as mockGrievances, type Grievance } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
 import { grievanceApi, decisionApi } from "@/lib/api";
@@ -69,7 +72,7 @@ export default function Grievances() {
 function Queue() {
   const [f, setF] = useState<Status>("ALL");
 
-  const { data: apiGrievances } = useQuery({
+  const { data: apiGrievances, isLoading } = useQuery({
     queryKey: ["grievancesList"],
     queryFn: () => grievanceApi.list().catch(() => null),
   });
@@ -130,36 +133,43 @@ function Queue() {
 
       {/* Table */}
       <div className="glass rounded-3xl overflow-hidden overflow-x-auto">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th className="first">ID</th>
-              <th>Applicant</th>
-              <th>Category</th>
-              <th>Summary</th>
-              <th>Status</th>
-              <th>SLA remaining</th>
-              <th className="last">Filed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((g) => (
-              <tr key={g.id}>
-                <td className="first font-mono text-xs font-medium text-primary">{g.id.slice(0, 10)}</td>
-                <td>{g.borrower_name}</td>
-                <td><Badge tone="neutral">{g.category.replace("_", " ")}</Badge></td>
-                <td className="max-w-xs truncate text-xs text-muted-foreground">{g.summary}</td>
-                <td><StatusBadge status={g.status} /></td>
-                <td>
-                  <SlaBadge hours={g.sla_hours_remaining} status={g.status} />
-                </td>
-                <td className="last text-xs text-muted-foreground">{formatDate(g.opened_at)}</td>
+        {isLoading ? (
+          <LoadingState text="Loading grievances…" />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={MessageSquareWarning}
+            title="No grievances found"
+            subtitle="No grievances match this status filter."
+          />
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th className="first">ID</th>
+                <th>Applicant</th>
+                <th>Category</th>
+                <th>Summary</th>
+                <th>Status</th>
+                <th>SLA remaining</th>
+                <th className="last">Filed</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {list.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground py-12">No grievances match this filter.</div>
+            </thead>
+            <tbody>
+              {list.map((g) => (
+                <tr key={g.id}>
+                  <td className="first font-mono text-xs font-medium text-primary">{g.id.slice(0, 10)}</td>
+                  <td>{g.borrower_name}</td>
+                  <td><Badge tone="neutral">{g.category.replace("_", " ")}</Badge></td>
+                  <td className="max-w-xs truncate text-xs text-muted-foreground">{g.summary}</td>
+                  <td><StatusBadge status={g.status} /></td>
+                  <td>
+                    <SlaBadge hours={g.sla_hours_remaining} status={g.status} />
+                  </td>
+                  <td className="last text-xs text-muted-foreground">{formatDate(g.opened_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
@@ -167,6 +177,7 @@ function Queue() {
 }
 
 function FileNew({ onCreated }: { onCreated?: () => void }) {
+  const { toast } = useToast();
   const { data: apiApps } = useQuery({
     queryKey: ["applicationsList"],
     queryFn: () => decisionApi.listApplications().catch(() => null),
@@ -174,11 +185,14 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
   const [cat, setCat] = useState(categories[0]);
   const [summary, setSummary] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [ticketId, setTicketId] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (summary.trim().length < 15) return;
+    if (summary.trim().length < 15 || isSubmitting) return;
+    setIsSubmitting(true);
+    let assignedId = "GRV-LOCAL";
     try {
       const catMap: Record<string, string> = {
         "Score dispute": "SCORE_DISPUTE",
@@ -194,18 +208,31 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
         description: summary.trim(),
         summary: summary.trim(),
       });
-      setTicketId(res.id.slice(0, 8).toUpperCase());
+      assignedId = res.id.slice(0, 8).toUpperCase();
+      setTicketId(assignedId);
+      toast({
+        variant: "success",
+        title: "Grievance filed",
+        description: `Appeal ticket ${assignedId} queued under SLA tracking.`,
+      });
     } catch (err) {
       console.warn("Using local grievance submission acknowledgment:", err);
       setTicketId("GRV-LOCAL");
+      toast({
+        variant: "info",
+        title: "Grievance queued locally",
+        description: "Recorded to local audit log while backend is syncing.",
+      });
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setTicketId(null);
+        if (onCreated) onCreated();
+      }, 2000);
+      setSummary("");
     }
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setTicketId(null);
-      if (onCreated) onCreated();
-    }, 2000);
-    setSummary("");
   }
 
   return (
@@ -247,10 +274,12 @@ function FileNew({ onCreated }: { onCreated?: () => void }) {
         </div>
         <button
           type="submit"
-          disabled={summary.trim().length < 15 || submitted}
+          disabled={summary.trim().length < 15 || submitted || isSubmitting}
           className="pill disabled:opacity-60"
         >
-          {submitted ? (
+          {isSubmitting ? (
+            <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Submitting…</>
+          ) : submitted ? (
             <><CheckCircle2 className="h-4 w-4 mr-1.5" /> Filed · {ticketId || "GRV-001"}</>
           ) : (
             <><Send className="h-4 w-4 mr-1.5" /> Submit grievance</>

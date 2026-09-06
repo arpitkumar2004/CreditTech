@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import SakhiEntry from "./pages/SakhiEntry";
@@ -9,6 +9,7 @@ import ApplicationDetail from "./pages/officer/ApplicationDetail";
 import Fairness from "./pages/officer/Fairness";
 import ModelRegistry from "./pages/officer/ModelRegistry";
 import Grievances from "./pages/officer/Grievances";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -23,7 +24,7 @@ export default function App() {
         <Route path="fairness" element={<Fairness />} />
         <Route path="models" element={<ModelRegistry />} />
         <Route path="grievances" element={<Grievances />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

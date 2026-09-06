@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, Download, ArrowUpRight, Plus, Loader2 } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { LoadingState } from "@/components/ui/loading";
+import { EmptyState } from "@/components/ui/empty";
 import { applications as mockApplications, type Application } from "@/lib/mockData";
 import { formatINR, formatDateShort } from "@/lib/utils";
 import { decisionApi } from "@/lib/api";
@@ -127,58 +129,65 @@ export default function Applications() {
           <span className="section-heading">Showing {items.length} of {sourceApps.length}</span>
           <span className="text-xs text-muted-foreground">Most recent first</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th className="first">Borrower</th>
-                <th>Application</th>
-                <th>Amount</th>
-                <th>Score</th>
-                <th>Recommendation</th>
-                <th>Decision</th>
-                <th>Date</th>
-                <th className="last text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((a) => (
-                <tr key={a.id}>
-                  <td className="first">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={a.borrower_name} size={32} />
-                      <div>
-                        <div className="font-medium">{a.borrower_name}</div>
-                        <div className="text-xs text-muted-foreground">{a.village}, {a.district}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="text-muted-foreground tabular text-xs">{a.id}</td>
-                  <td className="tabular font-medium">{formatINR(a.requested_amount)}</td>
-                  <td>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-base font-semibold display tabular">{a.score_900}</span>
-                      <span className="text-[11px] text-muted-foreground">{a.band}</span>
-                    </div>
-                  </td>
-                  <td><RecommendationBadge r={a.model_recommendation} /></td>
-                  <td><DecisionPill decision={a.decision} /></td>
-                  <td className="text-xs text-muted-foreground">{formatDateShort(a.submitted_at)}</td>
-                  <td className="last text-right">
-                    <Link
-                      to={`/applications/${a.id}`}
-                      className="inline-flex items-center gap-1 text-primary text-sm hover:underline"
-                    >
-                      Review <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </td>
+        {isLoading ? (
+          <LoadingState text="Loading applications…" />
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="No applications found"
+            subtitle="No applications match your filter or search criteria."
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className="first">Borrower</th>
+                  <th>Application</th>
+                  <th>Amount</th>
+                  <th>Score</th>
+                  <th>Recommendation</th>
+                  <th>Decision</th>
+                  <th>Date</th>
+                  <th className="last text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {items.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground py-16">No applications match this filter.</div>
+              </thead>
+              <tbody>
+                {items.map((a) => (
+                  <tr key={a.id}>
+                    <td className="first">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={a.borrower_name} size={32} />
+                        <div>
+                          <div className="font-medium">{a.borrower_name}</div>
+                          <div className="text-xs text-muted-foreground">{a.village}, {a.district}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="text-muted-foreground tabular text-xs">{a.id}</td>
+                    <td className="tabular font-medium">{formatINR(a.requested_amount)}</td>
+                    <td>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-base font-semibold display tabular">{a.score_900}</span>
+                        <span className="text-[11px] text-muted-foreground">{a.band}</span>
+                      </div>
+                    </td>
+                    <td><RecommendationBadge r={a.model_recommendation} /></td>
+                    <td><DecisionPill decision={a.decision} /></td>
+                    <td className="text-xs text-muted-foreground">{formatDateShort(a.submitted_at)}</td>
+                    <td className="last text-right">
+                      <Link
+                        to={`/applications/${a.id}`}
+                        className="inline-flex items-center gap-1 text-primary text-sm hover:underline"
+                      >
+                        Review <ArrowUpRight className="h-4 w-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

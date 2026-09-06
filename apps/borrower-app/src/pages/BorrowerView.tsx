@@ -7,10 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ingestApi } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
 
 export default function BorrowerView() {
+  const { toast } = useToast();
   const [borrowerId, setBorrowerId] = useState("");
-  const trigger = useMutation({ mutationFn: (id: string) => ingestApi.triggerAggregation(id) });
+  const trigger = useMutation({
+    mutationFn: (id: string) => ingestApi.triggerAggregation(id),
+    onSuccess: (d) => {
+      toast({
+        variant: "success",
+        title: "Aggregation completed",
+        description: `Snapshot generated with status: ${d.overall_status}.`,
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        variant: "error",
+        title: "Aggregation failed",
+        description: err?.message || "Failed to run data rails ingestion.",
+      });
+    },
+  });
 
   return (
     <div className="space-y-6">

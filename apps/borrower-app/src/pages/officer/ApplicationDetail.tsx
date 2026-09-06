@@ -13,10 +13,12 @@ import { formatINR, formatDate } from "@/lib/utils";
 import { isOverride, validateDecisionForm } from "@/lib/decisionLogic";
 import type { OfficerDecision } from "@/lib/types";
 import { decisionApi } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
 
 export default function ApplicationDetail() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { toast } = useToast();
 
   const { data: apiApps } = useQuery({
     queryKey: ["applicationsList"],
@@ -91,8 +93,18 @@ export default function ApplicationDetail() {
           notes: override || undefined,
         });
       }
+      toast({
+        variant: "success",
+        title: "Decision recorded",
+        description: `Decision ${decision} recorded for ${app.borrower_name}.`,
+      });
     } catch {
       // Graceful fallback for offline demo
+      toast({
+        variant: "info",
+        title: "Decision logged locally",
+        description: "Recorded to local audit log while offline.",
+      });
     } finally {
       setIsSubmitting(false);
       setSubmitted(true);

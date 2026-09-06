@@ -93,19 +93,46 @@ class SyntheticSHGGenerator:
         "crop_insurance_enrolled": 0.35,
     }
 
-    def __init__(self, n: int = 2000, seed: int = 42) -> None:
+    DEFAULT_VILLAGES: tuple[str, ...] = (
+        "Sangaria", "Tibbi", "Rawatsar", "Nohar", "Bhadra",
+        "Suratgarh", "Pilibanga", "Hanumangarh-Junction", "Sadulshahar", "Padampur",
+        "Karanpur", "Anupgarh", "Gharsana", "Raisinghnagar", "Vijaynagar",
+    )
+    ZONES: tuple[str, ...] = ("CANAL_IRRIGATED_NORTH", "ARID_RAIN_FED_WEST", "SEMI_ARID_CENTRAL")
+
+    def __init__(
+        self,
+        n: int = 2000,
+        seed: int = 42,
+        target_default_rate: float | None = None,
+        n_villages: int = 15,
+    ) -> None:
         self.n = n
         self.seed = seed
+        self.target_default_rate = target_default_rate
+        self.n_villages = n_villages
 
     def generate(self) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, DatasetInfo]:
         """Return (X, y, sensitive_attrs, info).
 
         X columns == MODEL_FEATURE_NAMES (numeric-coerced).
         y is 1=repay, 0=default.
-        sensitive_attrs contains gender and landholding_band (not model inputs).
+        sensitive_attrs contains gender, landholding_band, village_id, and agro_climatic_zone.
         """
         rng = np.random.default_rng(self.seed)
         n = self.n
+
+        # Assign villages and agro-climatic zones
+        villages_pool = list(self.DEFAULT_VILLAGES[: self.n_villages])
+        borrower_villages = rng.choice(villages_pool, size=n)
+        village_zone_map = {v: self.ZONES[i % len(self.ZONES)] for i, v in enumerate(villages_pool)}
+        borrower_zones = np.array([village_zone_map[v] for v in borrower_villages])
+
+        # Village-level environmental shock modifiers
+        village_ndvi_shift = {v: rng.normal(0, 0.05) for v in villages_pool}
+        village_rain_shift = {v: rng.normal(0, 8.0) for v in villages_pool}
+        v_ndvi_deltas = np.array([village_ndvi_shift[v] for v in borrower_villages])
+        v_rain_deltas = np.array([village_rain_shift[v] for v in borrower_villages])
 
         # Draw raw features
         shg_grade_cat = rng.choice(["A", "B", "C", "D"], size=n, p=[0.25, 0.4, 0.25, 0.1])
@@ -130,15 +157,22 @@ class SyntheticSHGGenerator:
             "asset_score": np.clip(rng.beta(2, 3, n), 0, 1),
             "land_holding_acres": np.clip(rng.gamma(2, 1.2, n), 0, 20),
             "irrigation_access": rng.binomial(1, 0.55, n).astype(float),
-            "land_quality_ndvi_avg": np.clip(rng.normal(0.55, 0.15, n), 0, 1),
+            "land_quality_ndvi_avg": np.clip(rng.normal(0.55, 0.15, n) + v_ndvi_deltas, 0, 1),
             "ndvi_trend_2season": np.clip(rng.normal(0.02, 0.15, n), -1, 1),
-            "rainfall_deviation_pct": rng.normal(0, 20, n),
+            "rainfall_deviation_pct": rng.normal(0, 20, n) + v_rain_deltas,
             "crop_insurance_enrolled": rng.binomial(1, 0.35, n).astype(float),
         }
         X = pd.DataFrame(raw, columns=list(MODEL_FEATURE_NAMES))
 
         # Ground-truth logit -> P(repay) -> Bernoulli label
-        logit = np.full(n, self.GT_INTERCEPT, dtype=float)
+        intercept = self.GT_INTERCEPT
+        if self.target_default_rate is not None:
+            # Shift intercept to achieve target default rate (e.g. 0.10 -> 90% repay)
+            # Baseline mean score ~ 0.60, adjust logit offset
+            desired_repay = 1.0 - self.target_default_rate
+            intercept += np.log(desired_repay / (1.0 - desired_repay))
+
+        logit = np.full(n, intercept, dtype=float)
         for feat, w in self.GT_WEIGHTS.items():
             logit += w * X[feat].to_numpy()
         # Add label noise so it's not perfectly separable
@@ -146,13 +180,15 @@ class SyntheticSHGGenerator:
         p_repay = 1.0 / (1.0 + np.exp(-logit))
         y = pd.Series(rng.binomial(1, p_repay, n), name="repay")
 
-        # Sensitive / fairness-monitoring attributes — NOT features
+        # Sensitive / fairness-monitoring attributes + spatial grouping — NOT model features
         sensitive = pd.DataFrame({
             "gender": rng.choice(["F", "M", "OTHER"], size=n, p=[0.55, 0.44, 0.01]),
             "landholding_band": rng.choice(
                 ["LANDLESS", "MARGINAL", "SMALL", "SEMI_MEDIUM", "MEDIUM", "LARGE"],
                 size=n, p=[0.05, 0.35, 0.30, 0.15, 0.10, 0.05],
             ),
+            "village_id": borrower_villages,
+            "agro_climatic_zone": borrower_zones,
         })
 
         info = DatasetInfo(
@@ -164,13 +200,14 @@ class SyntheticSHGGenerator:
             schema_hash=_hash_schema(list(MODEL_FEATURE_NAMES)),
             transformations=[
                 f"seed={self.seed}",
+                f"spatial_villages={len(villages_pool)}",
                 "clipping to plausible domain ranges",
                 "shg_grade -> numeric via schema.category_map",
                 "label = Bernoulli(sigmoid(GT_logit + N(0,0.5)))",
             ],
             limitations=[
                 "labels are simulated from hand-authored ground truth, not real repayment",
-                "no cohort dynamics, no calendar effects, no cross-borrower correlation",
+                "no calendar effects, cross-borrower correlation within SHG is approximated",
                 "AUC/Gini on this data cannot be interpreted as production predictive validity",
             ],
         )

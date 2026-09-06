@@ -1,0 +1,325 @@
+{
+  "auc": 0.7823,
+  "brier": 0.12943,
+  "calibration_bins": [
+    {
+      "bin_hi": 0.1,
+      "bin_lo": 0.0,
+      "count": 0,
+      "mean_predicted": 0.05,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.2,
+      "bin_lo": 0.1,
+      "count": 0,
+      "mean_predicted": 0.15,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.30000000000000004,
+      "bin_lo": 0.2,
+      "count": 22,
+      "mean_predicted": 0.2273,
+      "observed_rate": 0.2273
+    },
+    {
+      "bin_hi": 0.4,
+      "bin_lo": 0.30000000000000004,
+      "count": 3,
+      "mean_predicted": 0.3333,
+      "observed_rate": 0.3333
+    },
+    {
+      "bin_hi": 0.5,
+      "bin_lo": 0.4,
+      "count": 0,
+      "mean_predicted": 0.45,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.6000000000000001,
+      "bin_lo": 0.5,
+      "count": 93,
+      "mean_predicted": 0.5591,
+      "observed_rate": 0.5591
+    },
+    {
+      "bin_hi": 0.7000000000000001,
+      "bin_lo": 0.6000000000000001,
+      "count": 82,
+      "mean_predicted": 0.6707,
+      "observed_rate": 0.6707
+    },
+    {
+      "bin_hi": 0.8,
+      "bin_lo": 0.7000000000000001,
+      "count": 90,
+      "mean_predicted": 0.7111,
+      "observed_rate": 0.7111
+    },
+    {
+      "bin_hi": 0.9,
+      "bin_lo": 0.8,
+      "count": 203,
+      "mean_predicted": 0.8571,
+      "observed_rate": 0.8571
+    },
+    {
+      "bin_hi": 1.0,
+      "bin_lo": 0.9,
+      "count": 307,
+      "mean_predicted": 0.9465,
+      "observed_rate": 0.9479
+    }
+  ],
+  "fairness": {
+    "results": [
+      {
+        "attribute": "gender",
+        "groups": {
+          "F": {
+            "approval_rate": 0.956,
+            "n": 2184
+          },
+          "M": {
+            "approval_rate": 0.949,
+            "n": 1785
+          },
+          "OTHER": {
+            "approval_rate": 1.0,
+            "n": 31
+          }
+        },
+        "limitations": [
+          "Evaluated on spatial benchmark cohort across 15 pilot villages",
+          "Ratified per config/fairness_thresholds.json v2026.09.01"
+        ],
+        "max_disparity": 0.051,
+        "reference_group": "F",
+        "reference_rate": 0.956,
+        "status": "ok",
+        "threshold": 0.5
+      },
+      {
+        "attribute": "landholding_band",
+        "groups": {
+          "LANDLESS": {
+            "approval_rate": 0.9154,
+            "n": 201
+          },
+          "LARGE": {
+            "approval_rate": 0.9363,
+            "n": 204
+          },
+          "MARGINAL": {
+            "approval_rate": 0.9606,
+            "n": 1397
+          },
+          "MEDIUM": {
+            "approval_rate": 0.9643,
+            "n": 392
+          },
+          "SEMI_MEDIUM": {
+            "approval_rate": 0.9547,
+            "n": 618
+          },
+          "SMALL": {
+            "approval_rate": 0.9495,
+            "n": 1188
+          }
+        },
+        "limitations": [
+          "Evaluated on spatial benchmark cohort across 15 pilot villages",
+          "Ratified per config/fairness_thresholds.json v2026.09.01"
+        ],
+        "max_disparity": 0.0489,
+        "reference_group": "MARGINAL",
+        "reference_rate": 0.9606,
+        "status": "ok",
+        "threshold": 0.5
+      }
+    ]
+  },
+  "feature_version": "v1.0.0",
+  "gini": 0.5646,
+  "intercept": 0.040135963093605,
+  "iv_summary": [
+    {
+      "feature": "shg_savings_consistency",
+      "iv": 0.21893,
+      "n_bins": 6,
+      "predictive_power": "Medium"
+    },
+    {
+      "feature": "income_stability_cv",
+      "iv": 0.21791,
+      "n_bins": 6,
+      "predictive_power": "Medium"
+    },
+    {
+      "feature": "shg_repayment_rate",
+      "iv": 0.09295,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "irrigation_access",
+      "iv": 0.06562,
+      "n_bins": 3,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "shg_meeting_attendance_pct",
+      "iv": 0.05174,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "asset_score",
+      "iv": 0.05069,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "shg_grade",
+      "iv": 0.04664,
+      "n_bins": 5,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "upi_transaction_regularity",
+      "iv": 0.04559,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "shg_cumulative_savings",
+      "iv": 0.04257,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "pm_kisan_regularity",
+      "iv": 0.03625,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "ndvi_trend_2season",
+      "iv": 0.03548,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "land_holding_acres",
+      "iv": 0.03309,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "shg_membership_years",
+      "iv": 0.03175,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "land_quality_ndvi_avg",
+      "iv": 0.0261,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "utility_payment_ontime_pct",
+      "iv": 0.02363,
+      "n_bins": 6,
+      "predictive_power": "Weak"
+    },
+    {
+      "feature": "crop_insurance_enrolled",
+      "iv": 0.01996,
+      "n_bins": 3,
+      "predictive_power": "Unpredictable (Drop)"
+    },
+    {
+      "feature": "estimated_crop_income_kharif",
+      "iv": 0.0158,
+      "n_bins": 6,
+      "predictive_power": "Unpredictable (Drop)"
+    },
+    {
+      "feature": "estimated_crop_income_rabi",
+      "iv": 0.01447,
+      "n_bins": 6,
+      "predictive_power": "Unpredictable (Drop)"
+    },
+    {
+      "feature": "bank_balance_avg_6m",
+      "iv": 0.01205,
+      "n_bins": 6,
+      "predictive_power": "Unpredictable (Drop)"
+    },
+    {
+      "feature": "monthly_avg_credit_inflow",
+      "iv": 0.01191,
+      "n_bins": 6,
+      "predictive_power": "Unpredictable (Drop)"
+    },
+    {
+      "feature": "rainfall_deviation_pct",
+      "iv": 0.00782,
+      "n_bins": 6,
+      "predictive_power": "Unpredictable (Drop)"
+    }
+  ],
+  "ks": 0.46228,
+  "model_version": "v1.1.0-woe-scorecard",
+  "n_train": 3200,
+  "n_val": 800,
+  "notes": [
+    "L1 WoE Scorecard fitted on 3200 samples",
+    "Features selected by IV >= 0.015: 17/21",
+    "Isotonic probability calibration applied"
+  ],
+  "points_factor": 28.85390081777927,
+  "points_offset": 487.1228762045055,
+  "pr_auc": 0.93432,
+  "selected_features": [
+    "shg_repayment_rate",
+    "shg_meeting_attendance_pct",
+    "shg_savings_consistency",
+    "shg_membership_years",
+    "shg_grade",
+    "utility_payment_ontime_pct",
+    "upi_transaction_regularity",
+    "estimated_crop_income_kharif",
+    "income_stability_cv",
+    "pm_kisan_regularity",
+    "shg_cumulative_savings",
+    "asset_score",
+    "land_holding_acres",
+    "irrigation_access",
+    "land_quality_ndvi_avg",
+    "ndvi_trend_2season",
+    "crop_insurance_enrolled"
+  ],
+  "weights": {
+    "asset_score": 1.0417238846779273,
+    "crop_insurance_enrolled": 0.6582665348196671,
+    "estimated_crop_income_kharif": 0.7134982314525076,
+    "income_stability_cv": 1.1487685288120213,
+    "irrigation_access": 0.9621474682319404,
+    "land_holding_acres": 0.8286196542662647,
+    "land_quality_ndvi_avg": 0.9256592942126833,
+    "ndvi_trend_2season": 0.7779924449600059,
+    "pm_kisan_regularity": 0.8866022283437349,
+    "shg_cumulative_savings": 0.9703896527587657,
+    "shg_grade": 1.0734494936571275,
+    "shg_meeting_attendance_pct": 0.9350079771849724,
+    "shg_membership_years": 0.9500761047959203,
+    "shg_repayment_rate": 1.0753515773761229,
+    "shg_savings_consistency": 1.0797542578458585,
+    "upi_transaction_regularity": 1.090927524634329,
+    "utility_payment_ontime_pct": 0.5872280346943193
+  }
+}

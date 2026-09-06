@@ -1,0 +1,195 @@
+{
+  "auc": 0.75063,
+  "brier": 0.13027,
+  "calibration_bins": [
+    {
+      "bin_hi": 0.1,
+      "bin_lo": 0.0,
+      "count": 2,
+      "mean_predicted": 0.01,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.2,
+      "bin_lo": 0.1,
+      "count": 9,
+      "mean_predicted": 0.1111,
+      "observed_rate": 0.1111
+    },
+    {
+      "bin_hi": 0.30000000000000004,
+      "bin_lo": 0.2,
+      "count": 0,
+      "mean_predicted": 0.25,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.4,
+      "bin_lo": 0.30000000000000004,
+      "count": 6,
+      "mean_predicted": 0.3333,
+      "observed_rate": 0.3333
+    },
+    {
+      "bin_hi": 0.5,
+      "bin_lo": 0.4,
+      "count": 81,
+      "mean_predicted": 0.4568,
+      "observed_rate": 0.4568
+    },
+    {
+      "bin_hi": 0.6000000000000001,
+      "bin_lo": 0.5,
+      "count": 7,
+      "mean_predicted": 0.5714,
+      "observed_rate": 0.5714
+    },
+    {
+      "bin_hi": 0.7000000000000001,
+      "bin_lo": 0.6000000000000001,
+      "count": 0,
+      "mean_predicted": 0.65,
+      "observed_rate": 0.0
+    },
+    {
+      "bin_hi": 0.8,
+      "bin_lo": 0.7000000000000001,
+      "count": 245,
+      "mean_predicted": 0.7878,
+      "observed_rate": 0.7878
+    },
+    {
+      "bin_hi": 0.9,
+      "bin_lo": 0.8,
+      "count": 139,
+      "mean_predicted": 0.8345,
+      "observed_rate": 0.8345
+    },
+    {
+      "bin_hi": 1.0,
+      "bin_lo": 0.9,
+      "count": 311,
+      "mean_predicted": 0.9287,
+      "observed_rate": 0.9293
+    }
+  ],
+  "fairness": {
+    "results": [
+      {
+        "attribute": "gender",
+        "groups": {
+          "F": {
+            "approval_rate": 0.9515,
+            "n": 2184
+          },
+          "M": {
+            "approval_rate": 0.9429,
+            "n": 1785
+          },
+          "OTHER": {
+            "approval_rate": 0.9677,
+            "n": 31
+          }
+        },
+        "limitations": [
+          "Evaluated on spatial benchmark cohort across 15 pilot villages",
+          "Ratified per config/fairness_thresholds.json v2026.09.01"
+        ],
+        "max_disparity": 0.0248,
+        "reference_group": "F",
+        "reference_rate": 0.9515,
+        "status": "ok",
+        "threshold": 0.5
+      },
+      {
+        "attribute": "landholding_band",
+        "groups": {
+          "LANDLESS": {
+            "approval_rate": 0.9254,
+            "n": 201
+          },
+          "LARGE": {
+            "approval_rate": 0.9461,
+            "n": 204
+          },
+          "MARGINAL": {
+            "approval_rate": 0.947,
+            "n": 1397
+          },
+          "MEDIUM": {
+            "approval_rate": 0.949,
+            "n": 392
+          },
+          "SEMI_MEDIUM": {
+            "approval_rate": 0.9644,
+            "n": 618
+          },
+          "SMALL": {
+            "approval_rate": 0.9436,
+            "n": 1188
+          }
+        },
+        "limitations": [
+          "Evaluated on spatial benchmark cohort across 15 pilot villages",
+          "Ratified per config/fairness_thresholds.json v2026.09.01"
+        ],
+        "max_disparity": 0.039,
+        "reference_group": "MARGINAL",
+        "reference_rate": 0.947,
+        "status": "ok",
+        "threshold": 0.5
+      }
+    ]
+  },
+  "feature_version": "v1.0.0",
+  "features": [
+    "shg_repayment_rate",
+    "shg_meeting_attendance_pct",
+    "shg_savings_consistency",
+    "shg_membership_years",
+    "shg_grade",
+    "utility_payment_ontime_pct",
+    "upi_transaction_regularity",
+    "estimated_crop_income_kharif",
+    "estimated_crop_income_rabi",
+    "income_stability_cv",
+    "monthly_avg_credit_inflow",
+    "pm_kisan_regularity",
+    "shg_cumulative_savings",
+    "bank_balance_avg_6m",
+    "asset_score",
+    "land_holding_acres",
+    "irrigation_access",
+    "land_quality_ndvi_avg",
+    "ndvi_trend_2season",
+    "rainfall_deviation_pct",
+    "crop_insurance_enrolled"
+  ],
+  "gini": 0.50126,
+  "ks": 0.36299,
+  "model_version": "v1.1.0-gbm-challenger",
+  "monotonic_constraints": {
+    "asset_score": 1,
+    "crop_insurance_enrolled": 1,
+    "income_stability_cv": -1,
+    "irrigation_access": 1,
+    "land_quality_ndvi_avg": 1,
+    "ndvi_trend_2season": 1,
+    "pm_kisan_regularity": 1,
+    "rainfall_deviation_pct": -1,
+    "shg_grade": 1,
+    "shg_meeting_attendance_pct": 1,
+    "shg_membership_years": 1,
+    "shg_repayment_rate": 1,
+    "shg_savings_consistency": 1,
+    "utility_payment_ontime_pct": 1
+  },
+  "n_train": 3200,
+  "n_val": 800,
+  "notes": [
+    "Monotonic GBDT fitted on 3200 samples with 14 constrained features",
+    "TreeSHAP explainability engine wired",
+    "Isotonic probability calibration applied"
+  ],
+  "pr_auc": 0.92009
+}

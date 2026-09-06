@@ -166,7 +166,7 @@
     "model_type": "logistic_scorecard_v1",
     "model_version": "v1.0.0-logistic",
     "notes": [],
-    "promotion_status": "active",
+    "promotion_status": "retired",
     "trained_at": "2026-09-03T10:52:56.597997+00:00",
     "training_dataset": {
       "available": true,
@@ -211,5 +211,435 @@
       ]
     },
     "training_dataset_hash": "63f6eb34347f449cb12230f31c1233a6"
+  },
+  {
+    "artifact_hash": "cfd9560637a47dd6d3ede92d2313f507ce3ae6709aa3ae28729bef4701a58250",
+    "artifact_path": "v1.1.0-woe-scorecard/scorecard.json",
+    "code_version": null,
+    "fairness": {
+      "results": {
+        "results": [
+          {
+            "attribute": "gender",
+            "groups": {
+              "F": {
+                "approval_rate": 0.956,
+                "n": 2184
+              },
+              "M": {
+                "approval_rate": 0.949,
+                "n": 1785
+              },
+              "OTHER": {
+                "approval_rate": 1.0,
+                "n": 31
+              }
+            },
+            "limitations": [
+              "Evaluated on spatial benchmark cohort across 15 pilot villages",
+              "Ratified per config/fairness_thresholds.json v2026.09.01"
+            ],
+            "max_disparity": 0.051,
+            "reference_group": "F",
+            "reference_rate": 0.956,
+            "status": "ok",
+            "threshold": 0.5
+          },
+          {
+            "attribute": "landholding_band",
+            "groups": {
+              "LANDLESS": {
+                "approval_rate": 0.9154,
+                "n": 201
+              },
+              "LARGE": {
+                "approval_rate": 0.9363,
+                "n": 204
+              },
+              "MARGINAL": {
+                "approval_rate": 0.9606,
+                "n": 1397
+              },
+              "MEDIUM": {
+                "approval_rate": 0.9643,
+                "n": 392
+              },
+              "SEMI_MEDIUM": {
+                "approval_rate": 0.9547,
+                "n": 618
+              },
+              "SMALL": {
+                "approval_rate": 0.9495,
+                "n": 1188
+              }
+            },
+            "limitations": [
+              "Evaluated on spatial benchmark cohort across 15 pilot villages",
+              "Ratified per config/fairness_thresholds.json v2026.09.01"
+            ],
+            "max_disparity": 0.0489,
+            "reference_group": "MARGINAL",
+            "reference_rate": 0.9606,
+            "status": "ok",
+            "threshold": 0.5
+          }
+        ]
+      }
+    },
+    "feature_version": "v1.0.0",
+    "limitations": [
+      "labels are simulated from hand-authored ground truth, not real repayment",
+      "no calendar effects, cross-borrower correlation within SHG is approximated",
+      "AUC/Gini on this data cannot be interpreted as production predictive validity",
+      "L1 WoE Scorecard fitted on 3200 samples",
+      "Features selected by IV >= 0.015: 17/21",
+      "Isotonic probability calibration applied"
+    ],
+    "metrics": {
+      "auc": 0.7823,
+      "brier": 0.12943,
+      "calibration_bins": [
+        {
+          "bin_hi": 0.1,
+          "bin_lo": 0.0,
+          "count": 0,
+          "mean_predicted": 0.05,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.2,
+          "bin_lo": 0.1,
+          "count": 0,
+          "mean_predicted": 0.15,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.30000000000000004,
+          "bin_lo": 0.2,
+          "count": 22,
+          "mean_predicted": 0.2273,
+          "observed_rate": 0.2273
+        },
+        {
+          "bin_hi": 0.4,
+          "bin_lo": 0.30000000000000004,
+          "count": 3,
+          "mean_predicted": 0.3333,
+          "observed_rate": 0.3333
+        },
+        {
+          "bin_hi": 0.5,
+          "bin_lo": 0.4,
+          "count": 0,
+          "mean_predicted": 0.45,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.6000000000000001,
+          "bin_lo": 0.5,
+          "count": 93,
+          "mean_predicted": 0.5591,
+          "observed_rate": 0.5591
+        },
+        {
+          "bin_hi": 0.7000000000000001,
+          "bin_lo": 0.6000000000000001,
+          "count": 82,
+          "mean_predicted": 0.6707,
+          "observed_rate": 0.6707
+        },
+        {
+          "bin_hi": 0.8,
+          "bin_lo": 0.7000000000000001,
+          "count": 90,
+          "mean_predicted": 0.7111,
+          "observed_rate": 0.7111
+        },
+        {
+          "bin_hi": 0.9,
+          "bin_lo": 0.8,
+          "count": 203,
+          "mean_predicted": 0.8571,
+          "observed_rate": 0.8571
+        },
+        {
+          "bin_hi": 1.0,
+          "bin_lo": 0.9,
+          "count": 307,
+          "mean_predicted": 0.9465,
+          "observed_rate": 0.9479
+        }
+      ],
+      "gini": 0.5646,
+      "ks": 0.46228,
+      "n_train": 3200,
+      "n_val": 800
+    },
+    "model_type": "logistic_scorecard_v1",
+    "model_version": "v1.1.0-woe-scorecard",
+    "notes": [
+      "Champion WoE Scorecard fitted with L1 regularization and isotonic probability calibration"
+    ],
+    "promotion_status": "active",
+    "trained_at": "2026-09-06T20:45:25.613995+00:00",
+    "training_dataset": {
+      "available": true,
+      "feature_version": "v1.0.0",
+      "features": [
+        "shg_repayment_rate",
+        "shg_meeting_attendance_pct",
+        "shg_savings_consistency",
+        "shg_membership_years",
+        "shg_grade",
+        "utility_payment_ontime_pct",
+        "upi_transaction_regularity",
+        "estimated_crop_income_kharif",
+        "estimated_crop_income_rabi",
+        "income_stability_cv",
+        "monthly_avg_credit_inflow",
+        "pm_kisan_regularity",
+        "shg_cumulative_savings",
+        "bank_balance_avg_6m",
+        "asset_score",
+        "land_holding_acres",
+        "irrigation_access",
+        "land_quality_ndvi_avg",
+        "ndvi_trend_2season",
+        "rainfall_deviation_pct",
+        "crop_insurance_enrolled"
+      ],
+      "kind": "synthetic",
+      "limitations": [
+        "labels are simulated from hand-authored ground truth, not real repayment",
+        "no calendar effects, cross-borrower correlation within SHG is approximated",
+        "AUC/Gini on this data cannot be interpreted as production predictive validity"
+      ],
+      "samples": 4000,
+      "schema_hash": "2556de253967272a",
+      "source": "synthetic_shg_generator",
+      "transformations": [
+        "seed=42",
+        "spatial_villages=15",
+        "clipping to plausible domain ranges",
+        "shg_grade -> numeric via schema.category_map",
+        "label = Bernoulli(sigmoid(GT_logit + N(0,0.5)))"
+      ]
+    },
+    "training_dataset_hash": "5471615083feac88c576b2aec66a4d0a"
+  },
+  {
+    "artifact_hash": "8c8fbf54a855c9153cc0ce715ebe7080a8a5b4b7decc8c32e81d916db606a6fd",
+    "artifact_path": "v1.1.0-gbm-challenger/scorecard.json",
+    "code_version": null,
+    "fairness": {
+      "results": {
+        "results": [
+          {
+            "attribute": "gender",
+            "groups": {
+              "F": {
+                "approval_rate": 0.9515,
+                "n": 2184
+              },
+              "M": {
+                "approval_rate": 0.9429,
+                "n": 1785
+              },
+              "OTHER": {
+                "approval_rate": 0.9677,
+                "n": 31
+              }
+            },
+            "limitations": [
+              "Evaluated on spatial benchmark cohort across 15 pilot villages",
+              "Ratified per config/fairness_thresholds.json v2026.09.01"
+            ],
+            "max_disparity": 0.0248,
+            "reference_group": "F",
+            "reference_rate": 0.9515,
+            "status": "ok",
+            "threshold": 0.5
+          },
+          {
+            "attribute": "landholding_band",
+            "groups": {
+              "LANDLESS": {
+                "approval_rate": 0.9254,
+                "n": 201
+              },
+              "LARGE": {
+                "approval_rate": 0.9461,
+                "n": 204
+              },
+              "MARGINAL": {
+                "approval_rate": 0.947,
+                "n": 1397
+              },
+              "MEDIUM": {
+                "approval_rate": 0.949,
+                "n": 392
+              },
+              "SEMI_MEDIUM": {
+                "approval_rate": 0.9644,
+                "n": 618
+              },
+              "SMALL": {
+                "approval_rate": 0.9436,
+                "n": 1188
+              }
+            },
+            "limitations": [
+              "Evaluated on spatial benchmark cohort across 15 pilot villages",
+              "Ratified per config/fairness_thresholds.json v2026.09.01"
+            ],
+            "max_disparity": 0.039,
+            "reference_group": "MARGINAL",
+            "reference_rate": 0.947,
+            "status": "ok",
+            "threshold": 0.5
+          }
+        ]
+      }
+    },
+    "feature_version": "v1.0.0",
+    "limitations": [
+      "labels are simulated from hand-authored ground truth, not real repayment",
+      "no calendar effects, cross-borrower correlation within SHG is approximated",
+      "AUC/Gini on this data cannot be interpreted as production predictive validity",
+      "Monotonic GBDT fitted on 3200 samples with 14 constrained features",
+      "TreeSHAP explainability engine wired",
+      "Isotonic probability calibration applied"
+    ],
+    "metrics": {
+      "auc": 0.75063,
+      "brier": 0.13027,
+      "calibration_bins": [
+        {
+          "bin_hi": 0.1,
+          "bin_lo": 0.0,
+          "count": 2,
+          "mean_predicted": 0.01,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.2,
+          "bin_lo": 0.1,
+          "count": 9,
+          "mean_predicted": 0.1111,
+          "observed_rate": 0.1111
+        },
+        {
+          "bin_hi": 0.30000000000000004,
+          "bin_lo": 0.2,
+          "count": 0,
+          "mean_predicted": 0.25,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.4,
+          "bin_lo": 0.30000000000000004,
+          "count": 6,
+          "mean_predicted": 0.3333,
+          "observed_rate": 0.3333
+        },
+        {
+          "bin_hi": 0.5,
+          "bin_lo": 0.4,
+          "count": 81,
+          "mean_predicted": 0.4568,
+          "observed_rate": 0.4568
+        },
+        {
+          "bin_hi": 0.6000000000000001,
+          "bin_lo": 0.5,
+          "count": 7,
+          "mean_predicted": 0.5714,
+          "observed_rate": 0.5714
+        },
+        {
+          "bin_hi": 0.7000000000000001,
+          "bin_lo": 0.6000000000000001,
+          "count": 0,
+          "mean_predicted": 0.65,
+          "observed_rate": 0.0
+        },
+        {
+          "bin_hi": 0.8,
+          "bin_lo": 0.7000000000000001,
+          "count": 245,
+          "mean_predicted": 0.7878,
+          "observed_rate": 0.7878
+        },
+        {
+          "bin_hi": 0.9,
+          "bin_lo": 0.8,
+          "count": 139,
+          "mean_predicted": 0.8345,
+          "observed_rate": 0.8345
+        },
+        {
+          "bin_hi": 1.0,
+          "bin_lo": 0.9,
+          "count": 311,
+          "mean_predicted": 0.9287,
+          "observed_rate": 0.9293
+        }
+      ],
+      "gini": 0.50126,
+      "ks": 0.36299,
+      "n_train": 3200,
+      "n_val": 800
+    },
+    "model_type": "logistic_scorecard_v1",
+    "model_version": "v1.1.0-gbm-challenger",
+    "notes": [
+      "Challenger Monotonic GBDT fitted with directional constraints and TreeSHAP"
+    ],
+    "promotion_status": "candidate",
+    "trained_at": "2026-09-06T20:45:25.655787+00:00",
+    "training_dataset": {
+      "available": true,
+      "feature_version": "v1.0.0",
+      "features": [
+        "shg_repayment_rate",
+        "shg_meeting_attendance_pct",
+        "shg_savings_consistency",
+        "shg_membership_years",
+        "shg_grade",
+        "utility_payment_ontime_pct",
+        "upi_transaction_regularity",
+        "estimated_crop_income_kharif",
+        "estimated_crop_income_rabi",
+        "income_stability_cv",
+        "monthly_avg_credit_inflow",
+        "pm_kisan_regularity",
+        "shg_cumulative_savings",
+        "bank_balance_avg_6m",
+        "asset_score",
+        "land_holding_acres",
+        "irrigation_access",
+        "land_quality_ndvi_avg",
+        "ndvi_trend_2season",
+        "rainfall_deviation_pct",
+        "crop_insurance_enrolled"
+      ],
+      "kind": "synthetic",
+      "limitations": [
+        "labels are simulated from hand-authored ground truth, not real repayment",
+        "no calendar effects, cross-borrower correlation within SHG is approximated",
+        "AUC/Gini on this data cannot be interpreted as production predictive validity"
+      ],
+      "samples": 4000,
+      "schema_hash": "2556de253967272a",
+      "source": "synthetic_shg_generator",
+      "transformations": [
+        "seed=42",
+        "spatial_villages=15",
+        "clipping to plausible domain ranges",
+        "shg_grade -> numeric via schema.category_map",
+        "label = Bernoulli(sigmoid(GT_logit + N(0,0.5)))"
+      ]
+    },
+    "training_dataset_hash": "5471615083feac88c576b2aec66a4d0a"
   }
 ]

@@ -66,6 +66,8 @@ class ScorecardSHAPExplainer:
         }
 
     def compute_shap_values(self, features: dict[str, Any]) -> list[dict[str, Any]]:
+        if hasattr(self.scorecard, "compute_shap_values") and not isinstance(self.scorecard, LogisticScorecard):
+            return self.scorecard.compute_shap_values(features)
         contributions: list[dict[str, Any]] = []
         for feature, val in features.items():
             if feature not in self.scorecard.weights:

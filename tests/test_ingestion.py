@@ -1,6 +1,11 @@
 """Unit tests for the Ingestion Service, Connectors, and Routers."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 from unittest.mock import AsyncMock, patch
 
 import pytest

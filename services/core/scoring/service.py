@@ -30,12 +30,21 @@ def _load_scorecard_from_registry(model_version: str | None) -> tuple[LogisticSc
     artifact = registry.artifact_path(record.model_version)
     if artifact is None or not artifact.exists():
         return LogisticScorecard(), None
-    scorecard = LogisticScorecard.from_artifact(artifact)
+
+    import json
+    with open(artifact, encoding="utf-8") as f:
+        data = json.load(f)
+
+    if "woe_transformer" in data:
+        from ml.training.woe_scorecard import WoEScorecard
+        scorecard = WoEScorecard.from_dict(data)
+    else:
+        scorecard = LogisticScorecard.from_dict(data)
+
     # Pull the training-set feature means from the report if present.
     report_path = artifact.parent / "training_report.json"
     feature_means: dict | None = None
     if report_path.exists():
-        import json
         with open(report_path, encoding="utf-8") as f:
             report = json.load(f)
         feature_means = report.get("feature_means") or None

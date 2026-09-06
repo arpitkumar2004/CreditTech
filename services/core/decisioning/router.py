@@ -23,6 +23,35 @@ router = APIRouter(prefix="/decision", tags=["Officer Decisioning"])
 
 
 @router.get(
+    "/applications",
+    summary="List all loan applications for officer review",
+)
+async def list_applications(
+    officer_id: str = Depends(require_officer),  # noqa: ARG001
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    service = DecisioningService(db)
+    return await service.list_applications()
+
+
+@router.get(
+    "/applications/{application_id}",
+    response_model=ReviewPayload,
+    summary="Full application review pack",
+)
+async def get_application_review(
+    application_id: uuid.UUID,
+    officer_id: str = Depends(require_officer),  # noqa: ARG001
+    db: AsyncSession = Depends(get_db),
+) -> ReviewPayload:
+    service = DecisioningService(db)
+    try:
+        return await service.get_application_review(application_id)
+    except DecisioningError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get(
     "/review/{score_id}",
     response_model=ReviewPayload,
     summary="Assemble the officer review pack for a score",
@@ -78,3 +107,16 @@ async def get_audit(
     service = DecisioningService(db)
     entries = await service.get_audit_trail(score_id)
     return [OfficerDecisionRecord.model_validate(e) for e in entries]
+
+
+@router.get(
+    "/applications",
+    summary="List all loan applications for officer dashboard",
+)
+async def list_applications(
+    officer_id: str = Depends(require_officer),  # noqa: ARG001
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    service = DecisioningService(db)
+    return await service.list_applications()
+

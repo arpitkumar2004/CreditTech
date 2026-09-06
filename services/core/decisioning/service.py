@@ -255,6 +255,70 @@ class DecisioningService:
         )
         return result.scalars().first()
 
+    async def list_applications(self) -> list[dict]:
+        """Fetch all loan applications with borrower, score, and village context for officer review."""
+        stmt = (
+            select(LoanApplication, Borrower, Score, Village)
+            .join(Borrower, Borrower.id == LoanApplication.borrower_id)
+            .join(Score, Score.id == LoanApplication.score_id)
+            .outerjoin(Village, Village.id == Borrower.village_id)
+            .order_by(LoanApplication.created_at.desc())
+        )
+        res = await self.db.execute(stmt)
+        apps = []
+        for app, borrower, score, village in res.all():
+            score_100 = score.score if score.score <= 100 else (score.score - 300) / 6.0
+            score_900 = int(300 + (score_100 / 100.0) * 600) if score.score <= 100 else int(score.score)
+            band = ScoringService.get_score_band(score_100)
+            rec = recommendation_for_band(band)
+            # Use real readable name if available or formatted fallback
+            display_name = (
+                borrower.name_encrypted
+                if borrower.name_encrypted and len(borrower.name_encrypted) < 30
+                else f"Applicant {str(borrower.id)[:6]}"
+            )
+            apps.append({
+                "id": str(app.id),
+                "borrower_id": str(borrower.id),
+                "borrower_name": display_name,
+                "village": village.name if village else "Pilot Sangaria Village",
+                "district": village.district if village else "Hanumangarh",
+                "state": village.state if village else "Rajasthan",
+                "gender": borrower.gender,
+                "age": borrower.age,
+                "landholding_band": borrower.landholding_band,
+                "requested_amount": app.requested_amount,
+                "requested_tenure_months": app.requested_tenure_months,
+                "purpose": app.purpose,
+                "score_id": str(score.id),
+                "score_900": score_900,
+                "score_100": round(score_100, 1),
+                "band": band,
+                "confidence_lower": score.confidence_lower,
+                "confidence_upper": score.confidence_upper,
+                "model_recommendation": rec.value,
+                "decision": app.officer_decision or "PENDING",
+                "override_reason": app.override_reason,
+                "submitted_at": app.created_at.isoformat() if app.created_at else None,
+                "decided_at": app.decided_at.isoformat() if app.decided_at else None,
+            })
+        return apps
+
+    async def get_application_review(self, application_id: uuid.UUID) -> ReviewPayload:
+        """Retrieve full review payload by loan application ID or score ID."""
+        la_result = await self.db.execute(
+            select(LoanApplication).where(LoanApplication.id == application_id)
+        )
+        loan_app = la_result.scalars().first()
+        if loan_app and loan_app.score_id:
+            payload = await self.build_review_payload(loan_app.score_id)
+            payload.borrower_summary["application_id"] = str(loan_app.id)
+            payload.borrower_summary["requested_amount"] = loan_app.requested_amount
+            payload.borrower_summary["requested_tenure_months"] = loan_app.requested_tenure_months
+            payload.borrower_summary["purpose"] = loan_app.purpose
+            return payload
+        return await self.build_review_payload(application_id)
+
 
 __all__: list[Any] = [
     "DecisioningService",

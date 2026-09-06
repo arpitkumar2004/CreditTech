@@ -1,7 +1,10 @@
-"""Simulation Router executing end-to-end pilot runs for testing and demonstrating pipeline capabilities."""
-
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select

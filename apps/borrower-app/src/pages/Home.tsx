@@ -7,22 +7,56 @@ import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis,
   CartesianGrid, PieChart, Pie, Cell,
 } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 import { Badge, Dot } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import {
   portfolioKpis, applicationsByDay, scoreDistribution, applications, officerProfile,
 } from "@/lib/mockData";
 import { formatINR, formatDateShort } from "@/lib/utils";
-
-const kpis = [
-  { icon: TrendingUp, label: "Cumulative disbursement", value: formatINR(portfolioKpis.cumulative_disbursement, { compact: true }), sub: "+12.4% MoM" },
-  { icon: Users, label: "Active borrowers", value: portfolioKpis.active_borrowers.toLocaleString("en-IN"), sub: `${portfolioKpis.villages_active} villages` },
-  { icon: ClipboardList, label: "Pending review", value: String(portfolioKpis.pending_applications), sub: "SLA · under 24h" },
-  { icon: Percent, label: "Approval (30d)", value: `${(portfolioKpis.approval_rate_30d * 100).toFixed(1)}%`, sub: "Within fairness band" },
-];
+import { dashboardApi, decisionApi } from "@/lib/api";
 
 export default function Home() {
-  const recent = applications.slice(0, 6);
+  const { data: metrics } = useQuery({
+    queryKey: ["portfolioMetrics"],
+    queryFn: () => dashboardApi.portfolio().catch(() => null),
+  });
+
+  const { data: apiApps } = useQuery({
+    queryKey: ["applicationsList"],
+    queryFn: () => decisionApi.listApplications().catch(() => null),
+  });
+
+  const recent = apiApps && apiApps.length > 0
+    ? apiApps.slice(0, 6).map((a) => ({
+        id: a.id,
+        borrower_name: a.borrower_name,
+        village: a.village,
+        gender: a.gender as "F" | "M",
+        age: a.age,
+        score_900: a.score_900,
+        band: a.band,
+        decision: a.decision,
+        model_recommendation: a.model_recommendation,
+        requested_amount: a.requested_amount,
+        submitted_at: a.submitted_at,
+      }))
+    : applications.slice(0, 6);
+
+  const pendingCount = metrics?.applications_pending ?? portfolioKpis.pending_applications;
+  const disbAmount = metrics?.disbursed_amount_approved ?? portfolioKpis.cumulative_disbursement;
+  const activeBorrowers = metrics?.borrowers ?? portfolioKpis.active_borrowers;
+  const approvalRate = metrics?.approval_rate != null
+    ? `${(metrics.approval_rate * 100).toFixed(1)}%`
+    : `${(portfolioKpis.approval_rate_30d * 100).toFixed(1)}%`;
+
+  const kpis = [
+    { icon: TrendingUp, label: "Cumulative disbursement", value: formatINR(disbAmount, { compact: true }), sub: "+12.4% MoM" },
+    { icon: Users, label: "Active borrowers", value: activeBorrowers.toLocaleString("en-IN"), sub: `${portfolioKpis.villages_active} villages` },
+    { icon: ClipboardList, label: "Pending review", value: String(pendingCount), sub: "SLA · under 24h" },
+    { icon: Percent, label: "Approval rate", value: approvalRate, sub: "Within fairness band" },
+  ];
+
   return (
     <div className="space-y-6">
       <header>
@@ -33,7 +67,7 @@ export default function Home() {
           Overview · {officerProfile.name.split(" ")[0]}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {portfolioKpis.pending_applications} applications await your review. Fairness gate is passing across all monitored dimensions.
+          {pendingCount} applications await your review. Fairness gate is passing across all monitored dimensions.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge tone="success"><Dot tone="success" /> Fairness gate: PASS</Badge>

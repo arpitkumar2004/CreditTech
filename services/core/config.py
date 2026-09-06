@@ -24,9 +24,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
 
     # ── Database ─────────────────────────────────────────────
-    database_url: str = (
-        "postgresql+asyncpg://credittech:credittech_dev@localhost:5432/credittech"
-    )
+    database_url: str = "sqlite+aiosqlite:///./credittech.db"
     database_echo: bool = False
 
     # ── Security ─────────────────────────────────────────────

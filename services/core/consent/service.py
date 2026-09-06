@@ -8,7 +8,12 @@ Every downstream data pull must present a valid, unexpired consent token.
 import hashlib
 import json
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession

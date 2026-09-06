@@ -14,7 +14,12 @@ Guarantees added in Phase 4:
 
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 
 import httpx
 from sqlalchemy import select
@@ -144,8 +149,8 @@ class HandoffService:
             "borrower": {
                 "credittech_borrower_ref": str(borrower.id),
                 "aadhaar_reference_hash": borrower.aadhaar_ref_hash,
-                "name_encrypted": self.pii_encryptor.encrypt("Mock Decrypted Name"),
-                "phone_encrypted": self.pii_encryptor.encrypt("9876543210"),
+                "name_encrypted": borrower.name_encrypted,
+                "phone_encrypted": borrower.phone_encrypted,
                 "gender": borrower.gender,
                 "age": borrower.age,
                 "landholding_band": borrower.landholding_band,

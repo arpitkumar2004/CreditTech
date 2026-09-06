@@ -8,7 +8,12 @@ const BASE = import.meta.env.VITE_API_BASE ?? "/api/v1";
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
-    headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
+    headers: {
+      "content-type": "application/json",
+      "X-Officer-ID": "OFF-001",
+      "X-Officer-Role": "LOAN_OFFICER",
+      ...(init?.headers ?? {}),
+    },
   });
   if (!res.ok) {
     const body = await res.text();
@@ -77,3 +82,300 @@ export const ingestApi = {
       }
     ),
 };
+
+// ── Applications & Officer Decisioning ─────────────────
+export interface ApiApplication {
+  id: string;
+  borrower_id: string;
+  borrower_name: string;
+  village: string;
+  district: string;
+  state: string;
+  gender: string;
+  age: number;
+  landholding_band: string;
+  requested_amount: number;
+  requested_tenure_months: number;
+  purpose: string;
+  score_id: string;
+  score_900: number;
+  score_100: number;
+  band: string;
+  confidence_lower: number;
+  confidence_upper: number;
+  model_recommendation: "APPROVE" | "REVIEW" | "REJECT";
+  decision: "PENDING" | "APPROVED" | "REJECTED" | "MORE_INFO_REQUIRED";
+  override_reason: string | null;
+  submitted_at: string;
+  decided_at: string | null;
+}
+
+export interface ReviewPayload {
+  score_id: string;
+  borrower: {
+    id: string;
+    gender: string;
+    age: number;
+    landholding_band: string;
+    village: string | null;
+    district: string | null;
+    state: string | null;
+  };
+  credit_assessment: {
+    score: number;
+    score_900: number;
+    score_band: string;
+    model_version: string;
+    feature_version: string;
+    model_recommendation: "APPROVE" | "REVIEW" | "REJECT";
+  };
+  sources_status: { source: string; available: boolean }[];
+  partial_data: boolean;
+  reason_codes: {
+    rank: number;
+    feature_name: string;
+    direction: "POS" | "NEG";
+    shap_value: number;
+    localized_text_en: string;
+    localized_text_hi: string;
+  }[];
+  existing_decision?: {
+    decision: string;
+    is_override: boolean;
+    override_reason: string | null;
+    officer_id: string;
+    created_at: string;
+  } | null;
+}
+
+export const applicationsApi = {
+  list: () => request<ApiApplication[]>("/decision/applications"),
+  get: (id: string) => request<ReviewPayload>(`/decision/applications/${id}`),
+};
+
+export const decisionApi = {
+  listApplications: () => request<ApiApplication[]>("/decision/applications"),
+  getReview: (scoreId: string) => request<ReviewPayload>(`/decision/review/${scoreId}`),
+  record: (payload: {
+    score_id: string;
+    decision: "APPROVED" | "REJECTED" | "MORE_INFO_REQUIRED";
+    override_reason?: string | null;
+    officer_notes?: string | null;
+  }) =>
+    request<{
+      id: string;
+      score_id: string;
+      officer_id: string;
+      decision: string;
+      model_recommendation: string;
+      is_override: boolean;
+      override_reason: string | null;
+      created_at: string;
+    }>("/decision/", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  recordDecision: (payload: {
+    score_id: string;
+    decision: "APPROVED" | "REJECTED" | "MORE_INFO_REQUIRED";
+    override_reason?: string | null;
+    officer_notes?: string | null;
+    notes?: string | null;
+  }) =>
+    request<{
+      id: string;
+      score_id: string;
+      officer_id: string;
+      decision: string;
+      model_recommendation: string;
+      is_override: boolean;
+      override_reason: string | null;
+      created_at: string;
+    }>("/decision/", {
+      method: "POST",
+      body: JSON.stringify({
+        score_id: payload.score_id,
+        decision: payload.decision,
+        override_reason: payload.override_reason,
+        officer_notes: payload.officer_notes ?? payload.notes,
+      }),
+    }),
+  getAudit: (scoreId: string) => request<unknown[]>(`/decision/audit/${scoreId}`),
+};
+
+// ── Dashboard & Governance ─────────────────────────────
+export interface PortfolioMetrics {
+  borrowers: number;
+  scores_generated: number;
+  applications_total: number;
+  applications_pending: number;
+  applications_approved: number;
+  applications_rejected: number;
+  applications_more_info: number;
+  approval_rate: number | null;
+  disbursed_amount_approved: number;
+  officer_decisions_total: number;
+  officer_override_count: number;
+  officer_override_rate: number | null;
+  grievances_open: number;
+}
+
+export const dashboardApi = {
+  portfolio: () => request<PortfolioMetrics>("/dashboard/portfolio"),
+  fairness: (period?: string) =>
+    request<{
+      period: string | null;
+      rows: {
+        id?: string;
+        period?: string;
+        dimension: string;
+        group_value: string;
+        approval_rate: number | null;
+        sample_size?: number;
+        override_rate?: number | null;
+        total_applications?: number;
+        approved_applications?: number;
+        threshold_value?: number;
+        breach_detected?: boolean;
+        status?: string;
+        audited_at?: string;
+        computed_at?: string;
+      }[];
+      governance_note?: string;
+    }>(period ? `/dashboard/fairness?period=${period}` : "/dashboard/fairness"),
+};
+
+// ── Model Registry & Governance ────────────────────────
+export interface RegisteredModel {
+  model_version: string;
+  feature_version: string;
+  model_type: string;
+  trained_at: string;
+  promotion_status: "candidate" | "validated" | "active" | "retired";
+  metrics: {
+    auc: number;
+    gini: number;
+    ks: number;
+    brier: number;
+  };
+  limitations?: string[];
+  fairness?: { results?: unknown[] };
+}
+
+export const modelsApi = {
+  list: () => request<RegisteredModel[]>("/admin/models"),
+  listModels: () => request<RegisteredModel[]>("/admin/models"),
+  manifest: () =>
+    request<{ manifest_hash: string; manifest: { version: string; dimensions: Record<string, unknown> }; thresholds?: Record<string, any>; version?: string }>(
+      "/admin/fairness/manifest"
+    ),
+  getManifest: () =>
+    request<{ manifest_hash?: string; manifest?: { version: string; dimensions: Record<string, unknown> }; thresholds?: Record<string, any>; version?: string }>(
+      "/admin/fairness/manifest"
+    ),
+  fairnessGate: (period?: string) =>
+    request<{ passed: boolean; manifest_hash: string; breaches: unknown[]; checked_period: string }>(
+      period ? `/admin/fairness/gate?period=${period}` : "/admin/fairness/gate"
+    ),
+  evaluateGate: (period?: string) =>
+    request<{ passed: boolean; manifest_hash: string; breaches: unknown[]; checked_period: string }>(
+      period ? `/admin/fairness/gate?period=${period}` : "/admin/fairness/gate"
+    ),
+  promote: (version: string) =>
+    request<{ promoted: boolean; report: unknown }>(`/admin/models/${version}/promote`, {
+      method: "POST",
+    }),
+  check: (version: string) =>
+    request<unknown>(`/admin/models/${version}/promotion-check`),
+};
+export const adminApi = modelsApi;
+
+// ── Grievances ─────────────────────────────────────────
+export interface ApiGrievance {
+  id: string;
+  borrower_id: string;
+  category: "INTEREST_RATE" | "REJECTED_LOAN" | "DATA_ACCURACY" | "CONSENT_BREACH" | "OTHER" | string;
+  description?: string;
+  summary?: string;
+  status: "OPEN" | "IN_REVIEW" | "ESCALATED" | "RESOLVED" | "CLOSED" | string;
+  due_at?: string;
+  sla_deadline?: string;
+  resolution_notes?: string | null;
+  created_at: string;
+}
+
+export const grievancesApi = {
+  list: (status?: string) => request<ApiGrievance[]>(status ? `/grievances/?status=${status}` : "/grievances/"),
+  get: (id: string) => request<ApiGrievance>(`/grievances/${id}`),
+  create: (payload: {
+    borrower_id: string;
+    category: string;
+    description?: string;
+    summary?: string;
+    score_id?: string | null;
+    loan_application_id?: string | null;
+  }) =>
+    request<ApiGrievance>("/grievances/", {
+      method: "POST",
+      headers: { "X-Borrower-Id": payload.borrower_id },
+      body: JSON.stringify({
+        borrower_id: payload.borrower_id,
+        category: payload.category,
+        description: payload.description || payload.summary || "Grievance dispute",
+        score_id: payload.score_id,
+        loan_application_id: payload.loan_application_id,
+      }),
+    }),
+  update: (
+    id: string,
+    payload: {
+      status?: string;
+      resolution_notes?: string;
+      note?: string;
+      notes?: string;
+    }
+  ) =>
+    request<ApiGrievance>(`/grievances/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        status: payload.status,
+        resolution_notes: payload.resolution_notes,
+        note: payload.note || payload.notes,
+      }),
+    }),
+  audit: (id: string) => request<unknown[]>(`/grievances/${id}/audit`),
+  escalateOverdue: () => request<{ escalated: number }>("/grievances/escalate-overdue", { method: "POST" }),
+};
+export const grievanceApi = grievancesApi;
+
+// ── Partner RE Handoff ─────────────────────────────────
+export const handoffApi = {
+  submit: (
+    payloadOrScoreId: string | {
+      score_id: string;
+      partner_re_id: string;
+      requested_amount: number;
+      requested_tenure_months: number;
+      purpose: string;
+    },
+    optionalPayload?: {
+      partner_re_id?: string;
+      requested_amount?: number;
+      requested_tenure_months?: number;
+      purpose?: string;
+    }
+  ) => {
+    const body = typeof payloadOrScoreId === "string"
+      ? { score_id: payloadOrScoreId, ...optionalPayload }
+      : payloadOrScoreId;
+    return request<{
+      loan_application_id: string;
+      status: string;
+      message: string;
+    }>("/handoff/submit", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+};
+

@@ -9,7 +9,12 @@ Defaults to `./credittech.db` -> `./backups/credittech-<utc-ts>.db`.
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 from pathlib import Path
 
 from services.core.ops.dr import backup_sqlite, row_counts

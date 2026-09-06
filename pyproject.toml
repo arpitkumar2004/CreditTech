@@ -3,7 +3,7 @@ name = "credittech"
 version = "0.1.0"
 description = "Alternative Credit Scoring System for Rural Financial Inclusion"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {text = "Proprietary"}
 authors = [
     {name = "Arpit Kumar", email = "arpit@credittech.in"},
@@ -19,6 +19,7 @@ dependencies = [
     # Database
     "sqlalchemy[asyncio]>=2.0.30,<3.0.0",
     "asyncpg>=0.29.0,<1.0.0",
+    "aiosqlite>=0.20.0,<1.0.0",
     "alembic>=1.13.0,<2.0.0",
 
     # Validation & serialization

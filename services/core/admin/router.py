@@ -14,9 +14,16 @@ from services.core.monitoring.governance import (
     manifest_hash,
 )
 
+from ml.registry import ModelRegistry
 from .promotion import ModelPromotionService, PromotionBlocked
 
 router = APIRouter(prefix="/admin", tags=["Admin — Model Promotion & Governance"])
+
+
+@router.get("/models", summary="List all registered models with metrics and promotion status")
+async def list_models(_: str = Depends(require_officer)) -> list[dict]:
+    reg = ModelRegistry()
+    return [m.to_dict() for m in reg.list_models()]
 
 
 @router.get("/fairness/manifest", summary="Read the ratified fairness threshold manifest")

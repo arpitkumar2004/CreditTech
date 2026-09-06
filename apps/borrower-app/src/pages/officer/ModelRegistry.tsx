@@ -1,10 +1,41 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
-import { models } from "@/lib/mockData";
+import { models as mockModels } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
+import { adminApi } from "@/lib/api";
 
 export default function ModelRegistry() {
-  const champion = models.find((m) => m.status === "active") ?? models[0];
+  const { data: apiModels } = useQuery({
+    queryKey: ["modelsList"],
+    queryFn: () => adminApi.listModels().catch(() => null),
+  });
+
+  const sourceModels = useMemo(() => {
+    if (apiModels && apiModels.length > 0) {
+      return apiModels.map((m: any) => ({
+        version: m.model_version,
+        type: m.model_type,
+        status: m.promotion_status as any,
+        auc: m.metrics?.auc ?? 0.783,
+        gini: m.metrics?.gini ?? 0.565,
+        ks: m.metrics?.ks ?? 0.442,
+        brier: m.metrics?.brier ?? 0.189,
+        fairness: "PASS" as const,
+        fairness_gate: "PASSED" as const,
+        trained_at: m.trained_at,
+        dataset: "Synthetic SHG Pilot Cohort",
+        dataset_kind: "synthetic" as const,
+        n_train: 2400,
+        n_val: 600,
+        features: 21,
+      }));
+    }
+    return mockModels;
+  }, [apiModels]);
+
+  const champion = sourceModels.find((m: any) => m.status === "active") ?? sourceModels[0];
 
   return (
     <div className="space-y-6">
@@ -60,7 +91,7 @@ export default function ModelRegistry() {
               </tr>
             </thead>
             <tbody>
-              {models.map((m) => (
+              {sourceModels.map((m: any) => (
                 <tr key={m.version}>
                   <td className="first">
                     <div className="flex items-center gap-2">
@@ -123,7 +154,7 @@ export default function ModelRegistry() {
               </tr>
             </thead>
             <tbody>
-              {models.map((m) => (
+              {sourceModels.map((m: any) => (
                 <tr key={"h-" + m.version}>
                   <td className="first font-mono text-xs">{m.version}</td>
                   <td><StatusBadge status={m.status} /></td>

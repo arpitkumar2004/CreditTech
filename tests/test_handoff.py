@@ -1,6 +1,11 @@
 """Unit tests for the Partner RE Handoff Service and Router."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 
 import pytest
 from httpx import AsyncClient

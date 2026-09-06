@@ -15,7 +15,12 @@ Governance stance for the pilot:
 import csv
 import io
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession

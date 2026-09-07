@@ -29,6 +29,32 @@ class ScoreRequest(BaseModel):
     )
 
 
+class ShadowScoreResult(BaseModel):
+    shadow_model_version: str
+    shadow_score_100: float
+    shadow_score_900: int
+    score_delta_100: float
+    agreement: str  # "AGREE" | "DISAGREE"
+    latency_ms: float
+
+
+class ActionableRecourseItem(BaseModel):
+    feature_name: str
+    current_value: float
+    target_value: float
+    projected_score_impact: float
+    guidance_en: str
+    guidance_hi: str | None = None
+
+
+class ActionableRecourseResponse(BaseModel):
+    eligible: bool
+    current_score: int
+    target_score: int
+    projected_score: int
+    pathways: list[ActionableRecourseItem]
+
+
 class ScoreResponse(BaseModel):
     """Response containing the generated score, band, and explanations."""
 
@@ -45,5 +71,8 @@ class ScoreResponse(BaseModel):
     sources_used: list[str]
     reason_codes: list[ScoreReasonCodeResponse]
     generated_at: datetime
+    shadow_score: ShadowScoreResult | None = None
+    actionable_recourse: ActionableRecourseResponse | None = None
 
     model_config = {"from_attributes": True, "protected_namespaces": ()}
+

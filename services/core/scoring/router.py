@@ -49,6 +49,8 @@ async def generate_score(
             "sources_used": score_record.sources_used,
             "reason_codes": getattr(score_record, "transient_reason_codes", []),
             "generated_at": score_record.generated_at,
+            "shadow_score": getattr(score_record, "shadow_score", None),
+            "actionable_recourse": getattr(score_record, "actionable_recourse", None),
         }
     except ScoringServiceError as e:
         logger.error("failed_to_generate_score", error=str(e))

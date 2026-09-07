@@ -380,7 +380,7 @@
     "notes": [
       "Champion WoE Scorecard fitted with L1 regularization and isotonic probability calibration"
     ],
-    "promotion_status": "active",
+    "promotion_status": "retired",
     "trained_at": "2026-09-06T20:45:25.613995+00:00",
     "training_dataset": {
       "available": true,
@@ -595,7 +595,7 @@
     "notes": [
       "Challenger Monotonic GBDT fitted with directional constraints and TreeSHAP"
     ],
-    "promotion_status": "candidate",
+    "promotion_status": "active",
     "trained_at": "2026-09-06T20:45:25.655787+00:00",
     "training_dataset": {
       "available": true,

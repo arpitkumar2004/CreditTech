@@ -1,5 +1,6 @@
-"""Scoring Service managing scorecard execution, calibration, confidence bands, and persistence."""
+from __future__ import annotations
 
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,7 @@ from .schemas import ScoreRequest
 logger = get_logger("scoring.service")
 
 
-def _load_scorecard_from_registry(model_version: str | None) -> tuple[LogisticScorecard, dict | None]:
+def _load_scorecard_from_registry(model_version: str | None) -> tuple[Any, dict | None]:
     """Prefer a registered artifact; fall back to the built-in default scorecard.
 
     Returns (scorecard, feature_means_or_none). feature_means is used as SHAP
@@ -32,14 +33,31 @@ def _load_scorecard_from_registry(model_version: str | None) -> tuple[LogisticSc
         return LogisticScorecard(), None
 
     import json
-    with open(artifact, encoding="utf-8") as f:
-        data = json.load(f)
+    scorecard = None
 
-    if "woe_transformer" in data:
-        from ml.training.woe_scorecard import WoEScorecard
-        scorecard = WoEScorecard.from_dict(data)
+    # Check if artifact is a pickle (e.g. MonotonicGBMScorecard)
+    is_pickle = False
+    try:
+        with open(artifact, "rb") as f:
+            magic = f.read(2)
+            if magic.startswith(b"\x80"):
+                is_pickle = True
+    except Exception:
+        pass
+
+    if is_pickle or artifact.suffix == ".pkl" or (artifact.parent / "scorecard.pkl").exists() and not artifact.exists():
+        from ml.training.gbm_challenger import MonotonicGBMScorecard
+        pkl_path = artifact if is_pickle else (artifact.parent / "scorecard.pkl")
+        scorecard = MonotonicGBMScorecard.from_artifact(pkl_path)
     else:
-        scorecard = LogisticScorecard.from_dict(data)
+        with open(artifact, encoding="utf-8") as f:
+            data = json.load(f)
+
+        if "woe_transformer" in data:
+            from ml.training.woe_scorecard import WoEScorecard
+            scorecard = WoEScorecard.from_dict(data)
+        else:
+            scorecard = LogisticScorecard.from_dict(data)
 
     # Pull the training-set feature means from the report if present.
     report_path = artifact.parent / "training_report.json"
@@ -159,7 +177,71 @@ class ScoringService:
         score_record.score_900 = score_900  # type: ignore[attr-defined]
         score_record.transient_reason_codes = rendered_codes  # type: ignore[attr-defined]
 
+        # 7. Execute Challenger Shadow Scoring
+        score_record.shadow_score = self._run_shadow_scoring(features, score_100, score_900)  # type: ignore[attr-defined]
+
+        # 8. Compute Actionable Recourse if score is below auto-approve threshold (< 650)
+        recourse_result = None
+        if score_900 < 650 or self.get_score_band(score_100) in {"MODERATE", "HIGH_RISK", "VERY_HIGH_RISK"}:
+            try:
+                from ml.evaluation.recourse import CounterfactualRecourseEngine
+                engine = CounterfactualRecourseEngine(self.scorecard)
+                recourse_result = engine.generate_recourse(features, target_score=650)
+            except Exception as err:
+                logger.warning("recourse_generation_failed", error=str(err))
+        score_record.actionable_recourse = recourse_result  # type: ignore[attr-defined]
+
         return score_record
+
+    def _run_shadow_scoring(
+        self,
+        features: dict[str, Any],
+        active_score_100: float,
+        active_score_900: int,
+    ) -> dict[str, Any] | None:
+        """Runs the registered candidate/challenger model in shadow mode without blocking main flow."""
+        try:
+            import time
+            registry = ModelRegistry()
+            records = registry.list_all()
+            challenger_record = None
+            for r in records:
+                if r.promotion_status == "candidate" and r.model_version != self.scorecard.model_version:
+                    challenger_record = r
+                    break
+
+            if challenger_record is None:
+                return None
+
+            t0 = time.perf_counter()
+            challenger_card, _ = _load_scorecard_from_registry(challenger_record.model_version)
+            if challenger_card is None:
+                return None
+
+            shadow_prob = challenger_card.predict_probability(features)
+            shadow_100, shadow_900 = challenger_card.calibrate_score(shadow_prob)
+            elapsed_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+
+            def get_rec(s900: int) -> str:
+                if s900 >= 650:
+                    return "APPROVE"
+                elif s900 >= 550:
+                    return "REVIEW"
+                return "REJECT"
+
+            agreement = "AGREE" if get_rec(active_score_900) == get_rec(shadow_900) else "DISAGREE"
+
+            return {
+                "shadow_model_version": challenger_record.model_version,
+                "shadow_score_100": shadow_100,
+                "shadow_score_900": shadow_900,
+                "score_delta_100": round(shadow_100 - active_score_100, 1),
+                "agreement": agreement,
+                "latency_ms": elapsed_ms,
+            }
+        except Exception as err:
+            logger.warning("shadow_scoring_skipped", error=str(err))
+            return None
 
     @staticmethod
     def get_score_band(score_100: float) -> str:

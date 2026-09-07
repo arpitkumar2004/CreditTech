@@ -7,7 +7,7 @@ from services.core.database import get_db
 from services.core.decisioning.auth import require_officer
 from services.core.shared.logging import get_logger
 
-from .service import DataRetentionWorker, FairnessAuditor
+from .service import DataRetentionWorker, DriftMonitorService, FairnessAuditor
 
 logger = get_logger("monitoring.router")
 router = APIRouter(prefix="/monitoring", tags=["Monitoring & Compliance"])
@@ -115,3 +115,23 @@ async def export_fairness_audits(
             )
         },
     )
+
+
+@router.get(
+    "/drift",
+    summary="Retrieve Population Stability Index (PSI) and Characteristic Stability Index (CSI) drift metrics",
+)
+async def get_drift_metrics(
+    limit: int = Query(500, description="Max historical scores/features to evaluate"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Calculates operational and seasonal distribution drift across live scoring data."""
+    monitor = DriftMonitorService(db)
+    try:
+        return await monitor.compute_drift_audit(limit=limit)
+    except Exception as e:
+        logger.error("drift_audit_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Drift audit failed: {e}",
+        )

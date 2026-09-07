@@ -53,16 +53,17 @@ class ScorecardSHAPExplainer:
 
     def __init__(
         self,
-        scorecard: LogisticScorecard,
+        scorecard: Any,
         reference_values: dict[str, float] | None = None,
     ) -> None:
         self.scorecard = scorecard
+        weights = getattr(scorecard, "weights", None)
         # Prefer the trained model's feature means (loaded via registry); fall
-        # back to the domain prior; ignore anything not in the scorecard weights.
+        # back to the domain prior; ignore anything not in the scorecard weights if present.
         self.reference_values: dict[str, float] = {
             k: float(v)
             for k, v in (reference_values or DEFAULT_REFERENCE_VALUES).items()
-            if k in scorecard.weights
+            if weights is None or k in weights
         }
 
     def compute_shap_values(self, features: dict[str, Any]) -> list[dict[str, Any]]:

@@ -295,6 +295,17 @@ class ConsentService:
         self.db.add(audit)
         await self.db.flush()
 
+        # DPDP Act 2023 §12 — Right to Erasure / Consent Revocation:
+        # Cascade consent revocation to purge borrower repayment records from future retraining cohorts.
+        from sqlalchemy import update
+        from services.core.shared.models import LoanApplication, RepaymentRecord
+        borrower_loan_ids_sub = select(LoanApplication.id).where(LoanApplication.borrower_id == consent.borrower_id)
+        await self.db.execute(
+            update(RepaymentRecord)
+            .where(RepaymentRecord.loan_application_id.in_(borrower_loan_ids_sub))
+            .values(consented_for_retraining=False)
+        )
+
         logger.info(
             "consent_revoked",
             consent_id=str(consent_id),

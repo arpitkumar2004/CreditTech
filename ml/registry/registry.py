@@ -154,6 +154,8 @@ class ModelRegistry:
     def list_models(self) -> list[ModelRecord]:
         return [ModelRecord(**r) for r in self._read_index()]
 
+    list_all = list_models
+
     def get(self, model_version: str) -> ModelRecord | None:
         for r in self._read_index():
             if r["model_version"] == model_version:

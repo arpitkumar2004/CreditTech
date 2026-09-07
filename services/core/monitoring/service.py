@@ -364,10 +364,18 @@ class DriftMonitorService:
             exp_df, _, _, _ = gen.generate()
             csi_res = calculate_csi(exp_df, live_df)
 
+        action_recommendation = "NORMAL_OPERATION"
+        if psi_res.stability == "SEVERE_DRIFT":
+            action_recommendation = "LOCK_STRAIGHT_THROUGH_LENDING_MANUAL_REVIEW"
+        elif psi_res.stability == "MODERATE_DRIFT":
+            action_recommendation = "REVIEW_SEASONAL_AGRO_CLIMATIC_SHOCKS"
+
         return {
             "status": "OK",
             "score_psi": psi_res.to_dict(),
             "feature_csi": csi_res,
+            "stability": psi_res.stability,
+            "action_recommendation": action_recommendation,
             "evaluated_scores_count": len(live_scores),
             "evaluated_features_count": len(live_features),
             "model_version": active.model_version if active else "unknown",

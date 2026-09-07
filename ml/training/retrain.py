@@ -143,6 +143,15 @@ class DPDPRetrainingPipeline:
         y_real = pd.Series(labels, name="repay", dtype=int)
         sensitive_df = pd.DataFrame(sensitive_dicts)
 
+        # Strict Data Governance Invariant (DPDP Act 2023 & Article 15):
+        from ml.features.schema import MONITORED_ONLY_FIELDS, PROHIBITED_FIELDS
+        prohibited_in_X = set(X_real.columns).intersection(PROHIBITED_FIELDS)
+        if prohibited_in_X:
+            raise ValueError(f"Data Governance Violation: PROHIBITED_FIELDS detected in training matrix: {prohibited_in_X}")
+        monitored_in_X = set(X_real.columns).intersection(MONITORED_ONLY_FIELDS)
+        if monitored_in_X:
+            raise ValueError(f"Data Governance Violation: MONITORED_ONLY_FIELDS detected in training matrix: {monitored_in_X}")
+
         return X_real, y_real, sensitive_df, len(rows)
 
     async def run_retraining(

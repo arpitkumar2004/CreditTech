@@ -331,6 +331,23 @@ class IngestionOrchestrator:
         else:
             season = "ZAID"
 
+        # Strict Data Governance (DPDP Act 2023 & ADR-2):
+        # Quarantine any accidental PII or monitored-only demographic fields
+        from ml.features.schema import MONITORED_ONLY_FIELDS, PROHIBITED_FIELDS
+        quarantined = []
+        for key in list(features.keys()):
+            if key in PROHIBITED_FIELDS:
+                quarantined.append(key)
+                features.pop(key, None)
+            elif key in MONITORED_ONLY_FIELDS:
+                features.pop(key, None)
+        if quarantined:
+            logger.warning(
+                "data_governance_quarantined_pii_during_ingestion",
+                borrower_id=str(borrower.id),
+                fields=quarantined,
+            )
+
         # Generate snapshot entity
         snapshot = FeatureSnapshot(
             borrower_id=borrower.id,

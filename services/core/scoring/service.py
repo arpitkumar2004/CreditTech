@@ -106,8 +106,21 @@ class ScoringService:
                 f"No feature snapshot found for borrower {request.borrower_id}"
             )
 
-        # 2. Run logistic model prediction
-        features = snapshot.features_json
+        # 2. Strict Data Governance (Zero-PII & Monitored-Only Isolation):
+        from ml.features.schema import MONITORED_ONLY_FIELDS, PROHIBITED_FIELDS
+        raw_features = snapshot.features_json or {}
+        prohibited_present = [k for k in raw_features if k in PROHIBITED_FIELDS]
+        if prohibited_present:
+            logger.warning(
+                "data_governance_quarantined_pii_during_scoring",
+                borrower_id=str(request.borrower_id),
+                prohibited_fields=prohibited_present,
+            )
+        # Ensure only non-PII, non-monitored features reach model & explainers
+        features = {
+            k: v for k, v in raw_features.items()
+            if k not in PROHIBITED_FIELDS and k not in MONITORED_ONLY_FIELDS
+        }
         prob_repay = self.scorecard.predict_probability(features)
 
         # 3. Calibrate scores
@@ -203,7 +216,7 @@ class ScoringService:
         try:
             import time
             registry = ModelRegistry()
-            records = registry.list_all()
+            records = registry.list_models()
             challenger_record = None
             for r in records:
                 if r.promotion_status == "candidate" and r.model_version != self.scorecard.model_version:

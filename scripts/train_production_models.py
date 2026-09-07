@@ -157,6 +157,48 @@ def train_and_register_all():
     )
     print(f"  • Registered Challenger: {rec_chal.model_version} (status: {rec_chal.promotion_status})")
 
+    # 4.5 Generate Decision Graphs & Regulatory Plots Manifest
+    from ml.evaluation.plotting import DecisionPlottingEngine
+    print("\n[Step 4.5] Generating 20 Decision Graphs & Regulatory Visual Dossiers...")
+
+    # Champion Plots
+    champ_scores = [int(champ_scorecard.calibrate_score(p)[1]) for p in oof_champ]
+    DecisionPlottingEngine.generate_full_manifest(
+        model_version="v1.1.0-woe-scorecard",
+        y_true=y.to_numpy(),
+        y_probs=oof_champ,
+        scores_900=champ_scores,
+        output_dir=champ_dir / "plots",
+        fairness_report=champ_fairness,
+    )
+    DecisionPlottingEngine.generate_and_save_static_plots(
+        model_version="v1.1.0-woe-scorecard",
+        output_dir=root_dir / "docs" / "ml" / "figures" / "v1.1.0-woe-scorecard",
+        y_true=y.to_numpy(),
+        y_probs=oof_champ,
+        scores_900=champ_scores,
+    )
+    print("  ✓ Champion decision plots generated & archived to docs/ml/figures/v1.1.0-woe-scorecard/")
+
+    # Challenger Plots
+    chal_scores = [int(chal_scorecard.calibrate_score(p)[1]) for p in oof_chal]
+    DecisionPlottingEngine.generate_full_manifest(
+        model_version="v1.1.0-gbm-challenger",
+        y_true=y.to_numpy(),
+        y_probs=oof_chal,
+        scores_900=chal_scores,
+        output_dir=chal_dir / "plots",
+        fairness_report=chal_fairness,
+    )
+    DecisionPlottingEngine.generate_and_save_static_plots(
+        model_version="v1.1.0-gbm-challenger",
+        output_dir=root_dir / "docs" / "ml" / "figures" / "v1.1.0-gbm-challenger",
+        y_true=y.to_numpy(),
+        y_probs=oof_chal,
+        scores_900=chal_scores,
+    )
+    print("  ✓ Challenger decision plots generated & archived to docs/ml/figures/v1.1.0-gbm-challenger/")
+
     # 5. Model Promotion
     print("\n[Step 5/5] Promoting Champion Model (v1.1.0-woe-scorecard) to ACTIVE...")
     registry.promote("v1.1.0-woe-scorecard", "validated")

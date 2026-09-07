@@ -381,7 +381,7 @@
       "Champion WoE Scorecard fitted with L1 regularization and isotonic probability calibration"
     ],
     "promotion_status": "active",
-    "trained_at": "2026-09-06T20:45:25.613995+00:00",
+    "trained_at": "2026-09-07T03:03:54.072225+00:00",
     "training_dataset": {
       "available": true,
       "feature_version": "v1.0.0",
@@ -428,7 +428,7 @@
     "training_dataset_hash": "5471615083feac88c576b2aec66a4d0a"
   },
   {
-    "artifact_hash": "8c8fbf54a855c9153cc0ce715ebe7080a8a5b4b7decc8c32e81d916db606a6fd",
+    "artifact_hash": "e9f84c1324736b53dc2e88985fd7f48c84da4c995455ab93a8aa7d996bb52277",
     "artifact_path": "v1.1.0-gbm-challenger/scorecard.json",
     "code_version": null,
     "fairness": {
@@ -596,7 +596,7 @@
       "Challenger Monotonic GBDT fitted with directional constraints and TreeSHAP"
     ],
     "promotion_status": "candidate",
-    "trained_at": "2026-09-06T20:45:25.655787+00:00",
+    "trained_at": "2026-09-07T03:03:54.153809+00:00",
     "training_dataset": {
       "available": true,
       "feature_version": "v1.0.0",

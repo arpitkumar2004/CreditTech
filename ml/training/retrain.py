@@ -11,6 +11,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 
 try:
     from datetime import UTC
@@ -265,6 +266,31 @@ class DPDPRetrainingPipeline:
                 f"Spatial CV: AUC={eval_metrics.auc:.4f}, KS={eval_metrics.ks:.4f}, Brier={eval_metrics.brier:.4f}",
             ],
         )
+
+        # 4. Generate and persist Decision Graphs & Plots Manifest
+        from ml.evaluation.plotting import DecisionPlottingEngine
+        plot_dir = self.registry.store / version_id / "plots"
+        static_dir = Path(__file__).resolve().parents[2] / "docs" / "ml" / "figures" / version_id
+        scores_900 = [int(scorecard.calibrate_score(p)[1]) for p in oof_preds]
+        try:
+            plots_manifest = DecisionPlottingEngine.generate_full_manifest(
+                model_version=version_id,
+                y_true=y_combined,
+                y_probs=oof_preds,
+                scores_900=scores_900,
+                output_dir=plot_dir,
+                fairness_report={"results": fairness_results},
+            )
+            # Mirror to docs/ml/figures/<version_id>
+            DecisionPlottingEngine.generate_and_save_static_plots(
+                model_version=version_id,
+                output_dir=static_dir,
+                y_true=y_combined,
+                y_probs=oof_preds,
+                scores_900=scores_900,
+            )
+        except Exception:
+            plots_manifest = {}
 
         return RetrainingResult(
             status="SUCCESS",

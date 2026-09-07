@@ -12,10 +12,11 @@ import { applications as mockApplications, type Application } from "@/lib/mockDa
 import { formatINR, formatDate } from "@/lib/utils";
 import { isOverride, validateDecisionForm } from "@/lib/decisionLogic";
 import type { OfficerDecision } from "@/lib/types";
-import { decisionApi } from "@/lib/api";
+import { decisionApi, chartsApi } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 import { usePersona, isAllowed } from "@/lib/usePersona";
 import AccessDenied from "@/components/AccessDenied";
+import { NDVITrajectoryPlot } from "@/components/charts";
 
 export default function ApplicationDetail() {
   const persona = usePersona();
@@ -79,6 +80,11 @@ export default function ApplicationDetail() {
     queryKey: ["review", app.score_id],
     queryFn: () => (app.score_id ? decisionApi.getReview(app.score_id).catch(() => null) : Promise.resolve(null)),
     enabled: !!app.score_id,
+  });
+
+  const { data: officerCharts } = useQuery({
+    queryKey: ["officerAppCharts"],
+    queryFn: () => chartsApi.getCharts({ persona: "officer" }).catch(() => null),
   });
 
   const [decision, setDecision] = useState<OfficerDecision | null>(null);
@@ -253,6 +259,12 @@ export default function ApplicationDetail() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* 5b. Geospatial Verification — Sentinel-2 NDVI */}
+      <section className="space-y-3">
+        <p className="section-heading">Geospatial Farm Vigor Verification</p>
+        <NDVITrajectoryPlot data={officerCharts?.ndvi_trajectory} />
       </section>
 
       {/* 6. Actions — decision panel */}

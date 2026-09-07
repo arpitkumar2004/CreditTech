@@ -35,8 +35,14 @@ import {
   applications,
 } from "@/lib/mockData";
 import { formatINR } from "@/lib/utils";
-import { dashboardApi, decisionApi, type DevPersona } from "@/lib/api";
+import { dashboardApi, decisionApi, chartsApi, type DevPersona } from "@/lib/api";
 import { usePersona } from "@/lib/usePersona";
+import {
+  RecourseLadderPlot,
+  CashflowPulsePlot,
+  ScoreZonesPlot,
+  NDVITrajectoryPlot,
+} from "@/components/charts";
 
 export default function Home() {
   const persona = usePersona();
@@ -55,6 +61,11 @@ export default function Home() {
 // ── 1. Borrower Self-Service Portal View ────────────────────────────────────
 
 function BorrowerHome({ persona }: { persona: DevPersona }) {
+  const { data: borrowerCharts } = useQuery({
+    queryKey: ["borrowerCharts", persona.borrowerId],
+    queryFn: () => chartsApi.getCharts({ persona: "borrower", borrowerId: persona.borrowerId }).catch(() => null),
+  });
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <header className="glass rounded-3xl p-6 relative overflow-hidden">
@@ -103,13 +114,13 @@ function BorrowerHome({ persona }: { persona: DevPersona }) {
           <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-2xl bg-white/70 border border-white/80 shadow-sm">
             <div className="text-center sm:text-left">
               <div className="text-4xl font-extrabold text-primary tabular-nums tracking-tight">
-                771 <span className="text-sm font-medium text-muted-foreground">/ 900</span>
+                {borrowerCharts?.borrower_summary?.current_score ?? 771} <span className="text-sm font-medium text-muted-foreground">/ 900</span>
               </div>
               <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wide mt-0.5">
-                Band A · Good (Low Credit Risk)
+                {borrowerCharts?.borrower_summary?.current_band ?? "Band A · Good (Low Credit Risk)"}
               </div>
               <div className="text-[11px] text-muted-foreground mt-1">
-                90% Confidence Interval: [710 – 770]
+                90% Confidence Interval: [{borrowerCharts?.borrower_summary?.confidence_range?.[0] ?? 710} – {borrowerCharts?.borrower_summary?.confidence_range?.[1] ?? 770}]
               </div>
             </div>
 
@@ -178,6 +189,15 @@ function BorrowerHome({ persona }: { persona: DevPersona }) {
           </div>
         </div>
       </div>
+
+      {/* Actionable Recourse Progress Ladder */}
+      <RecourseLadderPlot
+        data={borrowerCharts?.borrower_summary}
+        steps={borrowerCharts?.recourse_ladder}
+      />
+
+      {/* 12-Month Cashflow & Mutual SHG Savings Pulse */}
+      <CashflowPulsePlot data={borrowerCharts?.cashflow_pulse} />
     </div>
   );
 }
@@ -185,6 +205,11 @@ function BorrowerHome({ persona }: { persona: DevPersona }) {
 // ── 2. Bank Sakhi Field Portal View ────────────────────────────────────────
 
 function BankSakhiHome({ persona }: { persona: DevPersona }) {
+  const { data: sakhiCharts } = useQuery({
+    queryKey: ["sakhiCharts"],
+    queryFn: () => chartsApi.getCharts({ persona: "borrower" }).catch(() => null),
+  });
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <header className="glass rounded-3xl p-6">
@@ -243,6 +268,18 @@ function BankSakhiHome({ persona }: { persona: DevPersona }) {
           <p className="text-xs text-muted-foreground">Submit score dispute or appeal on behalf of a SHG borrower.</p>
         </Link>
       </div>
+
+      {/* Field Counseling & Borrower Recourse Telemetry */}
+      <div className="space-y-4 pt-2">
+        <h3 className="text-base font-semibold text-foreground">
+          Assisted Borrower Counseling & Recourse Ladder
+        </h3>
+        <RecourseLadderPlot
+          data={sakhiCharts?.borrower_summary}
+          steps={sakhiCharts?.recourse_ladder}
+        />
+        <CashflowPulsePlot data={sakhiCharts?.cashflow_pulse} />
+      </div>
     </div>
   );
 }
@@ -258,6 +295,11 @@ function StaffHome({ persona }: { persona: DevPersona }) {
   const { data: apiApps } = useQuery({
     queryKey: ["applicationsList"],
     queryFn: () => decisionApi.listApplications().catch(() => null),
+  });
+
+  const { data: officerCharts } = useQuery({
+    queryKey: ["officerCharts"],
+    queryFn: () => chartsApi.getCharts({ persona: "officer" }).catch(() => null),
   });
 
   const recent = apiApps && apiApps.length > 0
@@ -442,6 +484,22 @@ function StaffHome({ persona }: { persona: DevPersona }) {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Underwriter Telemetry: 3-Zone Decision Spectrum & Satellite Vigor */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
+            Underwriter Decision Support & Field Telemetry
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Automated STP approval zones, branch override distribution, and Sentinel-2 multi-spectral crop vigor
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <ScoreZonesPlot data={officerCharts?.score_zones} />
+          <NDVITrajectoryPlot data={officerCharts?.ndvi_trajectory} />
         </div>
       </section>
     </div>

@@ -11,7 +11,7 @@ are pre-promotion states). Only the final `-> active` transition is gated.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,6 +43,7 @@ class PromotionReport:
     fairness_pass: bool
     performance_details: dict[str, Any]
     fairness_details: dict[str, Any]
+    plots_data: dict[str, Any] = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:
@@ -90,6 +91,18 @@ class ModelPromotionService:
         perf_pass, perf_details = _check_performance(rec.metrics)
         gate_result: FairnessGateResult = await self.gate.evaluate()
         fairness_pass = gate_result.passed
+        # Load plots data if manifest exists
+        plots_data: dict[str, Any] = {}
+        store_path = getattr(self.registry, "store", None)
+        if store_path:
+            plots_manifest_file = store_path / model_version / "plots" / "plots_manifest.json"
+            if plots_manifest_file.exists():
+                try:
+                    import json
+                    with open(plots_manifest_file, "r", encoding="utf-8") as f:
+                        plots_data = json.load(f)
+                except Exception:
+                    plots_data = {}
 
         return PromotionReport(
             model_version=model_version,
@@ -98,6 +111,7 @@ class ModelPromotionService:
             fairness_pass=fairness_pass,
             performance_details=perf_details,
             fairness_details=gate_result.to_dict(),
+            plots_data=plots_data,
         )
 
     async def promote_to_active(self, model_version: str) -> PromotionReport:

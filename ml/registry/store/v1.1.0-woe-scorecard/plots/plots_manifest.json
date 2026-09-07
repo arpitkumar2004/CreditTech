@@ -1,0 +1,706 @@
+{
+  "calibration": {
+    "bins": [
+      {
+        "bin_range": "0.0 - 0.1",
+        "count": 5,
+        "decile": 1,
+        "ideal_reference": 0.01,
+        "mean_predicted": 0.01,
+        "observed_rate": 0.4
+      },
+      {
+        "bin_range": "0.1 - 0.2",
+        "count": 36,
+        "decile": 2,
+        "ideal_reference": 0.1799,
+        "mean_predicted": 0.1799,
+        "observed_rate": 0.4167
+      },
+      {
+        "bin_range": "0.2 - 0.3",
+        "count": 46,
+        "decile": 3,
+        "ideal_reference": 0.2473,
+        "mean_predicted": 0.2473,
+        "observed_rate": 0.4783
+      },
+      {
+        "bin_range": "0.3 - 0.4",
+        "count": 33,
+        "decile": 4,
+        "ideal_reference": 0.3586,
+        "mean_predicted": 0.3586,
+        "observed_rate": 0.3939
+      },
+      {
+        "bin_range": "0.4 - 0.5",
+        "count": 67,
+        "decile": 5,
+        "ideal_reference": 0.4541,
+        "mean_predicted": 0.4541,
+        "observed_rate": 0.4776
+      },
+      {
+        "bin_range": "0.5 - 0.6",
+        "count": 223,
+        "decile": 6,
+        "ideal_reference": 0.5628,
+        "mean_predicted": 0.5628,
+        "observed_rate": 0.5964
+      },
+      {
+        "bin_range": "0.6 - 0.7",
+        "count": 651,
+        "decile": 7,
+        "ideal_reference": 0.6742,
+        "mean_predicted": 0.6742,
+        "observed_rate": 0.682
+      },
+      {
+        "bin_range": "0.7 - 0.8",
+        "count": 273,
+        "decile": 8,
+        "ideal_reference": 0.7601,
+        "mean_predicted": 0.7601,
+        "observed_rate": 0.7875
+      },
+      {
+        "bin_range": "0.8 - 0.9",
+        "count": 954,
+        "decile": 9,
+        "ideal_reference": 0.8349,
+        "mean_predicted": 0.8349,
+        "observed_rate": 0.848
+      },
+      {
+        "bin_range": "0.9 - 1.0",
+        "count": 1712,
+        "decile": 10,
+        "ideal_reference": 0.9501,
+        "mean_predicted": 0.9501,
+        "observed_rate": 0.9305
+      }
+    ],
+    "brier_score": 0.1307
+  },
+  "fairness_parity": {
+    "gender_ceiling": 20.0,
+    "gender_max_gap": 0.7,
+    "gender_parity": [
+      {
+        "approval_rate": 95.6,
+        "ceiling_gap": 20.0,
+        "group": "Female (SHG)",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 94.9,
+        "ceiling_gap": 20.0,
+        "group": "Male",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 96.8,
+        "ceiling_gap": 20.0,
+        "group": "Other",
+        "status": "PASS"
+      }
+    ],
+    "landholding_ceiling": 25.0,
+    "landholding_max_gap": 3.6,
+    "landholding_parity": [
+      {
+        "approval_rate": 92.5,
+        "ceiling_gap": 25.0,
+        "group": "Landless",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 96.1,
+        "ceiling_gap": 25.0,
+        "group": "Marginal (<2 ac)",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 95.0,
+        "ceiling_gap": 25.0,
+        "group": "Small (2-5 ac)",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 95.5,
+        "ceiling_gap": 25.0,
+        "group": "Semi-Medium",
+        "status": "PASS"
+      },
+      {
+        "approval_rate": 93.6,
+        "ceiling_gap": 25.0,
+        "group": "Large (>10 ac)",
+        "status": "PASS"
+      }
+    ],
+    "verdict": "PASSED_ALL_GATES"
+  },
+  "gains_lift": [
+    {
+      "cumulative_defaults_pct": 26.2,
+      "decile": 1,
+      "lift": 2.62,
+      "population_pct": 10.0,
+      "random_baseline_pct": 10.0
+    },
+    {
+      "cumulative_defaults_pct": 44.0,
+      "decile": 2,
+      "lift": 2.2,
+      "population_pct": 20.0,
+      "random_baseline_pct": 20.0
+    },
+    {
+      "cumulative_defaults_pct": 59.1,
+      "decile": 3,
+      "lift": 1.97,
+      "population_pct": 30.0,
+      "random_baseline_pct": 30.0
+    },
+    {
+      "cumulative_defaults_pct": 69.1,
+      "decile": 4,
+      "lift": 1.73,
+      "population_pct": 40.0,
+      "random_baseline_pct": 40.0
+    },
+    {
+      "cumulative_defaults_pct": 78.9,
+      "decile": 5,
+      "lift": 1.58,
+      "population_pct": 50.0,
+      "random_baseline_pct": 50.0
+    },
+    {
+      "cumulative_defaults_pct": 85.3,
+      "decile": 6,
+      "lift": 1.42,
+      "population_pct": 60.0,
+      "random_baseline_pct": 60.0
+    },
+    {
+      "cumulative_defaults_pct": 91.8,
+      "decile": 7,
+      "lift": 1.31,
+      "population_pct": 70.0,
+      "random_baseline_pct": 70.0
+    },
+    {
+      "cumulative_defaults_pct": 95.0,
+      "decile": 8,
+      "lift": 1.19,
+      "population_pct": 80.0,
+      "random_baseline_pct": 80.0
+    },
+    {
+      "cumulative_defaults_pct": 98.5,
+      "decile": 9,
+      "lift": 1.09,
+      "population_pct": 90.0,
+      "random_baseline_pct": 90.0
+    },
+    {
+      "cumulative_defaults_pct": 100.0,
+      "decile": 10,
+      "lift": 1.0,
+      "population_pct": 100.0,
+      "random_baseline_pct": 100.0
+    }
+  ],
+  "ks_separation": {
+    "curve": [
+      {
+        "cum_bads_pct": 0.0,
+        "cum_goods_pct": 0.0,
+        "ks_gap": 0.0,
+        "score": 300
+      },
+      {
+        "cum_bads_pct": 0.0,
+        "cum_goods_pct": 0.0,
+        "ks_gap": 0.0,
+        "score": 325
+      },
+      {
+        "cum_bads_pct": 0.0,
+        "cum_goods_pct": 0.0,
+        "ks_gap": 0.0,
+        "score": 350
+      },
+      {
+        "cum_bads_pct": 0.4,
+        "cum_goods_pct": 0.1,
+        "ks_gap": 0.0035,
+        "score": 375
+      },
+      {
+        "cum_bads_pct": 0.4,
+        "cum_goods_pct": 0.1,
+        "ks_gap": 0.0035,
+        "score": 400
+      },
+      {
+        "cum_bads_pct": 0.4,
+        "cum_goods_pct": 0.1,
+        "ks_gap": 0.0035,
+        "score": 425
+      },
+      {
+        "cum_bads_pct": 4.8,
+        "cum_goods_pct": 0.6,
+        "ks_gap": 0.0424,
+        "score": 450
+      },
+      {
+        "cum_bads_pct": 10.1,
+        "cum_goods_pct": 1.7,
+        "ks_gap": 0.0837,
+        "score": 475
+      },
+      {
+        "cum_bads_pct": 29.5,
+        "cum_goods_pct": 7.0,
+        "ks_gap": 0.2248,
+        "score": 500
+      },
+      {
+        "cum_bads_pct": 63.3,
+        "cum_goods_pct": 26.6,
+        "ks_gap": 0.3666,
+        "score": 525
+      },
+      {
+        "cum_bads_pct": 86.7,
+        "cum_goods_pct": 56.8,
+        "ks_gap": 0.299,
+        "score": 550
+      },
+      {
+        "cum_bads_pct": 96.4,
+        "cum_goods_pct": 79.4,
+        "ks_gap": 0.1699,
+        "score": 575
+      },
+      {
+        "cum_bads_pct": 98.9,
+        "cum_goods_pct": 91.4,
+        "ks_gap": 0.0753,
+        "score": 600
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 625
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 650
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 675
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 700
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 725
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 750
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 775
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 800
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 825
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 850
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 875
+      },
+      {
+        "cum_bads_pct": 100.0,
+        "cum_goods_pct": 100.0,
+        "ks_gap": 0.0,
+        "score": 900
+      }
+    ],
+    "max_ks": 0.3666,
+    "optimal_cutoff": 525
+  },
+  "model_version": "v1.1.0-woe-scorecard",
+  "roc_auc": {
+    "auc": 0.7473,
+    "gini": 0.4945,
+    "points": [
+      {
+        "fpr": 0.0,
+        "threshold": Infinity,
+        "tpr": 0.0
+      },
+      {
+        "fpr": 0.0125,
+        "threshold": 0.973,
+        "tpr": 0.1022
+      },
+      {
+        "fpr": 0.0222,
+        "threshold": 0.9702,
+        "tpr": 0.1428
+      },
+      {
+        "fpr": 0.0305,
+        "threshold": 0.9655,
+        "tpr": 0.1836
+      },
+      {
+        "fpr": 0.036,
+        "threshold": 0.9615,
+        "tpr": 0.2056
+      },
+      {
+        "fpr": 0.0374,
+        "threshold": 0.9538,
+        "tpr": 0.2062
+      },
+      {
+        "fpr": 0.0416,
+        "threshold": 0.9524,
+        "tpr": 0.2135
+      },
+      {
+        "fpr": 0.0679,
+        "threshold": 0.9503,
+        "tpr": 0.2892
+      },
+      {
+        "fpr": 0.0817,
+        "threshold": 0.9487,
+        "tpr": 0.3514
+      },
+      {
+        "fpr": 0.0997,
+        "threshold": 0.928,
+        "tpr": 0.3822
+      },
+      {
+        "fpr": 0.1011,
+        "threshold": 0.9198,
+        "tpr": 0.3826
+      },
+      {
+        "fpr": 0.1136,
+        "threshold": 0.9106,
+        "tpr": 0.4076
+      },
+      {
+        "fpr": 0.115,
+        "threshold": 0.9075,
+        "tpr": 0.4112
+      },
+      {
+        "fpr": 0.133,
+        "threshold": 0.9065,
+        "tpr": 0.432
+      },
+      {
+        "fpr": 0.1648,
+        "threshold": 0.8985,
+        "tpr": 0.4863
+      },
+      {
+        "fpr": 0.1759,
+        "threshold": 0.8833,
+        "tpr": 0.5082
+      },
+      {
+        "fpr": 0.1911,
+        "threshold": 0.8814,
+        "tpr": 0.5311
+      },
+      {
+        "fpr": 0.205,
+        "threshold": 0.8687,
+        "tpr": 0.5558
+      },
+      {
+        "fpr": 0.2064,
+        "threshold": 0.851,
+        "tpr": 0.5564
+      },
+      {
+        "fpr": 0.2188,
+        "threshold": 0.8344,
+        "tpr": 0.5735
+      },
+      {
+        "fpr": 0.2715,
+        "threshold": 0.8208,
+        "tpr": 0.6422
+      },
+      {
+        "fpr": 0.3407,
+        "threshold": 0.8023,
+        "tpr": 0.7032
+      },
+      {
+        "fpr": 0.3643,
+        "threshold": 0.8003,
+        "tpr": 0.7294
+      },
+      {
+        "fpr": 0.3657,
+        "threshold": 0.8,
+        "tpr": 0.7328
+      },
+      {
+        "fpr": 0.367,
+        "threshold": 0.7972,
+        "tpr": 0.7331
+      },
+      {
+        "fpr": 0.3712,
+        "threshold": 0.7708,
+        "tpr": 0.737
+      },
+      {
+        "fpr": 0.4391,
+        "threshold": 0.7623,
+        "tpr": 0.7913
+      },
+      {
+        "fpr": 0.446,
+        "threshold": 0.7082,
+        "tpr": 0.7974
+      },
+      {
+        "fpr": 0.5014,
+        "threshold": 0.7,
+        "tpr": 0.8228
+      },
+      {
+        "fpr": 0.5762,
+        "threshold": 0.6914,
+        "tpr": 0.8655
+      },
+      {
+        "fpr": 0.6011,
+        "threshold": 0.6809,
+        "tpr": 0.8764
+      },
+      {
+        "fpr": 0.6025,
+        "threshold": 0.6727,
+        "tpr": 0.8768
+      },
+      {
+        "fpr": 0.6122,
+        "threshold": 0.6605,
+        "tpr": 0.8871
+      },
+      {
+        "fpr": 0.6759,
+        "threshold": 0.6571,
+        "tpr": 0.9167
+      },
+      {
+        "fpr": 0.6911,
+        "threshold": 0.641,
+        "tpr": 0.9256
+      },
+      {
+        "fpr": 0.705,
+        "threshold": 0.6083,
+        "tpr": 0.9301
+      },
+      {
+        "fpr": 0.7341,
+        "threshold": 0.5881,
+        "tpr": 0.9338
+      },
+      {
+        "fpr": 0.7825,
+        "threshold": 0.5833,
+        "tpr": 0.9521
+      },
+      {
+        "fpr": 0.8019,
+        "threshold": 0.5714,
+        "tpr": 0.9549
+      },
+      {
+        "fpr": 0.8033,
+        "threshold": 0.5588,
+        "tpr": 0.9552
+      },
+      {
+        "fpr": 0.8809,
+        "threshold": 0.4857,
+        "tpr": 0.9805
+      },
+      {
+        "fpr": 0.8989,
+        "threshold": 0.4166,
+        "tpr": 0.9826
+      },
+      {
+        "fpr": 0.9197,
+        "threshold": 0.381,
+        "tpr": 0.9866
+      },
+      {
+        "fpr": 0.9294,
+        "threshold": 0.3333,
+        "tpr": 0.9878
+      },
+      {
+        "fpr": 0.9321,
+        "threshold": 0.3099,
+        "tpr": 0.9881
+      },
+      {
+        "fpr": 0.9391,
+        "threshold": 0.3,
+        "tpr": 0.9902
+      },
+      {
+        "fpr": 0.946,
+        "threshold": 0.25,
+        "tpr": 0.993
+      },
+      {
+        "fpr": 0.9543,
+        "threshold": 0.2043,
+        "tpr": 0.9939
+      },
+      {
+        "fpr": 0.9903,
+        "threshold": 0.1818,
+        "tpr": 0.9991
+      },
+      {
+        "fpr": 1.0,
+        "threshold": 0.01,
+        "tpr": 1.0
+      }
+    ]
+  },
+  "score_distribution": {
+    "histogram": [
+      {
+        "count": 55,
+        "percentage": 1.4,
+        "range": "300-450",
+        "zone": "REJECT"
+      },
+      {
+        "count": 388,
+        "percentage": 9.7,
+        "range": "450-500",
+        "zone": "REJECT"
+      },
+      {
+        "count": 1844,
+        "percentage": 46.1,
+        "range": "500-550",
+        "zone": "REJECT"
+      },
+      {
+        "count": 1422,
+        "percentage": 35.5,
+        "range": "550-600",
+        "zone": "REVIEW"
+      },
+      {
+        "count": 291,
+        "percentage": 7.3,
+        "range": "600-650",
+        "zone": "REVIEW"
+      },
+      {
+        "count": 0,
+        "percentage": 0.0,
+        "range": "650-700",
+        "zone": "APPROVE"
+      },
+      {
+        "count": 0,
+        "percentage": 0.0,
+        "range": "700-750",
+        "zone": "APPROVE"
+      },
+      {
+        "count": 0,
+        "percentage": 0.0,
+        "range": "750-800",
+        "zone": "APPROVE"
+      },
+      {
+        "count": 0,
+        "percentage": 0.0,
+        "range": "800-850",
+        "zone": "APPROVE"
+      },
+      {
+        "count": 0,
+        "percentage": 0.0,
+        "range": "850-900",
+        "zone": "APPROVE"
+      }
+    ],
+    "zones_summary": {
+      "approve_stp_pct": 0.0,
+      "reject_actionable_pct": 57.2,
+      "review_manual_pct": 42.8
+    }
+  },
+  "static_images": {
+    "calibration_curve": "calibration_curve.png",
+    "ks_separation": "ks_separation.png",
+    "roc_curve": "roc_curve.png",
+    "score_distribution": "score_distribution.png"
+  }
+}

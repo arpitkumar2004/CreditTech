@@ -1,17 +1,25 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download } from "lucide-react";
+import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download, BarChart3 } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
 import { LoadingState } from "@/components/ui/loading";
 import { EmptyState } from "@/components/ui/empty";
 import { models as mockModels } from "@/lib/mockData";
 import { formatDate } from "@/lib/utils";
-import { adminApi } from "@/lib/api";
+import { adminApi, chartsApi } from "@/lib/api";
 
 import { usePersona, isAllowed } from "@/lib/usePersona";
 import AccessDenied from "@/components/AccessDenied";
 import { Lock, Play } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import {
+  ROCPlot,
+  KSPlot,
+  CalibrationPlot,
+  ScoreZonesPlot,
+  FairnessParityPlot,
+  DriftRadarPlot,
+} from "@/components/charts";
 
 export default function ModelRegistry() {
   const persona = usePersona();
@@ -52,27 +60,34 @@ export default function ModelRegistry() {
   const sourceModels = useMemo(() => {
     if (apiModels && apiModels.length > 0) {
       return apiModels.map((m: any) => ({
-        version: m.model_version,
-        type: m.model_type,
-        status: m.promotion_status as any,
-        auc: m.metrics?.auc ?? 0.783,
-        gini: m.metrics?.gini ?? 0.565,
-        ks: m.metrics?.ks ?? 0.442,
-        brier: m.metrics?.brier ?? 0.189,
+        version: m.model_version || m.version,
+        type: m.model_type || m.type || "Scorecard",
+        status: (m.promotion_status || m.status || "candidate") as any,
+        auc: typeof m.metrics?.auc === "number" ? m.metrics.auc : typeof m.auc === "number" ? m.auc : 0.783,
+        gini: typeof m.metrics?.gini === "number" ? m.metrics.gini : typeof m.gini === "number" ? m.gini : 0.565,
+        ks: typeof m.metrics?.ks === "number" ? m.metrics.ks : typeof m.ks === "number" ? m.ks : 0.442,
+        brier: typeof m.metrics?.brier === "number" ? m.metrics.brier : typeof m.brier === "number" ? m.brier : 0.189,
         fairness: "PASS" as const,
         fairness_gate: "PASSED" as const,
         trained_at: m.trained_at,
         dataset: "Synthetic SHG Pilot Cohort",
         dataset_kind: "synthetic" as const,
-        n_train: 2400,
-        n_val: 600,
+        n_train: m.metrics?.n_train ?? 2400,
+        n_val: m.metrics?.n_val ?? 600,
         features: 21,
       }));
     }
     return mockModels;
   }, [apiModels]);
 
-  const champion = sourceModels.find((m: any) => m.status === "active") ?? sourceModels[0];
+  const champion = sourceModels?.find((m: any) => m.status === "active") ?? sourceModels?.[0] ?? mockModels[0];
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const activeModelVersion = selectedModel || champion?.version || "v1.1.0-woe-scorecard";
+
+  const { data: chartData } = useQuery({
+    queryKey: ["modelCharts", activeModelVersion],
+    queryFn: () => chartsApi.getCharts({ persona: "admin", modelVersion: activeModelVersion }).catch(() => null),
+  });
 
   return (
     <div className="space-y-6">
@@ -96,16 +111,68 @@ export default function ModelRegistry() {
             </span>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Champion</p>
-              <p className="text-lg font-semibold display">{champion.version}</p>
-              <p className="text-sm text-muted-foreground">{champion.type} · 5-Cs · exact Shapley explainer</p>
+              <p className="text-lg font-semibold display">{champion?.version || "v1.1.0-woe-scorecard"}</p>
+              <p className="text-sm text-muted-foreground">{champion?.type || "Scorecard"} · 5-Cs · exact Shapley explainer</p>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-4 md:ml-auto md:min-w-[420px]">
-            <Metric label="AUC" value={champion.auc.toFixed(3)} />
-            <Metric label="Gini" value={champion.gini.toFixed(3)} />
-            <Metric label="KS" value={champion.ks.toFixed(3)} />
-            <Metric label="Brier" value={champion.brier.toFixed(3)} />
+            <Metric label="AUC" value={typeof champion?.auc === "number" ? champion.auc.toFixed(3) : "—"} />
+            <Metric label="Gini" value={typeof champion?.gini === "number" ? champion.gini.toFixed(3) : "—"} />
+            <Metric label="KS" value={typeof champion?.ks === "number" ? champion.ks.toFixed(3) : "—"} />
+            <Metric label="Brier" value={typeof champion?.brier === "number" ? champion.brier.toFixed(3) : "—"} />
           </div>
+        </div>
+      </section>
+
+      {/* Visual Model Governance & Decision Graphs Dossier */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-sky-500" />
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                Decision Graphs & Model Validation Dossier
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Live mathematical decision telemetry · Basel II/III Model Risk Management (MRM) compliance suite
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-medium">Evaluating Model:</span>
+            <select
+              value={activeModelVersion}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-mono font-medium text-slate-800 shadow-sm hover:border-slate-300 focus:border-blue-500 focus:outline-none"
+            >
+              {sourceModels.map((m: any) => (
+                <option key={m.version} value={m.version}>
+                  {m.version} ({m.status.toUpperCase()})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* 6 Key Decision Graphs */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {/* Pillar 1: ROC Curve */}
+          <ROCPlot data={chartData?.roc_curve} />
+
+          {/* Pillar 2: KS Separation */}
+          <KSPlot data={chartData?.ks_separation} />
+
+          {/* Pillar 3: Score Calibration */}
+          <CalibrationPlot data={chartData?.calibration} />
+
+          {/* Pillar 4: 3-Zone Decision Spectrum */}
+          <ScoreZonesPlot data={chartData?.score_distribution} />
+
+          {/* Pillar 5: Statutory Fairness Parity */}
+          <FairnessParityPlot data={chartData?.fairness_parity} />
+
+          {/* Pillar 6: Population & Characteristic Drift Radar */}
+          <DriftRadarPlot data={chartData?.drift_radar} />
         </div>
       </section>
 
@@ -148,10 +215,10 @@ export default function ModelRegistry() {
                     </td>
                     <td className="text-xs">{m.type}</td>
                     <td><StatusBadge status={m.status} /></td>
-                    <td className="tabular font-medium">{m.auc.toFixed(3)}</td>
-                    <td className="tabular">{m.gini.toFixed(3)}</td>
-                    <td className="tabular">{m.ks.toFixed(3)}</td>
-                    <td className="tabular">{m.brier.toFixed(3)}</td>
+                    <td className="tabular font-medium">{typeof m.auc === "number" ? m.auc.toFixed(3) : "—"}</td>
+                    <td className="tabular">{typeof m.gini === "number" ? m.gini.toFixed(3) : "—"}</td>
+                    <td className="tabular">{typeof m.ks === "number" ? m.ks.toFixed(3) : "—"}</td>
+                    <td className="tabular">{typeof m.brier === "number" ? m.brier.toFixed(3) : "—"}</td>
                     <td>
                       {m.fairness_gate === "PASSED"
                         ? <Badge tone="success"><Dot tone="success" /> passed</Badge>

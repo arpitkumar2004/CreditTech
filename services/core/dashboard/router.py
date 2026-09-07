@@ -30,6 +30,20 @@ async def portfolio(
     return await DashboardService(db).portfolio_metrics()
 
 
+@router.get("/charts", summary="Persona-tailored decision graphs and charts")
+async def dashboard_charts(
+    persona: str = Query(default="admin", description="Target persona: admin, officer, or borrower"),
+    model_version: str | None = Query(default=None, description="Optional model version filter"),
+    borrower_id: uuid.UUID | None = Query(default=None, description="Optional borrower UUID"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    return await DashboardService(db).get_persona_charts(
+        persona=persona,
+        borrower_id=borrower_id,
+        model_version=model_version,
+    )
+
+
 @router.get("/fairness", summary="Latest fairness audit rows")
 async def fairness(
     period: str | None = Query(default=None),

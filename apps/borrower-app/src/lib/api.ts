@@ -475,3 +475,22 @@ export const handoffApi = {
   },
 };
 
+// ── Persona Decision Charts & Validation Dossier ─────────
+export interface PersonaChartsParams {
+  persona?: "admin" | "officer" | "borrower" | "risk_officer" | "bank_sakhi";
+  modelVersion?: string;
+  borrowerId?: string;
+}
+
+export const chartsApi = {
+  getCharts: (params?: PersonaChartsParams) => {
+    const q = new URLSearchParams();
+    if (params?.persona) q.set("persona", params.persona);
+    if (params?.modelVersion) q.set("model_version", params.modelVersion);
+    if (params?.borrowerId) q.set("borrower_id", params.borrowerId);
+    const qs = q.toString();
+    return request<any>(`/dashboard/charts${qs ? `?${qs}` : ""}`);
+  },
+};
+
+

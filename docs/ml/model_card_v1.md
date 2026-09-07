@@ -1,5 +1,5 @@
 # Model Card: CreditTech Alternative Credit Scoring Suite (v1.1.0)
-**Date:** 2026-09-06  
+**Date:** 2026-09-07  
 **Model Family:** Champion (WoE Scorecard) vs. Challenger (Monotonic GBDT)  
 **Standard:** Mitchell et al. (2019) · Basel II/III Model Risk Management · RBI DLG  
 

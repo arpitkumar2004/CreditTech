@@ -29,7 +29,7 @@ import pandas as pd
 
 from ml.features.schema import FEATURE_VERSION, MODEL_FEATURE_NAMES
 from ml.registry.registry import ModelRegistry
-from ml.training.datasets import SyntheticSHGGenerator
+from ml.training.datasets import SyntheticSHGGenerator, UnifiedBenchmarkLoader
 from ml.training.gbm_challenger import GBMScorecardTrainer
 from ml.training.validation import SpatialGroupValidator, evaluate_predictions
 from ml.training.woe_scorecard import WoEScorecardTrainer
@@ -81,10 +81,11 @@ def train_and_register_all():
     print(" CREDITTECH - PRODUCTION MODEL TRAINING & GOVERNANCE PROMOTION ")
     print("=" * 72)
 
-    # 1. Generate Spatial Benchmark Cohort
-    print("\n[Step 1/5] Generating spatial benchmark cohort (15 villages, 3 agro-climatic zones)...")
-    generator = SyntheticSHGGenerator(n=4000, seed=42, n_villages=15, target_default_rate=0.10)
-    X, y, sensitive, dataset_info = generator.generate()
+    # 1. Ingest Unified Benchmark Cohort (Kaggle Home Credit + Rural Domain)
+    print("\n[Step 1/5] Ingesting unified benchmark cohort (Kaggle Home Credit + Rural Domain, 15 villages)...")
+    benchmark_loader = UnifiedBenchmarkLoader(seed=42)
+    X, y, sensitive, dataset_info = benchmark_loader.load_fused_dataset(n_samples=5000)
+    print(f"  • Source: {dataset_info.source} (kind: {dataset_info.kind})")
     print(f"  • Borrowers: {len(X):,} | Target Default Rate: {np.mean(y == 0)*100:.1f}%")
 
     # 2. Spatial GroupKFold Cross-Validation
@@ -113,9 +114,17 @@ def train_and_register_all():
     print("\n[Step 3/5] Fitting final models and applying Isotonic Probability Calibration...")
     champ_trainer = WoEScorecardTrainer(model_version="v1.1.0-woe-scorecard", min_iv=0.015, c_penalty=0.2, random_state=42)
     champ_scorecard, champ_report = champ_trainer.fit(X, y)
+    champ_report.auc = float(metrics_champ_cv.auc)
+    champ_report.gini = float(metrics_champ_cv.gini)
+    champ_report.ks = float(metrics_champ_cv.ks)
+    champ_report.brier = float(metrics_champ_cv.brier)
 
     chal_trainer = GBMScorecardTrainer(model_version="v1.1.0-gbm-challenger", max_iter=100, learning_rate=0.05, random_state=42)
     chal_scorecard, chal_report = chal_trainer.fit(X, y)
+    chal_report.auc = float(metrics_chal_cv.auc)
+    chal_report.gini = float(metrics_chal_cv.gini)
+    chal_report.ks = float(metrics_chal_cv.ks)
+    chal_report.brier = float(metrics_chal_cv.brier)
 
     champ_fairness = compute_fairness_snapshot(oof_champ, sensitive)
     chal_fairness = compute_fairness_snapshot(oof_chal, sensitive)

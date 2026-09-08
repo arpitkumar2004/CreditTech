@@ -27,17 +27,22 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; ring: string }> = 
 
 const PERSONA_GROUPS = [
   {
-    title: "Cluster Alpha (Chandauli - Irrigated)",
-    icon: Building2,
-    keys: ["OFFICER_RAJESH", "SAKHI_SUNITA", "BORROWER_RADHIKA"],
+    title: "Borrower Personas (Self-Service & Loan Status)",
+    icon: Users,
+    keys: ["BORROWER_RADHIKA", "BORROWER_SITA", "BORROWER_RAMU", "BORROWER_MEENA"],
   },
   {
-    title: "Cluster Beta (Mirzapur - Rain-fed)",
+    title: "Bank Sakhi Field Network (Assisted Onboarding)",
     icon: Wheat,
-    keys: ["OFFICER_VIKRAM"],
+    keys: ["SAKHI_SUNITA", "SAKHI_MANJU"],
   },
   {
-    title: "Governance & Systems",
+    title: "Loan Officers (Branch Underwriting & Overrides)",
+    icon: Building2,
+    keys: ["OFFICER_RAJESH", "OFFICER_VIKRAM"],
+  },
+  {
+    title: "Governance & Systems (Audits, Parity & MLOps)",
     icon: Cpu,
     keys: ["RISK_PRIYA", "ADMIN_AMIT"],
   },

@@ -127,14 +127,23 @@ function BorrowerHome({ persona }: { persona: DevPersona }) {
             <div className="h-12 w-px bg-slate-200 hidden sm:block" />
 
             <div className="space-y-1.5 text-xs text-muted-foreground flex-1">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span><strong>Consistently active SHG group savings:</strong> 98% on-time repayment</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span><strong>Canal-irrigated farmland:</strong> High vegetative vigor index (NDVI: 0.68)</span>
-              </div>
+              {borrowerCharts?.top_strengths?.slice(0, 2).map((s: any, idx: number) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span><strong>{s.title_en}:</strong> {s.desc_en}</span>
+                </div>
+              )) ?? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span><strong>Consistently active SHG group savings:</strong> 98% on-time repayment</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span><strong>Canal-irrigated farmland:</strong> High vegetative vigor index (NDVI: 0.68)</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -151,43 +160,62 @@ function BorrowerHome({ persona }: { persona: DevPersona }) {
           </div>
         </div>
 
-        {/* Loan Application Status */}
-        <div className="glass rounded-3xl p-6 space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                Application Status
-              </span>
-              <Badge tone="success">APPROVED</Badge>
-            </div>
+        {/* Dynamic Loan Application Status */}
+        {(() => {
+          const loanApp = borrowerCharts?.loan_application;
+          const status = loanApp?.status ?? "APPROVED";
+          const statusTone =
+            status === "APPROVED" ? "success"
+            : status === "REJECTED" ? "danger"
+            : "warning";
+          const amount = loanApp?.approved_amount ?? loanApp?.requested_amount ?? 50000;
+          const tenure = loanApp?.requested_tenure_months ?? 12;
+          const purpose = loanApp?.purpose ?? "Irrigation equipment & organic seeds";
+          const partner = loanApp?.partner_re_id ?? "State Bank of India (RE-SBI-01)";
 
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-foreground">
-                ₹50,000
+          return (
+            <div className="glass rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Application Status
+                  </span>
+                  <Badge tone={statusTone}>{status}</Badge>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-foreground">
+                    ₹{Number(amount).toLocaleString("en-IN")}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {tenure} Months Tenure · {status === "APPROVED" ? "10.5% p.a." : "Under Review"}
+                  </div>
+                </div>
+
+                <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-slate-200/50">
+                  <div><strong>Purpose:</strong> {String(purpose).replace(/_/g, " ")}</div>
+                  <div><strong>Partner RE:</strong> {partner}</div>
+                  {loanApp?.override_reason && (
+                    <div className="text-amber-700 bg-amber-50 p-2 rounded-lg mt-1 text-[11px]">
+                      <strong>Note:</strong> {loanApp.override_reason}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                12 Months Tenure · 10.5% p.a.
+
+              <div className="space-y-2 pt-4">
+                <Link to="/consent" className="pill w-full justify-center text-xs">
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
+                  View Consent Chain
+                </Link>
+                <Link to="/grievances?tab=file" className="pill-ghost w-full justify-center text-xs">
+                  <HelpCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Dispute / File Appeal
+                </Link>
               </div>
             </div>
-
-            <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-slate-200/50">
-              <div><strong>Purpose:</strong> Irrigation equipment & organic seeds</div>
-              <div><strong>Partner RE:</strong> State Bank of India (RE-SBI-01)</div>
-              <div><strong>Underwriter:</strong> Rajesh Kumar (OFF-001)</div>
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-4">
-            <Link to="/consent" className="pill w-full justify-center text-xs">
-              <FileText className="h-3.5 w-3.5 mr-1.5" />
-              View Consent Chain
-            </Link>
-            <Link to="/grievances?tab=file" className="pill-ghost w-full justify-center text-xs">
-              <HelpCircle className="h-3.5 w-3.5 mr-1.5" />
-              Dispute / File Appeal
-            </Link>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
       {/* Actionable Recourse Progress Ladder */}

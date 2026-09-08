@@ -17,12 +17,14 @@ from services.core.scoring.service import ScoringService
 from services.core.shared.models import (
     Borrower,
     FairnessAuditLog,
+    FeatureSnapshot,
     Grievance,
     LoanApplication,
     OfficerDecisionLog,
     Score,
     Village,
 )
+from services.core.shared.scoring_utils import clean_borrower_name, normalize_score
 
 
 class DashboardError(Exception):
@@ -450,16 +452,14 @@ class DashboardService:
             )
             sc = r.scalar_one_or_none()
             if sc:
-                svc = ScoringService(self.db, model_version=sc.model_version)
-                _, score_900 = svc.scorecard.calibrate_score(sc.score / 100.0)
-                band = ScoringService.get_score_band(sc.score)
+                norm = normalize_score(sc.score, sc.confidence_lower, sc.confidence_upper)
                 borrower_profile = {
                     "borrower_id": str(borrower_id),
-                    "score_100": sc.score,
-                    "score_900": score_900,
-                    "band": band,
-                    "confidence_lower": sc.confidence_lower,
-                    "confidence_upper": sc.confidence_upper,
+                    "score_100": norm["score_100"],
+                    "score_900": norm["score_900"],
+                    "band": norm["band"],
+                    "confidence_lower": norm["confidence_lower_900"],
+                    "confidence_upper": norm["confidence_upper_900"],
                     "reason_codes": [
                         {
                             "code": rc.code,
@@ -510,99 +510,197 @@ class DashboardService:
 
     async def _get_borrower_charts(self, borrower_id: uuid.UUID | None = None) -> dict:
         current_score_900 = 582
+        current_score_100 = 47.0
         current_band = "MODERATE"
         confidence_range = [554, 610]
+        borrower_name = "Rural Borrower"
+        loan_application_data = None
+        top_strengths = [
+            {
+                "icon": "shield-check",
+                "title_en": "Zero SHG Default History",
+                "title_hi": "एसएचजी ऋण पर शून्य डिफ़ॉल्ट रिकॉर्ड",
+                "desc_en": "36 straight months of on-time mutual contribution and peer validation.",
+                "desc_hi": "36 महीनों से लगातार समय पर योगदान और समूह सत्यापन।",
+            },
+            {
+                "icon": "sprout",
+                "title_en": "Robust Crop Vigor Profile",
+                "title_hi": "सक्रिय फसल स्वास्थ्य और उपग्रह सत्यापन",
+                "desc_en": "Sentinel-2 satellite confirms healthy NDVI index across both Kharif and Rabi.",
+                "desc_hi": "सेंटिनल-2 उपग्रह खरीफ और रबी दोनों में स्वस्थ फसल स्वास्थ्य की पुष्टि करता है।",
+            },
+            {
+                "icon": "zap",
+                "title_en": "Prompt Electricity Utility Rail",
+                "title_hi": "समय पर बिजली बिल भुगतान",
+                "desc_en": "Consistently paid electricity dues within the bill cycle for 12 months.",
+                "desc_hi": "पिछले 12 महीनों में बिल चक्र के भीतर बिजली बिलों का निरंतर भुगतान।",
+            },
+        ]
+        recourse_ladder = [
+            {
+                "step": 1,
+                "title_en": "3 Consecutive On-Time SHG Meetings",
+                "title_hi": "लगातार 3 स्वयं सहायता समूह बैठकों में समय पर उपस्थिति",
+                "points": 25,
+                "status": "COMPLETED",
+                "estimated_days": 30,
+                "action_desc": "Attend weekly meetings and deposit monthly savings into SHG account on time.",
+            },
+            {
+                "step": 2,
+                "title_en": "Pay Electricity Bill within 7 Days of Generation",
+                "title_hi": "बिजली बिल जारी होने के 7 दिनों के भीतर भुगतान करें",
+                "points": 35,
+                "status": "IN_PROGRESS",
+                "estimated_days": 45,
+                "action_desc": "Demonstrates consistent household utility discipline without overdue notices.",
+            },
+            {
+                "step": 3,
+                "title_en": "Record 2 Harvest Crop Sales Digitally via e-NAM / Sakhi",
+                "title_hi": "ई-नाम या बैंक सखी के माध्यम से 2 फसल बिक्री डिजिटल दर्ज करें",
+                "points": 40,
+                "status": "NEXT",
+                "estimated_days": 90,
+                "action_desc": "Builds verified agri-cashflow history replacing informal cash receipts.",
+            },
+        ]
+        cashflow_pulse = [
+            {"month": "M-11", "shg_savings": 500, "inflow": 8200, "outflow": 6100, "net_savings": 2100, "on_time": True},
+            {"month": "M-10", "shg_savings": 500, "inflow": 7900, "outflow": 5800, "net_savings": 2100, "on_time": True},
+            {"month": "M-9", "shg_savings": 500, "inflow": 8400, "outflow": 6000, "net_savings": 2400, "on_time": True},
+            {"month": "M-8", "shg_savings": 500, "inflow": 12500, "outflow": 7200, "net_savings": 5300, "on_time": True},
+            {"month": "M-7", "shg_savings": 500, "inflow": 9100, "outflow": 6400, "net_savings": 2700, "on_time": True},
+            {"month": "M-6", "shg_savings": 500, "inflow": 8300, "outflow": 6100, "net_savings": 2200, "on_time": True},
+            {"month": "M-5", "shg_savings": 500, "inflow": 7800, "outflow": 5900, "net_savings": 1900, "on_time": True},
+            {"month": "M-4", "shg_savings": 500, "inflow": 8100, "outflow": 6000, "net_savings": 2100, "on_time": True},
+            {"month": "M-3", "shg_savings": 500, "inflow": 14200, "outflow": 8100, "net_savings": 6100, "on_time": True},
+            {"month": "M-2", "shg_savings": 500, "inflow": 8800, "outflow": 6300, "net_savings": 2500, "on_time": True},
+            {"month": "M-1", "shg_savings": 500, "inflow": 8500, "outflow": 6200, "net_savings": 2300, "on_time": True},
+            {"month": "Current", "shg_savings": 500, "inflow": 8600, "outflow": 6100, "net_savings": 2500, "on_time": True},
+        ]
 
         if borrower_id:
+            # 1. Fetch Borrower Name
+            b_res = await self.db.execute(
+                select(Borrower).where(Borrower.id == borrower_id)
+            )
+            borrower_obj = b_res.scalar_one_or_none()
+            if borrower_obj:
+                borrower_name = clean_borrower_name(borrower_obj.name_encrypted, borrower_id)
+
+            # 2. Fetch Score & Reason Codes
             r = await self.db.execute(
-                select(Score).where(Score.borrower_id == borrower_id)
+                select(Score).options(selectinload(Score.reason_codes))
+                .where(Score.borrower_id == borrower_id)
                 .order_by(Score.generated_at.desc()).limit(1)
             )
             sc = r.scalar_one_or_none()
             if sc:
-                svc = ScoringService(self.db, model_version=sc.model_version)
-                _, s900 = svc.scorecard.calibrate_score(sc.score / 100.0)
-                current_score_900 = s900
-                current_band = ScoringService.get_score_band(sc.score)
-                _, c_low = svc.scorecard.calibrate_score(sc.confidence_lower / 100.0)
-                _, c_high = svc.scorecard.calibrate_score(sc.confidence_upper / 100.0)
-                confidence_range = [c_low, c_high]
+                norm = normalize_score(sc.score, sc.confidence_lower, sc.confidence_upper)
+                current_score_900 = norm["score_900"]
+                current_score_100 = norm["score_100"]
+                current_band = norm["band"]
+                confidence_range = norm["confidence_range_900"]
+
+                # Extract real dynamic strengths and recourse
+                dynamic_strengths = []
+                dynamic_recourse = []
+                for rc in sorted(sc.reason_codes, key=lambda x: x.rank):
+                    feat_upper = rc.feature_name.upper()
+                    if rc.direction == "POSITIVE":
+                        icon = "shield-check" if "SHG" in feat_upper else ("sprout" if "NDVI" in feat_upper else "zap")
+                        dynamic_strengths.append({
+                            "icon": icon,
+                            "title_en": rc.localized_text_en,
+                            "title_hi": rc.localized_text_hi or rc.localized_text_en,
+                            "desc_en": f"Verified strength derived from alternative data rail ({rc.feature_name}).",
+                            "desc_hi": f"वैकल्पिक डेटा रेल ({rc.feature_name}) से प्राप्त सत्यापित शक्ति।",
+                        })
+                    else:
+                        dynamic_recourse.append({
+                            "step": len(dynamic_recourse) + 1,
+                            "title_en": f"Improve {rc.feature_name.replace('_', ' ').title()}",
+                            "title_hi": rc.localized_text_hi or rc.localized_text_en,
+                            "points": max(15, min(50, int(abs(rc.shap_value) * 100) or 25)),
+                            "status": "NEXT" if len(dynamic_recourse) > 0 else "IN_PROGRESS",
+                            "estimated_days": 30 * (len(dynamic_recourse) + 1),
+                            "action_desc": rc.localized_text_en,
+                        })
+                if dynamic_strengths:
+                    top_strengths = dynamic_strengths
+                if dynamic_recourse:
+                    recourse_ladder = dynamic_recourse
+
+                # 3. Fetch FeatureSnapshot for dynamic cashflow
+                feat_res = await self.db.execute(
+                    select(FeatureSnapshot).where(FeatureSnapshot.id == sc.feature_snapshot_id)
+                )
+                feat_snap = feat_res.scalar_one_or_none()
+                if feat_snap and feat_snap.features_json:
+                    fj = feat_snap.features_json
+                    monthly_inflow = float(fj.get("monthly_avg_credit_inflow", 8200) or 8200)
+                    shg_savings = max(200.0, float(fj.get("shg_cumulative_savings", 6000) or 6000) / 12.0)
+                    cashflow_pulse = [
+                        {
+                            "month": f"M-{12-i}",
+                            "shg_savings": int(shg_savings),
+                            "inflow": int(monthly_inflow * (0.85 + 0.05 * (i % 5))),
+                            "outflow": int(monthly_inflow * 0.7),
+                            "net_savings": int(monthly_inflow * 0.2),
+                            "on_time": True,
+                        }
+                        for i in range(1, 12)
+                    ]
+                    cashflow_pulse.append({
+                        "month": "Current",
+                        "shg_savings": int(shg_savings),
+                        "inflow": int(monthly_inflow),
+                        "outflow": int(monthly_inflow * 0.7),
+                        "net_savings": int(monthly_inflow * 0.3),
+                        "on_time": True,
+                    })
+
+            # 4. Fetch latest LoanApplication for real status & amounts
+            la_res = await self.db.execute(
+                select(LoanApplication)
+                .where(LoanApplication.borrower_id == borrower_id)
+                .order_by(LoanApplication.created_at.desc())
+            )
+            loan_app = la_res.scalars().first()
+            if loan_app:
+                status = loan_app.officer_decision or "PENDING"
+                loan_application_data = {
+                    "id": str(loan_app.id),
+                    "status": status,
+                    "requested_amount": loan_app.requested_amount,
+                    "approved_amount": loan_app.approved_amount or (loan_app.requested_amount if status == "APPROVED" else None),
+                    "requested_tenure_months": loan_app.requested_tenure_months,
+                    "purpose": loan_app.purpose,
+                    "partner_re_id": loan_app.partner_re_id or "RE-BOB-PILOT-01",
+                    "override_reason": loan_app.override_reason,
+                    "submitted_at": loan_app.created_at.isoformat() if loan_app.created_at else None,
+                    "decided_at": loan_app.decided_at.isoformat() if loan_app.decided_at else None,
+                }
 
         return {
             "persona": "borrower",
             "borrower_summary": {
+                "borrower_id": str(borrower_id) if borrower_id else None,
+                "borrower_name": borrower_name,
                 "current_score": current_score_900,
+                "current_score_100": current_score_100,
                 "current_band": current_band,
                 "confidence_range": confidence_range,
                 "target_score": 650,
                 "target_band": "GOOD (STP Pre-Approved)",
                 "points_needed": max(0, 650 - current_score_900),
             },
-            "recourse_ladder": [
-                {
-                    "step": 1,
-                    "title_en": "3 Consecutive On-Time SHG Meetings",
-                    "title_hi": "लगातार 3 स्वयं सहायता समूह बैठकों में समय पर उपस्थिति",
-                    "points": 25,
-                    "status": "COMPLETED",
-                    "estimated_days": 30,
-                    "action_desc": "Attend weekly meetings and deposit monthly savings into SHG account on time.",
-                },
-                {
-                    "step": 2,
-                    "title_en": "Pay Electricity Bill within 7 Days of Generation",
-                    "title_hi": "बिजली बिल जारी होने के 7 दिनों के भीतर भुगतान करें",
-                    "points": 35,
-                    "status": "IN_PROGRESS",
-                    "estimated_days": 45,
-                    "action_desc": "Demonstrates consistent household utility discipline without overdue notices.",
-                },
-                {
-                    "step": 3,
-                    "title_en": "Record 2 Harvest Crop Sales Digitally via e-NAM / Sakhi",
-                    "title_hi": "ई-नाम या बैंक सखी के माध्यम से 2 फसल बिक्री डिजिटल दर्ज करें",
-                    "points": 40,
-                    "status": "NEXT",
-                    "estimated_days": 90,
-                    "action_desc": "Builds verified agri-cashflow history replacing informal cash receipts.",
-                },
-            ],
-            "cashflow_pulse": [
-                {"month": "M-11", "shg_savings": 500, "inflow": 8200, "outflow": 6100, "net_savings": 2100, "on_time": True},
-                {"month": "M-10", "shg_savings": 500, "inflow": 7900, "outflow": 5800, "net_savings": 2100, "on_time": True},
-                {"month": "M-9", "shg_savings": 500, "inflow": 8400, "outflow": 6000, "net_savings": 2400, "on_time": True},
-                {"month": "M-8", "shg_savings": 500, "inflow": 12500, "outflow": 7200, "net_savings": 5300, "on_time": True},
-                {"month": "M-7", "shg_savings": 500, "inflow": 9100, "outflow": 6400, "net_savings": 2700, "on_time": True},
-                {"month": "M-6", "shg_savings": 500, "inflow": 8300, "outflow": 6100, "net_savings": 2200, "on_time": True},
-                {"month": "M-5", "shg_savings": 500, "inflow": 7800, "outflow": 5900, "net_savings": 1900, "on_time": True},
-                {"month": "M-4", "shg_savings": 500, "inflow": 8100, "outflow": 6000, "net_savings": 2100, "on_time": True},
-                {"month": "M-3", "shg_savings": 500, "inflow": 14200, "outflow": 8100, "net_savings": 6100, "on_time": True},
-                {"month": "M-2", "shg_savings": 500, "inflow": 8800, "outflow": 6300, "net_savings": 2500, "on_time": True},
-                {"month": "M-1", "shg_savings": 500, "inflow": 8500, "outflow": 6200, "net_savings": 2300, "on_time": True},
-                {"month": "Current", "shg_savings": 500, "inflow": 8600, "outflow": 6100, "net_savings": 2500, "on_time": True},
-            ],
-            "top_strengths": [
-                {
-                    "icon": "shield-check",
-                    "title_en": "Zero SHG Default History",
-                    "title_hi": "एसएचजी ऋण पर शून्य डिफ़ॉल्ट रिकॉर्ड",
-                    "desc_en": "36 straight months of on-time mutual contribution and peer validation.",
-                    "desc_hi": "36 महीनों से लगातार समय पर योगदान और समूह सत्यापन।",
-                },
-                {
-                    "icon": "sprout",
-                    "title_en": "Robust Crop Vigor Profile",
-                    "title_hi": "सक्रिय फसल स्वास्थ्य और उपग्रह सत्यापन",
-                    "desc_en": "Sentinel-2 satellite confirms healthy NDVI index across both Kharif and Rabi.",
-                    "desc_hi": "सेंटिनल-2 उपग्रह खरीफ और रबी दोनों में स्वस्थ फसल स्वास्थ्य की पुष्टि करता है।",
-                },
-                {
-                    "icon": "zap",
-                    "title_en": "Prompt Electricity Utility Rail",
-                    "title_hi": "समय पर बिजली बिल भुगतान",
-                    "desc_en": "Consistently paid electricity dues within the bill cycle for 12 months.",
-                    "desc_hi": "पिछले 12 महीनों में बिल चक्र के भीतर बिजली बिलों का निरंतर भुगतान।",
-                },
-            ],
+            "loan_application": loan_application_data,
+            "recourse_ladder": recourse_ladder,
+            "cashflow_pulse": cashflow_pulse,
+            "top_strengths": top_strengths,
         }
 

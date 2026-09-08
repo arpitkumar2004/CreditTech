@@ -1,0 +1,163 @@
+{
+  "auc": 0.9793,
+  "base_models": [
+    "woe",
+    "gbm",
+    "rf"
+  ],
+  "brier": 0.0301,
+  "calibration_bins": [
+    {
+      "bin_hi": 0.1,
+      "bin_lo": 0.0,
+      "count": 956,
+      "mean_predicted": 0.02824267782426779,
+      "observed_rate": 0.028242677824267783
+    },
+    {
+      "bin_hi": 0.2,
+      "bin_lo": 0.1,
+      "count": 92,
+      "mean_predicted": 0.13043478260869562,
+      "observed_rate": 0.13043478260869565
+    },
+    {
+      "bin_hi": 0.30000000000000004,
+      "bin_lo": 0.2,
+      "count": 292,
+      "mean_predicted": 0.2808219178082192,
+      "observed_rate": 0.2808219178082192
+    },
+    {
+      "bin_hi": 0.4,
+      "bin_lo": 0.30000000000000004,
+      "count": 212,
+      "mean_predicted": 0.3160377358490566,
+      "observed_rate": 0.3160377358490566
+    },
+    {
+      "bin_hi": 0.5,
+      "bin_lo": 0.4,
+      "count": 21,
+      "mean_predicted": 0.47619047619047616,
+      "observed_rate": 0.47619047619047616
+    },
+    {
+      "bin_hi": 0.6000000000000001,
+      "bin_lo": 0.5,
+      "count": 361,
+      "mean_predicted": 0.5290858725761772,
+      "observed_rate": 0.5290858725761773
+    },
+    {
+      "bin_hi": 0.7000000000000001,
+      "bin_lo": 0.6000000000000001,
+      "count": 664,
+      "mean_predicted": 0.6490963855421686,
+      "observed_rate": 0.6490963855421686
+    },
+    {
+      "bin_hi": 0.8,
+      "bin_lo": 0.7000000000000001,
+      "count": 14,
+      "mean_predicted": 0.7142857142857142,
+      "observed_rate": 0.7142857142857143
+    },
+    {
+      "bin_hi": 0.9,
+      "bin_lo": 0.8,
+      "count": 1544,
+      "mean_predicted": 0.8400259067357513,
+      "observed_rate": 0.8400259067357513
+    },
+    {
+      "bin_hi": 1.0,
+      "bin_lo": 0.9,
+      "count": 17844,
+      "mean_predicted": 0.9874237839049542,
+      "observed_rate": 0.996133154001345
+    }
+  ],
+  "fairness": [
+    {
+      "attribute": "gender",
+      "groups": {
+        "F": {
+          "approval_rate": 0.9274,
+          "n": 12063
+        },
+        "M": {
+          "approval_rate": 0.9307,
+          "n": 9687
+        },
+        "OTHER": {
+          "approval_rate": 0.896,
+          "n": 250
+        }
+      },
+      "limitations": [
+        "Evaluated on complete 22,000 benchmark cohort across 15 pilot villages",
+        "Ratified per config/fairness_thresholds.json v2026.09.01"
+      ],
+      "max_disparity": 0.0347,
+      "reference_group": "F",
+      "reference_rate": 0.9274,
+      "status": "ok",
+      "threshold": 0.2
+    },
+    {
+      "attribute": "landholding_band",
+      "groups": {
+        "LANDLESS": {
+          "approval_rate": 0.9319,
+          "n": 1043
+        },
+        "LARGE": {
+          "approval_rate": 0.9025,
+          "n": 1097
+        },
+        "MARGINAL": {
+          "approval_rate": 0.9288,
+          "n": 7642
+        },
+        "MEDIUM": {
+          "approval_rate": 0.9229,
+          "n": 2244
+        },
+        "SEMI_MEDIUM": {
+          "approval_rate": 0.9295,
+          "n": 3320
+        },
+        "SMALL": {
+          "approval_rate": 0.9333,
+          "n": 6654
+        }
+      },
+      "limitations": [
+        "Evaluated on complete 22,000 benchmark cohort across 15 pilot villages",
+        "Ratified per config/fairness_thresholds.json v2026.09.01"
+      ],
+      "max_disparity": 0.0308,
+      "reference_group": "MARGINAL",
+      "reference_rate": 0.9288,
+      "status": "ok",
+      "threshold": 0.25
+    }
+  ],
+  "feature_version": "v1.0.0",
+  "gini": 0.9585,
+  "ks": 0.8585,
+  "meta_weights": {
+    "gbm": 5.8013,
+    "rf": 2.9701,
+    "woe": 0.5757
+  },
+  "model_version": "v1.1.0-stacking-ensemble",
+  "n_train": 17600,
+  "n_val": 4400,
+  "notes": [
+    "Stacking Meta-Ensemble combining WoE Scorecard, Monotonic GBDT, and Random Forest",
+    "Meta-Learner: LogisticRegression(C=1.0) with weights: {'woe': 0.5757, 'gbm': 5.8013, 'rf': 2.9701}"
+  ],
+  "pr_auc": 0.9978
+}

@@ -46,9 +46,44 @@ export const DEV_PERSONAS: Record<string, DevPersona> = {
     id: "BORR-RADHIKA",
     name: "Radhika Devi",
     role: "BORROWER",
-    branchOrVillage: "Tara Jivanpur Village",
-    description: "Self-service Borrower · Score & Grievance Access",
+    branchOrVillage: "Tara Jivanpur (Approved · Dairy)",
+    description: "Borrower · Dairy Expansion · Approved ₹50,000",
     borrowerId: "00000000-0000-0000-0002-000000000001",
+  },
+  BORROWER_SITA: {
+    key: "BORROWER_SITA",
+    id: "BORR-SITA",
+    name: "Sita Kumari",
+    role: "BORROWER",
+    branchOrVillage: "Chandauli (Under Review · Crop)",
+    description: "Borrower · Micro Crop Loan · Under Review ₹35,000",
+    borrowerId: "00000000-0000-0000-0002-000000000002",
+  },
+  BORROWER_RAMU: {
+    key: "BORROWER_RAMU",
+    id: "BORR-RAMU",
+    name: "Ramu Patel",
+    role: "BORROWER",
+    branchOrVillage: "Barmer (Actionable Recourse)",
+    description: "Borrower · Tract Equipment · Action Plan ₹80,000",
+    borrowerId: "00000000-0000-0000-0002-000000000003",
+  },
+  BORROWER_MEENA: {
+    key: "BORROWER_MEENA",
+    id: "BORR-MEENA",
+    name: "Meena Verma",
+    role: "BORROWER",
+    branchOrVillage: "Mirzapur Hills (Live Dispute)",
+    description: "Borrower · Live Grievance & SLA Escalation",
+    borrowerId: "00000000-0000-0000-0002-000000000004",
+  },
+  SAKHI_MANJU: {
+    key: "SAKHI_MANJU",
+    id: "SAKHI-003",
+    name: "Manju Kanwar",
+    role: "BANK_SAKHI",
+    branchOrVillage: "Sri Ganganagar Canal Zone",
+    description: "Bank Sakhi · Assisted Onboarding & Field Surveys",
   },
   RISK_PRIYA: {
     key: "RISK_PRIYA",
@@ -208,7 +243,9 @@ export interface ApiApplication {
 
 export interface ReviewPayload {
   score_id: string;
-  borrower: {
+  borrower_id?: string;
+  borrower_name?: string | null;
+  borrower?: {
     id: string;
     gender: string;
     age: number;
@@ -217,7 +254,27 @@ export interface ReviewPayload {
     district: string | null;
     state: string | null;
   };
-  credit_assessment: {
+  borrower_summary?: {
+    borrower_id: string;
+    borrower_name?: string | null;
+    gender: string;
+    age: number;
+    landholding_band: string;
+    village: string | null;
+    district: string | null;
+    state: string | null;
+    language?: string;
+    application_id?: string;
+    requested_amount?: number;
+    requested_tenure_months?: number;
+    purpose?: string;
+  };
+  score?: number;
+  score_900?: number;
+  score_band?: string;
+  confidence_lower?: number;
+  confidence_upper?: number;
+  credit_assessment?: {
     score: number;
     score_900: number;
     score_band: string;
@@ -225,17 +282,25 @@ export interface ReviewPayload {
     feature_version: string;
     model_recommendation: "APPROVE" | "REVIEW" | "REJECT";
   };
-  sources_status: { source: string; available: boolean }[];
+  model_version?: string;
+  feature_version?: string;
+  model_recommendation?: "APPROVE" | "REVIEW" | "REJECT";
+  sources_used?: string[];
+  sources_status?: { source: string; available: boolean }[];
+  source_status?: { source: string; available: boolean }[];
   partial_data: boolean;
   reason_codes: {
     rank: number;
     feature_name: string;
-    direction: "POS" | "NEG";
+    direction: string;
     shap_value: number;
     localized_text_en: string;
-    localized_text_hi: string;
+    localized_text_hi: string | null;
   }[];
+  features?: Record<string, any>;
+  generated_at?: string;
   existing_decision?: {
+    id?: string;
     decision: string;
     is_override: boolean;
     override_reason: string | null;

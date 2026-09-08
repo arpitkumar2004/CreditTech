@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Search, Plus, Bell, ChevronDown,
@@ -10,6 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { cn, formatDateShort } from "@/lib/utils";
 import { usePersona } from "@/lib/usePersona";
 import { applications, grievances } from "@/lib/mockData";
+import { decisionApi } from "@/lib/api";
 
 function getNavForRole(role: string) {
   if (role === "BORROWER") {
@@ -90,14 +92,22 @@ export default function TopNav() {
   const primaryNav = getNavForRole(persona.role);
   const quickActions = getQuickActionsForRole(persona.role);
 
+  const { data: liveApplications } = useQuery({
+    queryKey: ["liveApplicationsNav"],
+    queryFn: () => decisionApi.listApplications().catch(() => null),
+  });
+
+  const activeApps = (liveApplications && liveApplications.length > 0) ? liveApplications : applications;
+
   const searchResults = q.trim().length >= 1
-    ? applications
+    ? activeApps
         .filter((a) =>
-          a.borrower_name.toLowerCase().includes(q.toLowerCase()) ||
-          a.id.toLowerCase().includes(q.toLowerCase()) ||
-          a.village.toLowerCase().includes(q.toLowerCase()),
+          (a.borrower_name || "").toLowerCase().includes(q.toLowerCase()) ||
+          (a.id || "").toLowerCase().includes(q.toLowerCase()) ||
+          (a.village || "").toLowerCase().includes(q.toLowerCase()) ||
+          (a.purpose || "").toLowerCase().includes(q.toLowerCase()),
         )
-        .slice(0, 6)
+        .slice(0, 8)
     : [];
 
   const notifications = [

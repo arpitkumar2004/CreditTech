@@ -1,0 +1,134 @@
+{
+  "dataset_samples": 22000,
+  "evaluation_strategy": "5-Fold Spatial GroupKFold Cross-Validation (Zero Spatial Leakage)",
+  "models": {
+    "gbm": {
+      "best_params": {
+        "learning_rate": 0.09,
+        "max_iter": 80,
+        "auc": 0.9761
+      },
+      "grid_lrs": [
+        0.03,
+        0.05,
+        0.07,
+        0.09
+      ],
+      "grid_iters": [
+        60,
+        80,
+        100,
+        130
+      ],
+      "auc_surface": [
+        [
+          0.9693,
+          0.972,
+          0.9742,
+          0.9736
+        ],
+        [
+          0.9742,
+          0.9736,
+          0.9744,
+          0.9759
+        ],
+        [
+          0.9737,
+          0.9731,
+          0.9733,
+          0.9737
+        ],
+        [
+          0.9739,
+          0.9761,
+          0.976,
+          0.976
+        ]
+      ]
+    },
+    "rf": {
+      "best_params": {
+        "max_depth": 10,
+        "n_estimators": 100,
+        "auc": 0.9744
+      },
+      "depths": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "train_aucs": [
+        0.9286,
+        0.9294,
+        0.938,
+        0.943,
+        0.9552,
+        0.9615,
+        0.9756
+      ],
+      "val_aucs": [
+        0.9589,
+        0.9628,
+        0.9653,
+        0.969,
+        0.9711,
+        0.9733,
+        0.9744
+      ]
+    },
+    "woe": {
+      "best_params": {
+        "c_penalty": 2.0,
+        "min_iv": 0.015,
+        "auc": 0.9595
+      },
+      "c_penalties": [
+        0.05,
+        0.1,
+        0.2,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "aucs": [
+        0.9573,
+        0.9583,
+        0.9591,
+        0.9593,
+        0.9593,
+        0.9595
+      ],
+      "active_features": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    "logistic": {
+      "best_params": {
+        "c_penalty": 0.5,
+        "solver": "lbfgs",
+        "auc": 0.9068
+      }
+    },
+    "stacking": {
+      "best_params": {
+        "meta_c": 1.0,
+        "weights": {
+          "woe": 1.15,
+          "gbm": 2.45,
+          "rf": 1.82
+        },
+        "auc": 0.9788
+      }
+    }
+  }
+}

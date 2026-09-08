@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -42,6 +43,7 @@ class ReviewPayload(BaseModel):
 
     score_id: uuid.UUID
     borrower_id: uuid.UUID
+    borrower_name: str | None = None
 
     borrower_summary: dict
 
@@ -61,6 +63,7 @@ class ReviewPayload(BaseModel):
     )
 
     reason_codes: list[ReviewReasonCode]
+    features: dict[str, Any] = Field(default_factory=dict)
     generated_at: datetime
 
     existing_decision: OfficerDecisionRecord | None = None

@@ -1,0 +1,6 @@
+,auc,gini,ks,optimal_cutoff,brier,ece,pr_auc,accuracy,balanced_accuracy,f1_score,latency_ms,model_version,architecture,role,gender_max_disparity,gender_fairness_status,landholding_max_disparity,landholding_fairness_status
+logistic,0.9062,0.8123,0.6631,560,0.064,0.022,0.4565,0.9098,0.6092,0.9516,0.051,v1.1.0-logistic-baseline,Logistic Regression Baseline,baseline,0.022,ok,0.0125,ok
+woe,0.9599,0.9198,0.8208,520,0.0596,0.0611,0.7293,0.9247,0.8833,0.9573,0.043,v1.1.0-woe-scorecard,WoE Scorecard (Champion),champion,0.0664,ok,0.0331,ok
+gbm,0.9758,0.9515,0.8549,480,0.0702,0.0903,0.8334,0.895,0.9275,0.9386,0.113,v1.1.0-gbm-challenger,Monotonic GBDT (Challenger),challenger,0.0681,ok,0.0384,ok
+rf,0.9766,0.9532,0.848,580,0.0344,0.0151,0.834,0.9528,0.7888,0.9743,1.335,v1.1.0-rf-scorecard,Random Forest (Challenger),challenger,0.0384,ok,0.0347,ok
+stacking,0.9793,0.9585,0.8585,560,0.0301,0.0071,0.8539,0.9581,0.8227,0.9772,1.511,v1.1.0-stacking-ensemble,Stacking Meta-Ensemble,ensemble,0.0347,ok,0.0308,ok

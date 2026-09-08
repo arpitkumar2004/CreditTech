@@ -24,36 +24,42 @@ export default function Grievances() {
   const isBorrower = persona.role === "BORROWER";
 
   const tabs = isBorrower
-    ? ([{ id: "file", label: "File appeal / dispute" }] as const)
+    ? ([
+        { id: "my_appeals", label: "My Appeals & Grievances" },
+        { id: "file", label: "File New Appeal / Dispute" },
+      ] as const)
     : ([
         { id: "queue", label: "Underwriting Grievance Queue" },
-        { id: "file", label: "File new" },
+        { id: "file", label: "File New" },
       ] as const);
 
-  type Tab = "queue" | "file";
+  type Tab = "queue" | "file" | "my_appeals";
 
   const [params, setParams] = useSearchParams();
-  const initial: Tab = isBorrower ? "file" : (params.get("tab") === "file" ? "file" : "queue");
+  const initial: Tab = isBorrower
+    ? (params.get("tab") === "file" ? "file" : "my_appeals")
+    : (params.get("tab") === "file" ? "file" : "queue");
   const [tab, setTab] = useState<Tab>(initial);
 
   useEffect(() => {
-    if (isBorrower && tab !== "file") {
-      setTab("file");
-      return;
-    }
     setParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (tab === "file") next.set("tab", "file"); else next.delete("tab");
+      if (tab === "file") next.set("tab", "file");
+      else next.delete("tab");
       return next;
     }, { replace: true });
-  }, [tab, isBorrower, setParams]);
+  }, [tab, setParams]);
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl sm:text-3xl font-semibold display">Grievances</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold display">
+          {isBorrower ? "My Appeals & Grievance Redressal" : "Grievances"}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Appeal channel · 48-hour SLA · escalation at 8h remaining.
+          {isBorrower
+            ? "Track your submitted dispute status under statutory 48-hour SLA resolution."
+            : "Appeal channel · 48-hour SLA · escalation at 8h remaining."}
         </p>
       </header>
 
@@ -76,7 +82,11 @@ export default function Grievances() {
           </button>
         ))}
       </div>
-      {tab === "queue" ? <Queue /> : <FileNew onCreated={() => setTab("queue")} />}
+      {tab === "queue" || tab === "my_appeals" ? (
+        <Queue />
+      ) : (
+        <FileNew onCreated={() => setTab(isBorrower ? "my_appeals" : "queue")} />
+      )}
     </div>
   );
 }
@@ -84,11 +94,14 @@ export default function Grievances() {
 function Queue() {
   const persona = usePersona();
 
-  if (!isAllowed(persona.role, ["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN", "BANK_SAKHI"])) {
+  if (
+    persona.role !== "BORROWER" &&
+    !isAllowed(persona.role, ["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN", "BANK_SAKHI"])
+  ) {
     return (
       <AccessDenied
         resourceName="Institutional Grievance Queue"
-        allowedRoles={["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN"]}
+        allowedRoles={["LOAN_OFFICER", "RISK_OFFICER", "SUPERVISOR", "ADMIN", "BORROWER"]}
       />
     );
   }
@@ -96,7 +109,7 @@ function Queue() {
   const [f, setF] = useState<Status>("ALL");
 
   const { data: apiGrievances, isLoading } = useQuery({
-    queryKey: ["grievancesList", persona.id],
+    queryKey: ["grievancesList", persona.id, persona.borrowerId],
     queryFn: () => grievanceApi.list().catch(() => null),
   });
 
@@ -104,18 +117,21 @@ function Queue() {
     if (apiGrievances && apiGrievances.length > 0) {
       return apiGrievances.map((g) => ({
         id: g.id,
-        borrower_name: `Borrower ${g.borrower_id.slice(0, 6)}`,
-        village: "Pilot Village",
+        borrower_name: persona.role === "BORROWER" ? persona.name : `Borrower ${g.borrower_id.slice(0, 6)}`,
+        village: persona.role === "BORROWER" ? persona.branchOrVillage : "Pilot Village",
         category: (g.category as any) || "DATA_ACCURACY",
         summary: g.summary || g.description || "Grievance dispute",
         status: (g.status as any) || "OPEN",
         sla_hours_remaining: 36,
         opened_at: g.created_at,
-        channel: "SAKHI" as const,
+        channel: ((g as any).channel as any) || "BORROWER_APP",
       }));
     }
+    if (persona.role === "BORROWER") {
+      return [];
+    }
     return mockGrievances;
-  }, [apiGrievances]);
+  }, [apiGrievances, persona]);
 
   const list = useMemo(() => sourceGrievances.filter((g) => f === "ALL" || g.status === f), [sourceGrievances, f]);
 

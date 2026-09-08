@@ -55,11 +55,23 @@ export default function SakhiEntry() {
     );
   }
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
-    defaultValues: { nabard_grade: "A", land_ownership: "OWN", irrigation_access: "yes" },
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
+    defaultValues: {
+      nabard_grade: "A",
+      land_ownership: "OWN",
+      irrigation_access: "yes",
+      created_by: persona.name || "sakhi_user",
+    },
   });
   const [banner, setBanner] = useState<{ kind: "ok" | "err" | "queued"; text: string } | null>(null);
   const { toast } = useToast();
+
+  const registeredBorrowers = [
+    { id: "00000000-0000-0000-0002-000000000001", name: "Radhika Devi", shg: "Ujala Mahila SHG", crop: "Paddy & Dairy" },
+    { id: "00000000-0000-0000-0002-000000000002", name: "Sita Kumari", shg: "Ganga Micro Thrift", crop: "Wheat & Mustard" },
+    { id: "00000000-0000-0000-0002-000000000004", name: "Meena Verma", shg: "Saraswati Sakhi Mandal", crop: "Vegetables" },
+    { id: "a1111111-1111-4111-8111-111111111101", name: "Kamla Devi", shg: "Baytu Dairy Federation", crop: "Cattle Fodder" },
+  ];
 
   // B6: Warn on browser close / tab switch when form has unsaved data
   useEffect(() => {
@@ -147,6 +159,43 @@ export default function SakhiEntry() {
             {banner.text}
           </motion.div>
         )}
+
+        <div className="mb-5 p-3.5 rounded-2xl bg-white/70 border border-white/80 shadow-sm space-y-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Quick Select Registered Pilot Borrower:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {registeredBorrowers.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => {
+                  setValue("borrower_id", b.id, { shouldValidate: true, shouldDirty: true });
+                  setValue("shg_name", b.shg, { shouldValidate: true, shouldDirty: true });
+                  setValue("crop_type_primary", b.crop, { shouldValidate: true, shouldDirty: true });
+                  setValue("created_by", persona.name || "sakhi_user", { shouldValidate: true, shouldDirty: true });
+                  setValue("monthly_savings", 500, { shouldValidate: true, shouldDirty: true });
+                  setValue("total_savings", 14000, { shouldValidate: true, shouldDirty: true });
+                  setValue("membership_years", 4, { shouldValidate: true, shouldDirty: true });
+                  setValue("meeting_attendance_pct", 96, { shouldValidate: true, shouldDirty: true });
+                  setValue("loans_taken", 2, { shouldValidate: true, shouldDirty: true });
+                  setValue("loans_repaid", 2, { shouldValidate: true, shouldDirty: true });
+                  setValue("land_holding_acres", 1.8, { shouldValidate: true, shouldDirty: true });
+                  setValue("estimated_monthly_income", 18500, { shouldValidate: true, shouldDirty: true });
+                  toast({
+                    variant: "success",
+                    title: "Borrower identity loaded",
+                    description: `Loaded pre-verified profile for ${b.name} (${b.shg}).`,
+                  });
+                }}
+                className="pill-ghost !py-1 !px-2.5 text-xs hover:bg-primary/10 hover:text-primary transition font-medium"
+              >
+                {b.name} · {b.shg}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Borrower ID (UUID)" error={errors.borrower_id?.message}>
             <Input placeholder="e.g. 5f9e…" {...register("borrower_id", { required: true })} />

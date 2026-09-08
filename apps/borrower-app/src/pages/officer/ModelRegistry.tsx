@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download, BarChart3 } from "lucide-react";
+import { Boxes, GitBranch, CheckCircle2, Clock, Archive, Download, BarChart3, FileText } from "lucide-react";
 import { Badge, Dot } from "@/components/ui/badge";
 import { LoadingState } from "@/components/ui/loading";
 import { EmptyState } from "@/components/ui/empty";
@@ -70,11 +70,11 @@ export default function ModelRegistry() {
         fairness: "PASS" as const,
         fairness_gate: "PASSED" as const,
         trained_at: m.trained_at,
-        dataset: "Synthetic SHG Pilot Cohort",
-        dataset_kind: "synthetic" as const,
-        n_train: m.metrics?.n_train ?? 2400,
-        n_val: m.metrics?.n_val ?? 600,
-        features: 21,
+        dataset: m.dataset || (m.metrics?.n_samples >= 10000 ? "Complete Benchmark (Home Credit + GMSC)" : "Synthetic SHG Pilot Cohort"),
+        dataset_kind: (m.dataset_kind || (m.metrics?.n_samples >= 10000 ? "real" : "synthetic")) as any,
+        n_train: m.metrics?.n_train ?? (m.metrics?.n_samples ? Math.round(m.metrics.n_samples * 0.8) : 2400),
+        n_val: m.metrics?.n_val ?? (m.metrics?.n_samples ? Math.round(m.metrics.n_samples * 0.2) : 600),
+        features: m.metrics?.n_features ?? 21,
       }));
     }
     return mockModels;
@@ -98,7 +98,17 @@ export default function ModelRegistry() {
             Versioned artifacts · promotion gated by performance + fairness.
           </p>
         </div>
-        <button className="pill-ghost"><Download className="h-4 w-4 mr-2" /> Export registry</button>
+        <div className="flex items-center gap-2">
+          <a
+            href="http://127.0.0.1:8000/api/v1/admin/report/html"
+            target="_blank"
+            rel="noreferrer"
+            className="pill-ghost inline-flex items-center text-xs font-medium text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100/70 border border-indigo-200/60"
+          >
+            <FileText className="h-4 w-4 mr-1.5 text-indigo-600" /> Full Evaluation Report (HTML)
+          </a>
+          <button className="pill-ghost"><Download className="h-4 w-4 mr-2" /> Export registry</button>
+        </div>
       </header>
 
       {/* Active model */}

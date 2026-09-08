@@ -1,0 +1,11 @@
+village,district,state,latitude,longitude,zone,season,total_rainfall_mm,rainy_days,max_dry_spell_days,rainfall_deviation_pct
+Suratgarh,Sri Ganganagar,Rajasthan,29.32,73.9,Canal-Irrigated Plains,Kharif 2023,213.6,22,45,-52.5
+Chidawa,Jhunjhunu,Rajasthan,28.24,75.64,Semi-Arid Arable,Kharif 2023,279.1,31,20,-38.0
+Hanumangarh Rural,Hanumangarh,Rajasthan,29.58,74.32,Canal-Irrigated Plains,Kharif 2023,178.1,14,34,-60.4
+Nokha,Bikaner,Rajasthan,27.6,73.42,Thar Desert Margin,Kharif 2023,299.4,25,45,-33.5
+Barmer Rural,Barmer,Rajasthan,25.75,71.39,Arid Sandy Plain,Kharif 2023,371.9,25,24,-17.4
+Tara Jivanpur,Chandauli,Uttar Pradesh,25.26,83.27,Middle Gangetic Alluvial,Kharif 2023,683.8,58,20,52.0
+Chakia,Chandauli,Uttar Pradesh,25.04,83.22,Vindhyan Rain-Fed Plateau,Kharif 2023,771.8,57,20,71.5
+Ahraura,Mirzapur,Uttar Pradesh,25.02,83.02,Vindhyan Rain-Fed Plateau,Kharif 2023,755.0,57,15,67.8
+Chunar Rural,Mirzapur,Uttar Pradesh,25.12,82.88,Middle Gangetic Alluvial,Kharif 2023,804.7,63,15,78.8
+Robertsganj Rural,Sonbhadra,Uttar Pradesh,24.68,83.07,Tribal Rain-Fed Uplands,Kharif 2023,570.7,59,20,26.8

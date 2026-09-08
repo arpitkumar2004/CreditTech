@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.core.database import get_db
@@ -74,6 +76,14 @@ async def promotion_check(
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return report.to_dict()
+
+
+@router.get("/report/html", response_class=HTMLResponse, summary="Serve publication-grade model evaluation report")
+async def get_model_evaluation_report(_: str = Depends(require_officer)) -> HTMLResponse:
+    report_path = Path("data/reports/CreditTech_Comprehensive_Model_Report.html")
+    if not report_path.exists():
+        raise HTTPException(status_code=404, detail="Model evaluation report not found.")
+    return HTMLResponse(content=report_path.read_text(encoding="utf-8"))
 
 
 __all__ = ["router"]

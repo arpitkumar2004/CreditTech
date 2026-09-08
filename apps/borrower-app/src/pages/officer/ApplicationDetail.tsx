@@ -144,6 +144,13 @@ export default function ApplicationDetail() {
     return app.reasons;
   }, [reviewData, app.reasons]);
 
+  const displayedFeatures = useMemo(() => {
+    if (reviewData?.features && Object.keys(reviewData.features).length > 0) {
+      return reviewData.features;
+    }
+    return app.features;
+  }, [reviewData, app.features]);
+
   const maxAbsShap = Math.max(1, ...reasonsList.map((r) => Math.abs(r.shap)));
 
   return (
@@ -214,7 +221,7 @@ export default function ApplicationDetail() {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(app.features).map(([k, v]) => (
+              {Object.entries(displayedFeatures).map(([k, v]) => (
                 <tr key={k}>
                   <td className="first font-mono text-xs text-muted-foreground">{k}</td>
                   <td className="last text-right tabular font-medium">{typeof v === "number" ? v.toFixed(2) : String(v)}</td>

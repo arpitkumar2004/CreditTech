@@ -100,15 +100,34 @@ async def get_grievance(
 @router.get(
     "/",
     response_model=list[GrievanceRecord],
-    summary="List grievances (officer view)",
+    summary="List grievances (officer view or borrower's own)",
 )
 async def list_grievances(
     status_filter: str | None = Query(default=None, alias="status"),
     borrower_id: uuid.UUID | None = None,
     overdue_only: bool = False,
-    officer_id: str = Depends(require_officer),  # noqa: ARG001
+    x_officer_id: str | None = Header(default=None, alias="X-Officer-Id"),
+    x_officer_role: str | None = Header(default=None, alias="X-Officer-Role"),
+    x_borrower_id: str | None = Header(default=None, alias="X-Borrower-Id"),
     db: AsyncSession = Depends(get_db),
 ) -> list[GrievanceRecord]:
+    officer_ok = bool(
+        x_officer_id
+        and x_officer_role
+        and x_officer_role.upper() in {"LOAN_OFFICER", "SUPERVISOR", "ADMIN", "RISK_OFFICER", "BANK_SAKHI"}
+    )
+    if not officer_ok and not x_borrower_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing officer or borrower credentials",
+        )
+    # If caller is a borrower, force filter to their own borrower_id
+    if not officer_ok and x_borrower_id:
+        try:
+            borrower_id = uuid.UUID(x_borrower_id.strip())
+        except ValueError:
+            return []
+
     svc = GrievanceService(db)
     items = await svc.list(
         status=status_filter, borrower_id=borrower_id, include_overdue_only=overdue_only,

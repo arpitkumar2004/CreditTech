@@ -55,6 +55,9 @@ class Village(Base):
 # ──────────────────────────────────────────────────────────────
 class Borrower(Base):
     __tablename__ = "borrowers"
+    __table_args__ = (
+        Index("idx_borrowers_village_created", "village_id", "created_at"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         GUID(), primary_key=True, default=uuid.uuid4
@@ -278,6 +281,9 @@ class DataPull(Base):
 # ──────────────────────────────────────────────────────────────
 class FeatureSnapshot(Base):
     __tablename__ = "feature_snapshots"
+    __table_args__ = (
+        Index("idx_feature_snapshots_borrower_computed", "borrower_id", "computed_at"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         GUID(), primary_key=True, default=uuid.uuid4
@@ -308,6 +314,9 @@ class FeatureSnapshot(Base):
 # ──────────────────────────────────────────────────────────────
 class Score(Base):
     __tablename__ = "scores"
+    __table_args__ = (
+        Index("idx_scores_borrower_created", "borrower_id", "generated_at"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         GUID(), primary_key=True, default=uuid.uuid4
@@ -366,6 +375,10 @@ class ReasonCode(Base):
 # ──────────────────────────────────────────────────────────────
 class LoanApplication(Base):
     __tablename__ = "loan_applications"
+    __table_args__ = (
+        Index("idx_loan_apps_re_decision", "partner_re_id", "officer_decision"),
+        Index("idx_loan_apps_borrower_created", "borrower_id", "created_at"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         GUID(), primary_key=True, default=uuid.uuid4

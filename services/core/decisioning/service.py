@@ -22,11 +22,13 @@ from services.core.scoring.service import ScoringService
 from services.core.shared.logging import get_logger
 from services.core.shared.models import (
     Borrower,
+    FeatureSnapshot,
     LoanApplication,
     OfficerDecisionLog,
     Score,
     Village,
 )
+from services.core.shared.scoring_utils import clean_borrower_name, normalize_score
 
 from .schemas import (
     DecisionRequest,
@@ -106,12 +108,16 @@ class DecisioningService:
             )
             village_row = v.scalar_one_or_none()
 
-        band = ScoringService.get_score_band(score.score)
-        rec = recommendation_for_band(band)
+        feat_stmt = select(FeatureSnapshot).where(FeatureSnapshot.id == score.feature_snapshot_id)
+        feat_res = await self.db.execute(feat_stmt)
+        feat_snapshot = feat_res.scalar_one_or_none()
+        features = feat_snapshot.features_json if feat_snapshot else {}
 
-        prob_repay = score.score / 100.0
+        norm = normalize_score(score.score, score.confidence_lower, score.confidence_upper)
+        rec = recommendation_for_band(norm["band"])
+        display_name = clean_borrower_name(borrower.name_encrypted, borrower.id)
+
         service = ScoringService(self.db, model_version=score.model_version)
-        _, score_900 = service.scorecard.calibrate_score(prob_repay)
         feature_version = service.scorecard.feature_version
 
         sources_used = list(score.sources_used or [])
@@ -144,8 +150,10 @@ class DecisioningService:
         return ReviewPayload(
             score_id=score.id,
             borrower_id=borrower.id,
+            borrower_name=display_name,
             borrower_summary={
                 "borrower_id": str(borrower.id),
+                "borrower_name": display_name,
                 "gender": borrower.gender,
                 "age": borrower.age,
                 "landholding_band": borrower.landholding_band,
@@ -154,11 +162,11 @@ class DecisioningService:
                 "state": village_row.state if village_row else None,
                 "language": borrower.language,
             },
-            score=score.score,
-            score_900=score_900,
-            score_band=band,
-            confidence_lower=score.confidence_lower,
-            confidence_upper=score.confidence_upper,
+            score=norm["score_100"],
+            score_900=norm["score_900"],
+            score_band=norm["band"],
+            confidence_lower=float(norm["confidence_lower_100"]),
+            confidence_upper=float(norm["confidence_upper_100"]),
             model_version=score.model_version,
             feature_version=feature_version,
             model_recommendation=rec,
@@ -166,6 +174,7 @@ class DecisioningService:
             source_status=source_status,
             partial_data=partial,
             reason_codes=reason_codes,
+            features=features,
             generated_at=score.generated_at,
             existing_decision=(
                 OfficerDecisionRecord.model_validate(existing) if existing else None
@@ -178,8 +187,8 @@ class DecisioningService:
         officer_id: str,
     ) -> OfficerDecisionLog:
         score = await self._load_score(request.score_id)
-        band = ScoringService.get_score_band(score.score)
-        rec = recommendation_for_band(band)
+        norm = normalize_score(score.score, score.confidence_lower, score.confidence_upper)
+        rec = recommendation_for_band(norm["band"])
         override = is_override(request.decision, rec)
 
         if override and not request.override_reason:
@@ -267,16 +276,9 @@ class DecisioningService:
         res = await self.db.execute(stmt)
         apps = []
         for app, borrower, score, village in res.all():
-            score_100 = score.score if score.score <= 100 else (score.score - 300) / 6.0
-            score_900 = int(300 + (score_100 / 100.0) * 600) if score.score <= 100 else int(score.score)
-            band = ScoringService.get_score_band(score_100)
-            rec = recommendation_for_band(band)
-            # Use real readable name if available or formatted fallback
-            display_name = (
-                borrower.name_encrypted
-                if borrower.name_encrypted and len(borrower.name_encrypted) < 30
-                else f"Applicant {str(borrower.id)[:6]}"
-            )
+            norm = normalize_score(score.score, score.confidence_lower, score.confidence_upper)
+            rec = recommendation_for_band(norm["band"])
+            display_name = clean_borrower_name(borrower.name_encrypted, borrower.id)
             apps.append({
                 "id": str(app.id),
                 "borrower_id": str(borrower.id),
@@ -291,11 +293,11 @@ class DecisioningService:
                 "requested_tenure_months": app.requested_tenure_months,
                 "purpose": app.purpose,
                 "score_id": str(score.id),
-                "score_900": score_900,
-                "score_100": round(score_100, 1),
-                "band": band,
-                "confidence_lower": score.confidence_lower,
-                "confidence_upper": score.confidence_upper,
+                "score_900": norm["score_900"],
+                "score_100": norm["score_100"],
+                "band": norm["band"],
+                "confidence_lower": norm["confidence_lower_900"],
+                "confidence_upper": norm["confidence_upper_900"],
                 "model_recommendation": rec.value,
                 "decision": app.officer_decision or "PENDING",
                 "override_reason": app.override_reason,

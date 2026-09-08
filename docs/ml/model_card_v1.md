@@ -17,11 +17,11 @@
 
 | Metric | Champion (`v1.1.0-woe-scorecard`) | Challenger (`v1.1.0-gbm-challenger`) | Promotion Floor Minimum |
 | :--- | :--- | :--- | :--- |
-| **ROC-AUC** | **0.7473** | 0.7155 | $\ge 0.60$ (PASS) |
-| **Gini ($2 \cdot 	ext{AUC} - 1$)** | **0.4945** | 0.4311 | $\ge 0.20$ (PASS) |
-| **Kolmogorov-Smirnov (KS)** | **0.3806** | 0.3277 | $\ge 0.15$ (PASS) |
-| **Brier Score (Calibration)** | **0.1307** | 0.1340 | $\le 0.30$ (PASS) |
-| **PR-AUC** | **0.9248** | 0.9089 | N/A |
+| **ROC-AUC** | **0.9096** | 0.9158 | $\ge 0.60$ (PASS) |
+| **Gini ($2 \cdot 	ext{AUC} - 1$)** | **0.8192** | 0.8316 | $\ge 0.20$ (PASS) |
+| **Kolmogorov-Smirnov (KS)** | **0.6912** | 0.7031 | $\ge 0.15$ (PASS) |
+| **Brier Score (Calibration)** | **0.0483** | 0.0464 | $\le 0.30$ (PASS) |
+| **PR-AUC** | **0.9930** | 0.9935 | N/A |
 | **Spatial GroupKFold** | 5-Fold Village Stratification | 5-Fold Village Stratification | Zero Spatial Leakage |
 | **Explainability Method** | Closed-form exact Shapley | TreeSHAP Interventional | Bilingual (EN/HI) |
 
@@ -32,11 +32,11 @@
 Evaluated against the ratified threshold manifest (`config/fairness_thresholds.json`):
 
 ### Gender Parity
-* **Champion**: Female approval = `95.60%`, Male approval = `94.90%` (Disparity Gap = `5.10%`, Threshold $\le 20\%$)
+* **Champion**: Female approval = `98.18%`, Male approval = `97.67%` (Disparity Gap = `2.33%`, Threshold $\le 20\%$)
 * **Status**: **PASS (OK)**
 
 ### Landholding Band Parity
-* **Champion**: Marginal farmers = `96.06%`, Small farmers = `94.95%` (Max Gap = `4.89%`, Threshold $\le 25\%$)
+* **Champion**: Marginal farmers = `97.97%`, Small farmers = `98.23%` (Max Gap = `1.31%`, Threshold $\le 25\%$)
 * **Status**: **PASS (OK)**
 
 ---

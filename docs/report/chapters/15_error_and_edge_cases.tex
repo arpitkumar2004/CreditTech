@@ -1,0 +1,60 @@
+% -----------------------------------------------------------------------------
+% Chapter 15: Error & Edge-Case Handling
+% -----------------------------------------------------------------------------
+\chapter{Error \& Edge-Case Handling}
+\label{chap:error_handling}
+
+\section{Systemic Failure Modes \& Mitigations}
+A resilient digital credit platform operating across rural geographies must expect partial network connectivity, data quality anomalies, and intermittent third-party service outages. CreditTech adopts a \textit{defensive design posture} where every potential failure mode is mapped to an explicit, tested system response. Table~\ref{tab:error_matrix} documents the matrix of operational edge cases and the corresponding platform defense mechanisms.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{p{3.2cm} p{3.6cm} X}
+  \toprule
+  \textbf{Failure Situation} & \textbf{HTTP Status / Layer} & \textbf{System Response \& Recovery Mechanism} \\
+  \midrule
+  \textbf{Invalid Schema Input} & \texttt{422 Unprocessable} (Gateway) & Pydantic v2 validation intercepts malformed fields; returns structured JSON detailing field names and constraints without stack traces. \\
+  \addlinespace
+  \textbf{Unauthenticated Request} & \texttt{401 Unauthorized} (Auth) & Request lacks required identity headers; terminates execution immediately; dispatches audit warning. \\
+  \addlinespace
+  \textbf{Forbidden Privilege Attempt} & \texttt{403 Forbidden} (RBAC) & Caller role lacks permission for the requested endpoint (e.g., Sakhi attempting loan approval); logs tripwire alert. \\
+  \addlinespace
+  \textbf{Cross-Tenant Access} & \texttt{403 Forbidden} (Service) & Borrower attempts to query another user's score or grievance; tenant check fails; access denied with zero data leakage. \\
+  \addlinespace
+  \textbf{Resource Not Found} & \texttt{404 Not Found} (Storage) & Target UUID does not exist; returns clean not-found message. \\
+  \addlinespace
+  \textbf{Duplicate Submission} & \texttt{409 Conflict} (State Guard) & Underwriter attempts to approve an already decided application; state machine rejects second mutation. \\
+  \addlinespace
+  \textbf{Revoked / Expired Consent} & \texttt{400 Bad Request} (Consent) & Scoring triggered on revoked consent; pipeline aborts before invoking external rails; logs compliance block. \\
+  \addlinespace
+  \textbf{External Rail Timeout} & \texttt{200 OK} with Degraded Flag & Account Aggregator or Satellite rail exceeds 5\,s SLA; orchestrator applies population median imputation and sets \texttt{completeness\_pct} $<1.0$. \\
+  \addlinespace
+  \textbf{Payload Over-Sized} & \texttt{413 Payload Too Large} & Request payload exceeds 1.0\,MB ceiling; Starlette middleware drops connection before memory allocation. \\
+  \addlinespace
+  \textbf{Excessive Request Rate} & \texttt{429 Too Many Requests} & Caller exceeds 60 requests/minute burst threshold; rate limiter rejects with \texttt{Retry-After} response header. \\
+  \addlinespace
+  \textbf{Extreme Feature Outlier} & Scorecard Preprocessing & Values outside 99th percentile (e.g., negative crop yield or billion-rupee income) are clamped via monotonic binning without crashing. \\
+  \addlinespace
+  \textbf{Server Internal Error} & \texttt{500 Internal Error} & Unhandled exception caught by global exception handler; obfuscates internal error; emits UUID for telemetry correlation. \\
+  \bottomrule
+\end{tabularx}
+\caption{Systemic Error, Exception, and Edge-Case Mitigation Matrix.}
+\label{tab:error_matrix}
+\end{table}
+
+\section{Defensive Degradation Architecture}
+To guarantee that rural applicants are not penalised by intermittent infrastructure failures, CreditTech employs a \textit{graceful degradation pattern}:
+\begin{lstlisting}[language=Python, caption={Defensive Rail Execution with Imputation Fallback.}]
+async def fetch_rail_safely(rail_fn, default_payload, timeout_sec=5.0):
+    try:
+        return await asyncio.wait_for(rail_fn(), timeout=timeout_sec)
+    except asyncio.TimeoutError:
+        logger.warn("rail_timeout_imputed", rail=rail_fn.__name__)
+        return default_payload | {"is_degraded": True}
+    except Exception as e:
+        logger.error("rail_exception_fallback", rail=rail_fn.__name__, error=str(e))
+        return default_payload | {"is_degraded": True}
+\end{lstlisting}
+This architecture guarantees that a temporary failure in European Space Agency satellite tile fetching or a state electricity board API does not halt the loan origination workflow.

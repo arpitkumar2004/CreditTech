@@ -1,0 +1,95 @@
+% -----------------------------------------------------------------------------
+% Chapter 3: Problem Statement
+% -----------------------------------------------------------------------------
+\chapter{Problem Statement}
+\label{chap:problem_statement}
+
+\section{Macro Context \& Existing Inefficiencies}
+In India's rural economy, access to institutional debt from formal Scheduled Commercial Banks (SCBs) and Regional Rural Banks (RRBs) remains acutely constrained. Despite expansive financial inclusion mandates such as the \textit{Pradhan Mantri Jan Dhan Yojana} (PMJDY), having a savings bank account has not translated into access to formal working capital or unsecured agricultural term loans. 
+
+Under current banking workflows, loan origination relies almost entirely on traditional credit information companies (CICs, such as CIBIL, Experian, and CRIF High Mark) and collateral documentation (formal land registry revenue records, \textit{Khata/Khasra}). When a smallholder farmer or woman Self-Help Group (SHG) member applies for credit, branch credit underwriters encounter an immediate systemic bottleneck:
+\begin{enumerate}
+  \item \textbf{The Thin-File Trap:} Over 65\% of rural agricultural laborers and marginal farmers have zero recorded bureau trade lines. Traditional credit scoring models score these applicants as ``-1'' (insufficient history), resulting in automatic programmatic rejection.
+  \item \textbf{Collateral Invisibility:} Marginal landholders often cultivate ancestral plots without clear individual titles, or operate under informal sharecropping (\textit{Batai}) agreements, rendering conventional mortgage underwriting impossible.
+  \item \textbf{Operational Cost Asymmetry:} The physical underwriting cost for a rural branch officer to conduct on-site field visits, inspect standing crops, and verify paper receipts for a small ₹30,000--₹50,000 micro-loan frequently exceeds the total net interest margin of the loan itself.
+\end{enumerate}
+
+\section{Target Demographics Affected}
+The primary victims of this information asymmetry comprise three vital segments of the rural agrarian economy:
+\begin{itemize}
+  \item \textbf{Small and Marginal Farmers:} Cultivating less than 2.0 hectares of land, operating under high weather volatility, and needing seasonal crop input financing for seeds, diesel, and fertilizer.
+  \item \textbf{Women SHG Members:} Over 80 million women enrolled in National Rural Livelihoods Mission (NRLM) groups who demonstrate exemplary internal peer-thrift discipline and group meeting attendance, yet receive zero individual credit bureau recognition.
+  \item \textbf{Rural Micro-Enterprises:} Local village aggregation points, dairy collection centers, repair shops, and Custom Hiring Centers (CHCs) requiring working capital without formal balance sheets.
+\end{itemize}
+
+\section{Systemic Limitations of Existing Alternatives}
+Faced with rejection by commercial banks, rural borrowers are forced into suboptimal alternatives:
+\begin{itemize}
+  \item \textbf{Informal Moneylenders (\textit{Sahukars}):} Charge exorbitant interest rates ranging from $36\%$ to over $60\%$ per annum, trapping smallholders in persistent cycles of generational debt.
+  \item \textbf{Predatory Digital Lending Apps:} Unregulated digital lenders that harvest invasive device data (entire contact books, photo galleries, location tracking) in direct violation of user privacy and use coercive collection tactics.
+  \item \textbf{Manual Joint Liability Groups (JLGs):} While Microfinance Institutions (MFIs) provide group credit, the group-liability model imposes high meeting transaction costs and caps individual credit limits, preventing progressive farmers from scaling.
+\end{itemize}
+
+\section{The Causal Problem-Solution Schematic}
+Figure~\ref{fig:problem_solution_chain} illustrates the research problem formulation, demonstrating how traditional data poverty drives credit rationing and how CreditTech's multi-rail alternative architecture resolves the failure modes.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm and 0.5cm, auto]
+  % Stage 1: Problem (Top Left)
+  \node[securityblock, text width=4.3cm, minimum height=1.65cm, fill=danger!10, draw=danger] (prob) {
+    \textbf{1. Structural Problem}\\[2pt]
+    \scriptsize 140M+ thin-file rural applicants\\
+    \scriptsize Zero formal bureau credit history\\
+    \scriptsize High physical underwriting cost
+  };
+
+  % Stage 2: Affected Users (Top Middle)
+  \node[clientblock, right=0.5cm of prob, text width=4.3cm, minimum height=1.65cm, fill=primary!10, draw=primary] (users) {
+    \textbf{2. Target Rural Cohort}\\[2pt]
+    \scriptsize Marginal farmers ($<2$\,ha land)\\
+    \scriptsize NRLM / SHG women borrowers\\
+    \scriptsize Informal rural micro-enterprises
+  };
+
+  % Stage 3: Current Gaps (Top Right)
+  \node[serviceblock, right=0.5cm of users, text width=4.3cm, minimum height=1.65cm, fill=warn!10, draw=warn] (limits) {
+    \textbf{3. Existing Market Gaps}\\[2pt]
+    \scriptsize Usurious informal moneylenders\\
+    \scriptsize Predatory digital lending apps\\
+    \scriptsize Unviable physical branch visits
+  };
+
+  % Stage 4: Proposed Solution (Row 2, Right - directly under limits)
+  \node[serviceblock, below=1.5cm of limits, text width=6.1cm, xshift=-1.1cm, minimum height=1.75cm, fill=accent!10, draw=accent] (sol) {
+    \textbf{4. Proposed Solution: CreditTech}\\[2pt]
+    \scriptsize 4-Rail Alternative Data (AA + Sentinel EO)\\
+    \scriptsize Monotonic WoE Scorecard (300--900) + SHAP\\
+    \scriptsize DPDP Hash-Chained Cryptographic Consent
+  };
+
+  % Stage 5: Expected Benefits (Row 2, Left - directly under prob)
+  \node[baseblock, left=1.4cm of sol, text width=6.1cm, minimum height=1.75cm, fill=success!12, draw=success] (benefit) {
+    \textbf{5. Quantifiable Financial Impact}\\[2pt]
+    \scriptsize 0.038\,ms Decision Latency ($>26\text{k}$/sec)\\
+    \scriptsize Rs.\ 5.2 Crore Net Margin per 10,000 Loans\\
+    \scriptsize $+12.4\%$ Financial Inclusion at Score 500
+  };
+
+  % Flows - Clean Non-Crossing Lines
+  \draw[flowline] (prob) -- (users);
+  \draw[flowline] (users) -- (limits);
+  \draw[flowline] (limits.south) -- node[right, font=\scriptsize\sffamily] {Architectural Intervention} (limits.south |- sol.north);
+  \draw[flowline] (sol.west) -- node[above=2pt, font=\scriptsize\sffamily] {Impact} (benefit.east);
+\end{tikzpicture}
+\caption{Research Block Diagram: Problem-to-Impact Causal Trajectory of the CreditTech Platform.}
+\label{fig:problem_solution_chain}
+\end{figure}
+
+\section{Proposed Solution \& Core Hypotheses}
+CreditTech introduces a non-extractive, regulatory-compliant alternative data decisioning framework built on three technical hypotheses:
+\begin{enumerate}
+  \item \textbf{Signal Sufficiency Hypothesis:} Non-traditional proxies---such as peer-thrift discipline in SHGs, satellite-observed multi-season crop vegetative vigor (NDVI), electricity utility payment punctuality, and government Direct Benefit Transfers (PM-Kisan)---provide sufficient statistical information to predict debt serviceability ($P(\text{Default})$) with an $\text{ROC-AUC} \ge 0.90$.
+  \item \textbf{Explainability-Fairness Invariant:} High machine learning discrimination does not require black-box opacity; a calibrated Weight-of-Evidence (WoE) scorecard can capture 98\% of complex tree-ensemble performance while maintaining closed-form point additivity and demographic fairness.
+  \item \textbf{Assisted Digital Delivery Model:} Partnering non-literate borrowers with local \textit{Bank Sakhis} equipped with offline-capable digital consent tablets resolves the digital divide without compromising data integrity or privacy.
+\end{enumerate}

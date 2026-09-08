@@ -1,0 +1,25 @@
+% -----------------------------------------------------------------------------
+% Chapter 26: Limitations
+% -----------------------------------------------------------------------------
+\chapter{Limitations}
+\label{chap:limitations}
+
+\section{Authentic Disclosure of MVP Boundaries}
+A hallmark of rigorous software engineering and scientific inquiry is the candid disclosure of system boundaries. While CreditTech demonstrates high predictive discrimination, pristine calibration, and verified role isolation, the current MVP release is subject to five specific technical and operational limitations:
+
+\begin{enumerate}
+  \item \textbf{Absence of Live Account Aggregator Production Credentials:}\\
+  Due to the multi-month regulatory onboarding and contractual vetting required by licensed Account Aggregator (AA) entities and the Reserve Bank Information Technology Private Limited (ReBIT), live financial data in the current MVP is ingested via self-contained mock servers adhering to the Sahamati FIU JSON specification. While the data contracts are identical, production latency and transient network drops from live bank core systems remain unverified.
+
+  \item \textbf{Proxy Mapping of Benchmark Default Labels:}\\
+  The 22,000-record real benchmark dataset was derived from international credit risk benchmarks (Home Credit and Give Me Some Credit) and mathematically mapped to Indian agro-ecological signals (SHG thrift, NDVI, PM-Kisan). While the covariance relationships reflect empirical agricultural literature, they do not replace a multi-year longitudinal repayment dataset collected directly from Indian Regional Rural Banks.
+
+  \item \textbf{Single-Node SQLite Concurrency Limits:}\\
+  In its local pilot configuration, the database utilizes SQLite in WAL mode. While SQLite handles hundreds of concurrent read operations with sub-millisecond response times, write transactions are serialized at the database file lock level. Sustained concurrent write volume exceeding 150 transactions per second will require immediate migration to PostgreSQL.
+
+  \item \textbf{Header-Based Identity Contract vs. Enterprise SSO:}\\
+  To maintain test velocity and deterministic automated test execution without external Identity Provider (IdP) dependencies, the MVP asserts identity via HTTP headers. While guarded by gateway middleware, an enterprise production deployment will require transition to signed JSON Web Tokens (JWT) issued by an OpenID Connect (OIDC) provider with hardware security keys.
+
+  \item \textbf{Static Satellite Revisit Interval:}\\
+  Sentinel-2 optical multispectral imagery operates on a 5-day revisit cycle. During peak monsoon months (July--August) in heavy cloud-cover regions, optical NDVI observations can suffer data gaps of 15 to 30 days, necessitating reliance on synthetic aperture radar (SAR) or imputation fallbacks.
+\end{enumerate}

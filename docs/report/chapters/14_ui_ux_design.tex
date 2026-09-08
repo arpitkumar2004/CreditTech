@@ -1,0 +1,100 @@
+% -----------------------------------------------------------------------------
+% Chapter 14: UI/UX Design System
+% -----------------------------------------------------------------------------
+\chapter{UI/UX Design System}
+\label{chap:ui_ux}
+
+\section{Design System Principles \& Tokens}
+CreditTech implements a clean, accessible design system tailored for high readability across diverse display hardware---ranging from low-cost Android smartphones in rural environments to high-resolution desktop monitors in commercial bank underwriting centers. The design system enforces five core UX principles:
+
+\begin{enumerate}
+  \item \textbf{High-Contrast Typography:} Primary interfaces use modern geometric sans-serif typography (\textit{Outfit} for display headings, \textit{Inter} for body text, and \textit{JetBrains Mono} for tabular scores and currency figures), ensuring crisp legibility under direct sunlight.
+  \item \textbf{8-Point Spatial Grid:} All paddings, margins, and component dimensions adhere to an 8-point geometric scale (8px, 16px, 24px, 32px), creating visual rhythm and responsive consistency.
+  \item \textbf{Institutional Color Tokens:} The color palette strictly avoids saturated garish tones, utilizing deep navy (\texttt{\#1E3A8A}) for primary structural headers, slate blue for navigation, emerald (\texttt{\#047857}) for approvals, amber (\texttt{\#B45309}) for manual review, and muted crimson (\texttt{\#991B1B}) for rejections.
+  \item \textbf{Vernacular Bilingualism:} Critical credit decisions and adverse action reason codes are presented side-by-side in English and Hindi (\textit{Devanagari}), eliminating the linguistic barrier for rural applicants.
+  \item \textbf{Low-Bandwidth Mobile Optimization:} Assets, fonts, and icons are bundled into an ultra-lean client footprint ($<300$\,KB gzip), enabling the web application to function smoothly over 2G/3G rural networks.
+\end{enumerate}
+
+\section{Persona-Tailored Screen Architecture}
+Table~\ref{tab:screen_catalog} outlines the core application views and their design intent across the operational personas.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{p{3.0cm} p{3.2cm} X}
+  \toprule
+  \textbf{Screen / View} & \textbf{Target Persona} & \textbf{UX Design Purpose \& Key Elements} \\
+  \midrule
+  \textbf{Landing / Home} & All Callers & High-level platform introduction, regulatory compliance badges (RBI/DPDP), and entry points for borrowers and officers. \\
+  \addlinespace
+  \textbf{Borrower Health View} & Rural Borrower & Minimalist visual gauge displaying credit health (300--900 scale), decision zone badge, and bilingual positive/negative factors. \\
+  \addlinespace
+  \textbf{Sakhi Field Ingest} & Bank Sakhi & Fast-input form optimized for touch tablets; supports batch digitizing of paper SHG registers and assisted consent capture. \\
+  \addlinespace
+  \textbf{Officer Workstation} & Loan Underwriter & Dense data layout: synthesized 21-feature 5-Cs panel, regional peer comparisons, TreeSHAP contribution bars, and override action buttons. \\
+  \addlinespace
+  \textbf{Model Registry Dossier} & Risk Officer / Admin & Institutional governance dashboard rendering real-time mathematical validation graphs, PSI drift monitors, and gated promotion controls. \\
+  \addlinespace
+  \textbf{Grievance Portal} & Borrower / Sakhi & Transparent complaint lodgement interface with 30-day statutory countdown timer and auditable resolution status badges. \\
+  \addlinespace
+  \textbf{Error / Fallback State} & All Callers & Informative, friendly failure messages explaining the error without exposing internal stack traces or database schema names. \\
+  \addlinespace
+  \textbf{Empty State} & All Callers & Contextual guidance cards with clear call-to-action buttons when queues or data lists have zero records. \\
+  \bottomrule
+\end{tabularx}
+\caption{Screen Catalog and Persona-Specific User Experience Functions.}
+\label{tab:screen_catalog}
+\end{table}
+
+\section{Component Routing & State Hierarchy}
+Figure~\ref{fig:ui_routing_hierarchy} provides the schematic block diagram of the front-end component hierarchy, illustrating how the \texttt{usePersona} hook controls view rendering and route authorization.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 1.2cm, auto]
+
+  % Root
+  \node[baseblock, fill=secondary!10, draw=secondary, minimum width=3.6cm] (app) {
+    \textbf{React 18 Application Root}\\
+    \scriptsize \texttt{App.tsx} $\bullet$ QueryClient $\bullet$ Toast
+  };
+
+  % Persona Switcher
+  \node[clientblock, below=1.0cm of app, fill=primary!12, draw=primary, minimum width=4.2cm] (switcher) {
+    \textbf{TopNav \& DevPersonaSwitcher}\\
+    \scriptsize Broadcasts \texttt{PersonaContext} (Role, ID, District)
+  };
+
+  % Routes
+  \node[serviceblock, below left=1.2cm and 0.2cm of switcher, fill=accent!10, draw=accent, minimum width=3.4cm] (borrower_routes) {
+    \textbf{Borrower Views}\\
+    \scriptsize \texttt{/borrower} $\bullet$ \texttt{/grievance}
+  };
+
+  \node[serviceblock, below=1.2cm of switcher, fill=accent!10, draw=accent, minimum width=3.4cm] (sakhi_routes) {
+    \textbf{Sakhi Field Views}\\
+    \scriptsize \texttt{/sakhi/entry} $\bullet$ \texttt{/consent}
+  };
+
+  \node[serviceblock, below right=1.2cm and 0.2cm of switcher, fill=accent!10, draw=accent, minimum width=3.4cm] (officer_routes) {
+    \textbf{Officer / Admin Views}\\
+    \scriptsize \texttt{/officer} $\bullet$ \texttt{/models}
+  };
+
+  % Access Denied Guard
+  \node[securityblock, below=1.1cm of officer_routes, fill=danger!12, draw=danger, minimum width=3.4cm] (guard) {
+    \textbf{AccessDenied Guard}\\
+    \scriptsize Verifies \texttt{isAllowed(role)}
+  };
+
+  \draw[flowline] (app) -- (switcher);
+  \draw[flowline] (switcher) -| (borrower_routes);
+  \draw[flowline] (switcher) -- (sakhi_routes);
+  \draw[flowline] (switcher) -| (officer_routes);
+  \draw[flowline] (officer_routes) -- (guard);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: Front-End Component Routing and Persona Authorization Hierarchy.}
+\label{fig:ui_routing_hierarchy}
+\end{figure}

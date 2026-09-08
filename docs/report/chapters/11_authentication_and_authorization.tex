@@ -1,0 +1,114 @@
+% -----------------------------------------------------------------------------
+% Chapter 11: Authentication & Authorization
+% -----------------------------------------------------------------------------
+\chapter{Authentication \& Authorization}
+\label{chap:auth}
+
+\section{Identity Propagation Pipeline}
+Security within CreditTech is built on an end-to-end identity resolution pipeline. Unlike monolithic web applications that rely on opaque session cookies or client-side trust, CreditTech verifies caller identity at the gateway layer, derives an authenticated \texttt{CallerContext}, and passes this security context immutably through FastAPI dependency injection to downstream business logic. Figure~\ref{fig:identity_pipeline} illustrates this identity resolution flow.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.1cm and 1.2cm, auto]
+
+  % Stage 1: Inbound Request
+  \node[clientblock, fill=primary!10, draw=primary, minimum width=3.4cm] (req) {
+    \textbf{Inbound HTTP Request}\\
+    \scriptsize Headers: \texttt{X-Borrower-Id},\\
+    \scriptsize \texttt{X-Officer-Role}, \texttt{X-Officer-Id}
+  };
+
+  % Stage 2: Gateway Interceptor
+  \node[securityblock, right=1.0cm of req, fill=danger!10, draw=danger, minimum width=3.6cm] (gateway) {
+    \textbf{Security Middleware}\\
+    \scriptsize Rate Limit Check\\
+    \scriptsize Body Size Sanitization\\
+    \scriptsize Request-ID Ingestion
+  };
+
+  % Stage 3: Dependency Injection
+  \node[serviceblock, right=1.0cm of gateway, fill=accent!10, draw=accent, minimum width=3.6cm] (dep) {
+    \textbf{FastAPI Dependency}\\
+    \scriptsize \texttt{require\_officer()}\\
+    \scriptsize \texttt{require\_admin()}\\
+    \scriptsize \texttt{get\_borrower\_ctx()}
+  };
+
+  % Stage 4: Resource Authorizer
+  \node[decisionblock, below=1.3cm of dep, fill=warn!10, draw=warn, minimum width=3.2cm] (authz) {
+    \textbf{Resource}\\
+    \textbf{Authorizer}\\
+    \scriptsize Tenant Match?\\
+    \scriptsize Role Permitted?
+  };
+
+  % Stage 5: Execution vs Abort
+  \node[baseblock, left=1.2cm of authz, fill=success!12, draw=success, minimum width=3.4cm] (exec) {
+    \textbf{Execute Handler}\\
+    \scriptsize Authorized Context\\
+    \scriptsize Service Business Logic
+  };
+
+  \node[securityblock, below=1.1cm of authz, fill=danger!15, draw=danger, minimum width=3.4cm] (abort) {
+    \textbf{Immediate Termination}\\
+    \scriptsize HTTP 401 / 403 Abort\\
+    \scriptsize Audit Alert Dispatched
+  };
+
+  % Connecting Flows
+  \draw[flowline] (req) -- (gateway);
+  \draw[flowline] (gateway) -- (dep);
+  \draw[flowline] (dep) -- (authz);
+  \draw[flowline] (authz) -- node[above, font=\scriptsize\sffamily] {Pass} (exec);
+  \draw[flowline] (authz) -- node[right, font=\scriptsize\sffamily] {Fail} (abort);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: Inbound Request Identity Propagation and Resource Authorization Pipeline.}
+\label{fig:identity_pipeline}
+\end{figure}
+
+\section{Defense Against Horizontal Privilege Escalation}
+Horizontal privilege escalation occurs when an attacker possesses valid credentials as a regular user (e.g., Borrower A) and attempts to access or manipulate private resources belonging to another user of equivalent rank (e.g., Borrower B).
+
+In CreditTech, this threat is neutralized at the route dependency layer through an explicit \textit{Tenant Ownership Invariant}:
+\begin{lstlisting}[language=Python, caption={Tenant Ownership Verification in Score Retrieval Handler.}]
+@router.get("/score/{score_id}", summary="Fetch credit score and SHAP reason codes")
+async def get_score(
+    score_id: UUID,
+    borrower_id: UUID | None = Depends(get_optional_borrower_id),
+    officer: OfficerContext | None = Depends(get_optional_officer),
+    db: AsyncSession = Depends(get_db),
+):
+    score = await db.get(ScoreResult, score_id)
+    if not score:
+        raise HTTPException(status_code=404, detail="Score record not found")
+        
+    # Horizontal Authorization Guard:
+    if borrower_id is not None:
+        # Caller is a borrower -> Must own the associated snapshot
+        snapshot = await db.get(FeatureSnapshot, score.feature_id)
+        if snapshot.borrower_id != borrower_id:
+            logger.warn("horizontal_privilege_attempt", caller=borrower_id, target=snapshot.borrower_id)
+            raise HTTPException(status_code=403, detail="Access to resource forbidden: caller does not own record")
+            
+    return score.to_response()
+\end{lstlisting}
+
+\section{Defense Against Vertical Privilege Escalation}
+Vertical privilege escalation occurs when a standard user (e.g., a Borrower or Field Sakhi) attempts to execute restricted operations reserved for higher-privilege administrative or underwriting roles (e.g., activating an unvetted ML model or overriding an adverse loan decision).
+
+CreditTech prevents vertical escalation through tiered role-guard dependencies (\texttt{require\_officer}, \texttt{require\_admin}). Any route modifying platform-level configuration or model promotion enforces strict role membership:
+\begin{lstlisting}[language=Python, caption={Role-Gating Dependency Implementation.}]
+async def require_admin(
+    role: str = Header(..., alias="X-Officer-Role"),
+    officer_id: str = Header(..., alias="X-Officer-Id"),
+) -> str:
+    if role.strip().upper() != "ADMIN":
+        logger.error("vertical_escalation_blocked", caller=officer_id, attempted_role=role)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operation requires administrative privileges"
+        )
+    return officer_id
+\end{lstlisting}
+Because these checks are evaluated before handler execution, no sensitive internal state, weights, or database queries are leaked to unauthorized callers.

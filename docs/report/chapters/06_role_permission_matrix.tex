@@ -1,0 +1,130 @@
+% -----------------------------------------------------------------------------
+% Chapter 6: Role & Permission Matrix
+% -----------------------------------------------------------------------------
+\chapter{Role \& Permission Matrix}
+\label{chap:role_permission_matrix}
+
+\section{Conceptual Security \& Authorization Hierarchy}
+To ensure rigorous non-repudiation and prevent both horizontal and vertical privilege escalation, CreditTech enforces a multi-tier authorization topology. Figure~\ref{fig:authorization_hierarchy} depicts the schematic authorization model governing how identities flow to resources, establishing hard tripwires where unauthorized actions trigger instantaneous HTTP \texttt{401 Unauthorized} or \texttt{403 Forbidden} terminations.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 0.4cm, auto]
+  % Row 1: System Caller Personas (Single Tier, Zero Block Crossing)
+  \node[clientblock, text width=2.6cm, minimum height=1.4cm, fill=primary!15, draw=primary] (borrower) {
+    \textbf{\footnotesize Rural Borrower}\\[1pt]
+    \scriptsize Self-Service Portal\\
+    \scriptsize Own Dossier
+  };
+
+  \node[clientblock, right=0.4cm of borrower, text width=2.6cm, minimum height=1.4cm, fill=primary!10, draw=primary] (sakhi) {
+    \textbf{\footnotesize Bank Sakhi}\\[1pt]
+    \scriptsize Assisted Field Tablet\\
+    \scriptsize Village Cohort
+  };
+
+  \node[serviceblock, right=0.4cm of sakhi, text width=2.6cm, minimum height=1.4cm, fill=accent!12, draw=accent] (officer) {
+    \textbf{\footnotesize Loan Officer}\\[1pt]
+    \scriptsize Underwriting Station\\
+    \scriptsize Dissent Overrides
+  };
+
+  \node[serviceblock, right=0.4cm of officer, text width=2.6cm, minimum height=1.4cm, fill=warn!12, draw=warn] (risk) {
+    \textbf{\footnotesize Risk Officer}\\[1pt]
+    \scriptsize Fairness Manifest\\
+    \scriptsize Portfolio Audits
+  };
+
+  \node[securityblock, right=0.4cm of risk, text width=2.6cm, minimum height=1.4cm, fill=danger!12, draw=danger] (admin) {
+    \textbf{\footnotesize Admin / MLOps}\\[1pt]
+    \scriptsize Model Gates\\
+    \scriptsize System Telemetry
+  };
+
+  % Cryptographic Boundary Barrier Line (in open space between actors and resources)
+  \coordinate (barrier_left) at ($(borrower.south west)+(-0.2,-0.65)$);
+  \coordinate (barrier_right) at ($(admin.south east)+(0.2,-0.65)$);
+  
+  \draw[line width=1.4pt, danger, dashed] (barrier_left) -- (barrier_right);
+
+  % Row 2: Protected Resources & Storage (Clean Rectangular Baseblock)
+  \node[baseblock, below=1.35cm of officer, text width=14.4cm, minimum height=1.2cm, fill=primary!10, draw=primary!80!black] (res) {
+    \textbf{Protected Application Resources \& State Store (Zero-Trust Perimeter)}\\[2pt]
+    \scriptsize Feature Snapshots $\bullet$ Credit Scores $\bullet$ SHA-256 Consent Chains $\bullet$ Underwriting Decisions $\bullet$ Audit Logs
+  };
+
+  % Enforcement Tripwire Alert Box
+  \node[securityblock, below=0.45cm of res, text width=14.4cm, minimum height=0.85cm, fill=danger!8, draw=danger] (denied) {
+    \textbf{\scriptsize HARD ZERO-TRUST ENFORCEMENT:}\\[1pt]
+    \scriptsize Cross-Tenant Scope Violations or Role Mismatches Intercepted Instantly with HTTP \texttt{401 Unauthorized} / \texttt{403 Forbidden}
+  };
+
+  % 5 Clean, Parallel Vertical Flows (Directly through tripwire, zero collisions)
+  \draw[flowline] (borrower.south) -- node[pos=0.3, fill=cardbg, inner sep=1.5pt, font=\tiny\sffamily] {OWN} (borrower.south |- res.north);
+  \draw[flowline] (sakhi.south) -- node[pos=0.3, fill=cardbg, inner sep=1.5pt, font=\tiny\sffamily] {Assisted} (sakhi.south |- res.north);
+  \draw[flowline] (officer.south) -- node[pos=0.3, fill=cardbg, inner sep=1.5pt, font=\tiny\sffamily] {Decisions} (officer.south |- res.north);
+  \draw[flowline] (risk.south) -- node[pos=0.3, fill=cardbg, inner sep=1.5pt, font=\tiny\sffamily] {Audits} (risk.south |- res.north);
+  \draw[flowline] (admin.south) -- node[pos=0.3, fill=cardbg, inner sep=1.5pt, font=\tiny\sffamily] {Gates} (admin.south |- res.north);
+\end{tikzpicture}
+\caption{Research Block Diagram: Multi-Tier Authorization Model and Cryptographic Tripwire Boundaries.}
+\label{fig:authorization_hierarchy}
+\end{figure}
+
+\section{Exhaustive Persona $\times$ Resource $\times$ Action Matrix}
+Table~\ref{tab:permission_matrix} details the complete access permissions governing all 20 platform operations across the seven platform caller roles.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X *{7}{>{\centering\arraybackslash}p{1.45cm}}}
+  \toprule
+  \textbf{Resource / Action} & \textbf{Guest} & \textbf{Borrower} & \textbf{Sakhi} & \textbf{Officer} & \textbf{Risk} & \textbf{Admin} & \textbf{RE Bank} \\
+  \midrule
+  System Health \& Probes (\texttt{/health}) & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+  OpenAPI Documentation (\texttt{/docs}) & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+  \addlinespace
+  Create Consent (\texttt{POST /consent}) & $\times$ & \textbf{OWN} & \checkmark\,(Asst) & $\times$ & $\times$ & $\times$ & $\times$ \\
+  Lookup Consent Record (\texttt{GET /consent/\{id\}}) & $\times$ & \textbf{OWN} & \checkmark & \checkmark & Eye & Eye & Eye \\
+  Revoke Consent (\texttt{POST /consent/revoke}) & $\times$ & \textbf{OWN} & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ \\
+  \addlinespace
+  Ingest SHG/FPO Record (\texttt{POST /ingest/shg}) & $\times$ & $\times$ & \checkmark & \checkmark & $\times$ & \checkmark & $\times$ \\
+  Trigger 4-Rail Ingestion (\texttt{POST /ingest/trigger}) & $\times$ & $\times$ & \checkmark & \checkmark & $\times$ & \checkmark & $\times$ \\
+  Compute Credit Score (\texttt{POST /score}) & $\times$ & $\times$ & \checkmark & \checkmark & $\times$ & \checkmark & $\times$ \\
+  View Score \& SHAP (\texttt{GET /score/\{id\}}) & $\times$ & \textbf{OWN} & Eye & \checkmark & Eye & Eye & Eye \\
+  \addlinespace
+  Submit Underwriting Decision (\texttt{POST /decisions}) & $\times$ & $\times$ & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ \\
+  Record Officer Dissent Override & $\times$ & $\times$ & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ \\
+  Dispatch RE Loan Package (\texttt{POST /handoff}) & $\times$ & $\times$ & $\times$ & \checkmark & $\times$ & $\times$ & \checkmark \\
+  \addlinespace
+  Lodge Formal Grievance (\texttt{POST /grievances}) & $\times$ & \textbf{OWN} & \checkmark\,(Asst) & $\times$ & $\times$ & $\times$ & $\times$ \\
+  Triage Grievance / Update SLA (\texttt{PATCH ...}) & $\times$ & $\times$ & $\times$ & \checkmark & $\times$ & \checkmark & $\times$ \\
+  \addlinespace
+  Portfolio Drift Metrics (\texttt{GET .../portfolio}) & $\times$ & $\times$ & $\times$ & Eye & Eye & Eye & Eye \\
+  Fairness Parity Audit (\texttt{GET .../fairness}) & $\times$ & $\times$ & $\times$ & Eye & \checkmark & \checkmark & Eye \\
+  Auditor CSV Log Export (\texttt{GET .../export}) & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark & \checkmark & \checkmark \\
+  \addlinespace
+  List Models \& Metrics (\texttt{GET /admin/models}) & $\times$ & $\times$ & $\times$ & Eye & Eye & \checkmark & $\times$ \\
+  Fairness Manifest Inspection (\texttt{GET .../manifest}) & $\times$ & $\times$ & $\times$ & Eye & Eye & \checkmark & $\times$ \\
+  Promote Model to Active Champion & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark\,(Gated) & $\times$ \\
+  \bottomrule
+\end{tabularx}
+\caption{Canonical Role-Based Access Control (RBAC) Matrix across System Resources. Legend: \checkmark = Full Access, $\times$ = Forbidden (HTTP 403), \textbf{OWN} = Restricted to Caller's Authenticated Identity, Eye = Read-Only Aggregated Access.}
+\label{tab:permission_matrix}
+\end{table}
+
+\section{Privilege Escalation Tripwires}
+CreditTech defines programmatic tripwires that actively detect, reject, and audit both forms of unauthorized privilege escalation:
+
+\begin{tripwirebox}{Tripwire 1: Horizontal Privilege Escalation Defense}
+\textbf{Scenario:} Borrower Radhika Devi (\texttt{BORROWER-A1}) attempts to fetch the credit score or grievance details belonging to Sita Kumari (\texttt{BORROWER-A2}) via \texttt{GET /api/v1/score/\{id\_sita\}}.\\
+\textbf{System Defense:} The service layer enforces an identity predicate:
+$$\text{ASSERT}\; \text{resource}.\text{borrower\_id} == \text{request}.\text{headers}[\text{`X-Borrower-Id'}]$$
+Failure immediately aborts request execution with \textbf{HTTP 403 Forbidden} and dispatches an audit telemetry alert with no resource data reflected.
+\end{tripwirebox}
+
+\begin{tripwirebox}{Tripwire 2: Vertical Privilege Escalation Defense}
+\textbf{Scenario:} Loan Officer Rajesh Kumar attempts to invoke the model promotion endpoint (\texttt{POST /api/v1/admin/models/v1.1.0-gbm-challenger/promote}) to force-activate an unvetted model.\\
+\textbf{System Defense:} The route is guarded by the \texttt{require\_admin} FastAPI dependency. Because the caller's role is \texttt{LOAN\_OFFICER}, the request is intercepted at the API gateway layer with \textbf{HTTP 403 Forbidden}, logging an unauthorized administrative operation attempt.
+\end{tripwirebox}

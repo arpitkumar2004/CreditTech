@@ -1,0 +1,86 @@
+% -----------------------------------------------------------------------------
+% Chapter 18: Test Case Matrix
+% -----------------------------------------------------------------------------
+\chapter{Test Case Matrix}
+\label{chap:test_case_matrix}
+
+\section{Representative Security \& Functional Test Cases}
+Table~\ref{tab:test_cases_matrix} presents 25 representative automated test cases covering persona authorization boundaries, consent revocation cascades, underwriting overrides, and fairness gate enforcements. Every test case is executed as part of the automated continuous integration suite.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{l p{2.2cm} p{1.6cm} p{3.2cm} p{2.4cm} c}
+  \toprule
+  \textbf{ID} & \textbf{Caller Persona} & \textbf{Action} & \textbf{Target Resource} & \textbf{Expected Verdict} & \textbf{Status} \\
+  \midrule
+  \textbf{T01} & Borrower A & \texttt{GET} & Own Credit Score (\texttt{/score/A}) & \texttt{200 OK} (Allow) & \textbf{PASS} \\
+  \textbf{T02} & Borrower A & \texttt{GET} & Borrower B Score (\texttt{/score/B}) & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \textbf{T03} & Borrower A & \texttt{POST} & Revoke Own Consent & \texttt{200 OK} (Revoked) & \textbf{PASS} \\
+  \textbf{T04} & Borrower A & \texttt{POST} & Revoke Borrower B Consent & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \textbf{T05} & Borrower A & \texttt{POST} & Model Promotion Endpoint & \texttt{401/403 Forbidden}& \textbf{PASS} \\
+  \addlinespace
+  \textbf{T06} & Bank Sakhi & \texttt{POST} & Assisted Consent Capture & \texttt{201 Created} & \textbf{PASS} \\
+  \textbf{T07} & Bank Sakhi & \texttt{POST} & Ingest SHG Passbook & \texttt{200 OK} (Ingested)& \textbf{PASS} \\
+  \textbf{T08} & Bank Sakhi & \texttt{POST} & Underwriting Decision & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \textbf{T09} & Bank Sakhi & \texttt{POST} & Trigger Ingest (Assigned) & \texttt{200 OK} (Spawned) & \textbf{PASS} \\
+  \textbf{T10} & Bank Sakhi & \texttt{POST} & Model Promotion Endpoint & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \addlinespace
+  \textbf{T11} & Loan Officer & \texttt{GET} & Applicant Score \& SHAP & \texttt{200 OK} (Allow) & \textbf{PASS} \\
+  \textbf{T12} & Loan Officer & \texttt{POST} & Approve Loan (Standard) & \texttt{201 Created} & \textbf{PASS} \\
+  \textbf{T13} & Loan Officer & \texttt{POST} & Dissent Override (w/ Note) & \texttt{201 Created} & \textbf{PASS} \\
+  \textbf{T14} & Loan Officer & \texttt{POST} & Override (Missing Note) & \texttt{422 Unprocessable} & \textbf{PASS} \\
+  \textbf{T15} & Loan Officer & \texttt{POST} & Model Promotion Endpoint & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \addlinespace
+  \textbf{T16} & Risk Officer & \texttt{GET} & Portfolio Drift Metrics & \texttt{200 OK} (Allow) & \textbf{PASS} \\
+  \textbf{T17} & Risk Officer & \texttt{GET} & Demographic Parity Audit & \texttt{200 OK} (Allow) & \textbf{PASS} \\
+  \textbf{T18} & Risk Officer & \texttt{GET} & Fairness Auditor CSV Export & \texttt{200 OK} (CSV Stream) & \textbf{PASS} \\
+  \textbf{T19} & Risk Officer & \texttt{POST} & Underwriting Decision & \texttt{403 Forbidden} & \textbf{PASS} \\
+  \addlinespace
+  \textbf{T20} & MLOps Admin & \texttt{POST} & Promote Model (Passing Gate) & \texttt{200 OK} (Promoted) & \textbf{PASS} \\
+  \textbf{T21} & MLOps Admin & \texttt{POST} & Promote Model (Failing Gate) & \texttt{409 Conflict} (Blocked)& \textbf{PASS} \\
+  \textbf{T22} & Anonymous & \texttt{GET} & Health Probes (\texttt{/health}) & \texttt{200 OK} (Healthy) & \textbf{PASS} \\
+  \textbf{T23} & Anonymous & \texttt{GET} & Borrower Score Endpoint & \texttt{401 Unauthorized} & \textbf{PASS} \\
+  \textbf{T24} & System Core & \texttt{POST} & Scoring on Revoked Consent & \texttt{400 Bad Request} & \textbf{PASS} \\
+  \textbf{T25} & System Core & \texttt{POST} & Duplicate Decision Submission & \texttt{409 Conflict} & \textbf{PASS} \\
+  \bottomrule
+\end{tabularx}
+\caption{Representative Security and Functional Test Matrix with Verified Outcomes.}
+\label{tab:test_cases_matrix}
+\end{table}
+
+\section{Complete Automated Test Suite Audit (169 Tests)}
+Table~\ref{tab:test_suite_breakdown} details the distribution of the complete \textbf{169 automated tests} implemented across the CreditTech codebase, confirming a \textbf{100\% pass rate} executed in 55.06 seconds.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{l X c c}
+  \toprule
+  \textbf{Test Module File} & \textbf{Focus Area / Test Dimension} & \textbf{Test Count} & \textbf{Result} \\
+  \midrule
+  \texttt{tests/test\_persona\_authorization.py} & Exhaustive RBAC route security \& tripwires & 14 & \textbf{PASS} \\
+  \texttt{tests/test\_consent.py} & SHA-256 hash chaining \& revocation cascades & 5 & \textbf{PASS} \\
+  \texttt{tests/test\_ingestion.py} & 4-rail asynchronous ingestion \& fallback & 7 & \textbf{PASS} \\
+  \texttt{tests/test\_scoring.py} & WoE scorecard calculation \& bounds checking & 7 & \textbf{PASS} \\
+  \texttt{tests/test\_officer\_decision.py} & Underwriting verdicts \& override rationale validation & 10 & \textbf{PASS} \\
+  \texttt{tests/test\_p5\_fairness.py} & Demographic parity \& disparate impact ratios & 5 & \textbf{PASS} \\
+  \texttt{tests/test\_p5\_grievance.py} & 30-day statutory SLA countdown \& state machine & 7 & \textbf{PASS} \\
+  \texttt{tests/test\_p6\_fairness\_gate.py} & Automated model promotion blocker on bias & 8 & \textbf{PASS} \\
+  \texttt{tests/test\_p6\_promotion.py} & Candidate to active champion lifecycle transitions & 4 & \textbf{PASS} \\
+  \texttt{tests/test\_p6\_security.py} & Rate limiting, payload size ceilings, security headers & 5 & \textbf{PASS} \\
+  \texttt{tests/test\_p6\_load.py} & 60-request concurrent burst resilience & 1 & \textbf{PASS} \\
+  \texttt{tests/test\_benchmark\_loaders.py} & 22,000-sample Home Credit + GMSC data ingestion & 3 & \textbf{PASS} \\
+  \texttt{tests/test\_early\_adopter\_db.py} & SQLite seeding of 15 pilot village clusters & 2 & \textbf{PASS} \\
+  \texttt{tests/test\_ml\_champion\_challenger.py} & Multi-model benchmark suite comparisons & 3 & \textbf{PASS} \\
+  \texttt{tests/test\_cuj\_workflows.py} & Complete end-to-end critical user journeys & 4 & \textbf{PASS} \\
+  \textit{Additional 24 test modules} & Features, Geospatial, Drift, Recourse, Retraining, etc. & 84 & \textbf{PASS} \\
+  \midrule
+  \textbf{Total Test Suite} & \textbf{Unified Automated Test Harness} & \textbf{169} & \textbf{100\% PASS} \\
+  \bottomrule
+\end{tabularx}
+\caption{Automated Pytest Suite Distribution and Verification Audit.}
+\label{tab:test_suite_breakdown}
+\end{table}

@@ -1,0 +1,26 @@
+% -----------------------------------------------------------------------------
+% Chapter 28: Lessons Learned & Engineering Post-Mortem
+% -----------------------------------------------------------------------------
+\chapter{Lessons Learned \& Engineering Post-Mortem}
+\label{chap:lessons_learned}
+
+\section{Retrospective Architectural Insights}
+Developing CreditTech provided profound engineering lessons at the intersection of distributed systems, machine learning governance, and rural human-computer interaction:
+
+\begin{enumerate}
+  \item \textbf{The Regulatory Fallacy of Unconstrained ML in Banking:}\\
+  \textit{Initial Mistake:} Early project iterations explored complex unconstrained gradient boosted decision trees (GBDT) and multi-layer perceptrons, chasing incremental gains in AUC ($\sim 0.98$).\\
+  \textit{The Lesson:} We discovered that pure black-box models are effectively un-deployable in regulated banking. Under RBI guidelines, an underwriter cannot reject an applicant without specific, legally defensible reason codes. TreeSHAP on unconstrained trees frequently suffered from local feature correlations producing unstable or counter-intuitive explanations. Transitioning to a \textbf{Monotonic Weight-of-Evidence Scorecard} solved this completely: it enforced that higher peer savings or higher crop vigor could never mathematically lower a borrower's score, guaranteeing legal compliance and underwriter trust.
+
+  \item \textbf{Handling Spatial Autocorrelation in Agricultural Credit:}\\
+  \textit{Initial Mistake:} Traditional random train/test splits yielded unrealistically optimistic validation metrics ($\text{AUC} > 0.99$). Neighboring farmers in the same village shared identical rainfall, canal water access, and local market prices.\\
+  \textit{The Lesson:} We implemented \textbf{5-Fold Spatial GroupKFold Cross-Validation} grouped strictly by village cluster. This forced models to generalize across distinct agro-climatic zones (e.g., irrigated canal plains vs. drought-prone rainfed hills), eliminating spatial data leakage and reflecting true real-world risk.
+
+  \item \textbf{Async Python Concurrency \& Database Locking:}\\
+  \textit{Initial Mistake:} Running concurrent ingestion tasks with SQLite initially caused transient \texttt{database is locked} exceptions during simultaneous multi-rail writes.\\
+  \textit{The Lesson:} We reconfigured SQLite to utilize Write-Ahead Logging (\texttt{PRAGMA journal\_mode=WAL}), raised the busy timeout to 5,000\,ms, and decoupled rail fetching from database persistence. The orchestrator collects all four rail payloads in memory first, performing a single atomic write transaction.
+
+  \item \textbf{UI Persona Switching \& State Isolation:}\\
+  \textit{Initial Mistake:} Storing active persona state in browser \texttt{localStorage} caused stale data when developers switched between Borrower and Loan Officer personas during manual testing.\\
+  \textit{The Lesson:} We refactored the frontend to use React Query with query-key invalidation tied directly to \texttt{persona.id}. Switching personas instantaneously purges cached queries and refetches resources under the new caller role, eliminating cross-persona data ghosting.
+\end{enumerate}

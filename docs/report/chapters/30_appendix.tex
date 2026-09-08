@@ -1,0 +1,150 @@
+% -----------------------------------------------------------------------------
+% Chapter 30: Appendix
+% -----------------------------------------------------------------------------
+\chapter{Appendix}
+\label{chap:appendix}
+
+\section{Mathematical Formulations of Core Metrics}
+
+\subsection{Weight of Evidence (WoE) and Information Value (IV)}
+For a continuous or categorical credit risk feature discretized into $k$ bins:
+$$\text{WoE}_i = \ln \left( \frac{\text{Good}_i / \text{Good}_{\text{total}}}{\text{Bad}_i / \text{Bad}_{\text{total}}} \right)$$
+$$\text{IV} = \sum_{i=1}^{k} \left( \frac{\text{Good}_i}{\text{Good}_{\text{total}}} - \frac{\text{Bad}_i}{\text{Bad}_{\text{total}}} \right) \times \text{WoE}_i$$
+Where features with $\text{IV} < 0.02$ are discarded as uninformative, and features with $0.10 \le \text{IV} \le 0.50$ represent strong credit risk predictors~\cite{thomas_credit_2017}.
+
+\subsection{Standardized Credit Score Scaling Transformation}
+$$\text{Score} = \text{Offset} - \text{Factor} \cdot \ln \left( \frac{P(\text{Default})}{1 - P(\text{Default})} \right)$$
+Where scaling parameters are derived from standard institutional benchmarks:
+$$\text{Factor} = \frac{\text{PDO}}{\ln(2)}, \quad \text{Offset} = \text{TargetScore} - \text{Factor} \cdot \ln(\text{TargetOdds})$$
+Under CreditTech parameters ($\text{TargetScore} = 600$, $\text{TargetOdds} = 19:1$, $\text{PDO} = 40$), the scorecard produces scores bounded strictly between 300 and 900 points.
+
+\subsection{Kolmogorov-Smirnov (KS) Separation Statistic}
+$$\text{KS} = \max_{s \in [300, 900]} \left| F_{\text{Goods}}(s) - F_{\text{Bads}}(s) \right|$$
+Where $F(s)$ represents the cumulative empirical distribution function of scores for each cohort.
+
+\subsection{Expected Calibration Error (ECE)}
+For $M$ equally spaced probability bins $B_m$:
+$$\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|$$
+
+\subsection{Shapley Value Feature Attribution (TreeSHAP)}
+For an applicant feature vector $\mathbf{x}$ and model prediction $f(\mathbf{x})$:
+$$\phi_i(f, \mathbf{x}) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[ f_x(S \cup \{i\}) - f_x(S) \right]$$
+Where $\phi_i$ denotes the exact additive marginal contribution of feature $i$ to the predicted log-odds of default~\cite{lundberg_shap_2017}.
+
+\section{Core API Endpoint Catalog}
+Table~\ref{tab:api_catalog} documents the primary RESTful HTTP routes implemented by the CreditTech backend service.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{l p{5.0cm} p{2.2cm} X}
+  \toprule
+  \textbf{Method} & \textbf{Path / Endpoint} & \textbf{Auth Guard} & \textbf{Functional Description} \\
+  \midrule
+  \texttt{GET} & \texttt{/health} & Anonymous & System liveness and dependency probe. \\
+  \texttt{POST} & \texttt{/api/v1/consent/} & Borrower / Sakhi & Records new consent with SHA-256 hash chaining. \\
+  \texttt{GET} & \texttt{/api/v1/consent/\{id\}} & Borrower / Officer & Retrieves consent record metadata and status. \\
+  \texttt{POST} & \texttt{/api/v1/consent/\{id\}/revoke} & Borrower (Own) & Unilaterally revokes active borrower consent. \\
+  \addlinespace
+  \texttt{POST} & \texttt{/api/v1/ingest/shg-fpo} & Sakhi / Officer & Ingests manual SHG/FPO peer-thrift records. \\
+  \texttt{POST} & \texttt{/api/v1/ingest/trigger} & Sakhi / Officer & Spawns parallel 4-rail asynchronous ingestion. \\
+  \texttt{POST} & \texttt{/api/v1/score/} & Sakhi / Officer & Synthesizes 5-Cs snapshot and scores applicant. \\
+  \texttt{GET} & \texttt{/api/v1/score/\{id\}} & Borrower / Officer & Fetches score, decision zone, and SHAP reason codes. \\
+  \addlinespace
+  \texttt{POST} & \texttt{/api/v1/decisions/} & Loan Officer & Records underwriter decision and mandatory override. \\
+  \texttt{POST} & \texttt{/api/v1/handoff/\{app\_id\}} & Loan Officer & Compiles signed loan file for Core Banking dispatch. \\
+  \texttt{POST} & \texttt{/api/v1/grievances/} & Borrower / Sakhi & Lodges statutory customer dispute with 30-day SLA. \\
+  \texttt{PATCH} & \texttt{/api/v1/grievances/\{id\}} & Loan Officer & Triages grievance and logs resolution notes. \\
+  \addlinespace
+  \texttt{GET} & \texttt{/api/v1/dashboard/portfolio} & Officer / Auditor & Fetches cross-village PSI drift and volume metrics. \\
+  \texttt{GET} & \texttt{/api/v1/dashboard/fairness} & Risk Officer & Evaluates demographic parity across protected cohorts. \\
+  \texttt{GET} & \texttt{/api/v1/dashboard/fairness/export.csv} & Auditor / RE & Streams complete anonymized compliance logs to CSV. \\
+  \addlinespace
+  \texttt{GET} & \texttt{/api/v1/admin/models} & Officer / Admin & Lists registered candidate and champion models. \\
+  \texttt{GET} & \texttt{/api/v1/admin/fairness/manifest} & Officer / Admin & Returns ratified mathematical tolerance manifest. \\
+  \texttt{POST} & \texttt{/api/v1/admin/models/\{v\}/promote} & Admin Only & Evaluates Fairness Gate and promotes model to Champion. \\
+  \texttt{GET} & \texttt{/api/v1/admin/report/html} & Officer / Admin & Serves complete standalone publication HTML report. \\
+  \bottomrule
+\end{tabularx}
+\caption{Complete RESTful API Endpoint Specifications across Platform Services.}
+\label{tab:api_catalog}
+\end{table}
+
+\section{Sample JSON Payloads}
+
+\subsection{1. Cryptographic Consent Record Payload}
+\begin{lstlisting}[language=json, caption={Sample Cryptographic Consent Record JSON Payload.}]
+{
+  "consent_id": "c1f7a2b9-4820-4e9b-8e12-3f8d91c7a001",
+  "borrower_id": "00000000-0000-0000-0000-000000000001",
+  "purpose": "AGRICULTURAL_CREDIT_UNDERWRITING",
+  "channels": ["ACCOUNT_AGGREGATOR", "SENTINEL2_SATELLITE", "ELECTRICITY_UTILITY", "SHG_PEER_THRIFT"],
+  "status": "ACTIVE",
+  "hash_chain": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "granted_at": "2026-09-07T08:15:30Z",
+  "expires_at": "2026-10-07T08:15:30Z"
+}
+\end{lstlisting}
+
+\subsection{2. Credit Scoring Output with Bilingual SHAP Reason Codes}
+\begin{lstlisting}[language=json, caption={Sample Credit Score and Bilingual Adverse Action Output JSON Payload.}]
+{
+  "score_id": "8f3e2b10-6c9a-4d2e-9f11-1a2b3c4d5e6f",
+  "borrower_id": "00000000-0000-0000-0000-000000000001",
+  "model_version": "v1.1.0-woe-scorecard",
+  "probability_of_default": 0.0245,
+  "credit_score": 745,
+  "decision_zone": "APPROVE",
+  "reasons": [
+    {
+      "feature": "shg_repayment_rate",
+      "impact": "POSITIVE",
+      "shap_value": 0.421,
+      "text_en": "Exemplary 100% on-time repayment history across past SHG micro-loans.",
+      "text_hi": "Pichhle SHG rinon me samay par 100 percent bhugtan ka utkrisht record."
+    },
+    {
+      "feature": "ndvi_crop_mean",
+      "impact": "POSITIVE",
+      "shap_value": 0.315,
+      "text_en": "Consistently robust vegetative health (NDVI: 0.74) observed across satellite passes.",
+      "text_hi": "Upagrah ankdon me fasal ki satat utkrisht hariyali (NDVI: 0.74) darj ki gayi."
+    }
+  ],
+  "timestamp": "2026-09-07T08:16:02Z"
+}
+\end{lstlisting}
+
+\subsection{3. Officer Underwriting Dissent Override Record}
+\begin{lstlisting}[language=json, caption={Sample Loan Officer Dissent Override JSON Payload.}]
+{
+  "decision_id": "a4c2e1b8-7f9d-4e3a-8b12-9c8d7e6f5a4b",
+  "application_id": "00000000-0000-0000-0000-000000000003",
+  "officer_id": "OFF-001",
+  "final_verdict": "APPROVE",
+  "is_override": true,
+  "override_reason_code": "IRRIGATION_INFRASTRUCTURE_ADDITION",
+  "justification_note": "Applicant suffered temporary crop yield drop during 2025 drought, but has co-invested in a newly energized community solar borewell; Kharif season water supply secured.",
+  "recommended_limit_inr": 35000,
+  "decided_at": "2026-09-07T09:42:15Z"
+}
+\end{lstlisting}
+
+\section{Inventory of Publication Decision Figures}
+The following 13 publication-grade figures (300\,DPI, white theme) are permanently archived within the report distribution:
+\begin{enumerate}
+  \item \textbf{\texttt{figures/roc\_curve\_comparison.png}}: Comparative Receiver Operating Characteristic curves across 5 benchmark models.
+  \item \textbf{\texttt{figures/pr\_curve\_comparison.png}}: Precision-Recall dynamics evaluating minority default detection efficiency under class imbalance.
+  \item \textbf{\texttt{figures/ks\_separation\_plots.png}}: Kolmogorov-Smirnov separation plots across the 300--900 score scale for Champion vs. GBDT.
+  \item \textbf{\texttt{figures/calibration\_reliability\_curves.png}}: Decile calibration reliability diagrams with Expected Calibration Error metrics.
+  \item \textbf{\texttt{figures/confusion\_matrices\_comparison.png}}: Normalized confusion matrices at the operational score cutoff of 600.
+  \item \textbf{\texttt{figures/score\_distributions\_zones.png}}: Portfolio score histogram mapped against the three institutional underwriting decision zones.
+  \item \textbf{\texttt{figures/feature\_importance\_shap.png}}: TreeSHAP importance (GBDT) vs. Mean Gini impurity (Random Forest) feature ranking.
+  \item \textbf{\texttt{figures/demographic\_fairness\_parity.png}}: Gender and landholding approval rates compared against statutory ceiling limits.
+  \item \textbf{\texttt{figures/drift\_radar\_psi.png}}: Cross-village Population Stability Index radar proving $\text{PSI} < 0.10$ across all 15 village clusters.
+  \item \textbf{\texttt{figures/hyperparameter\_sensitivity\_gbdt.png}}: 2D validation surface of Learning Rate vs. Max Iterations.
+  \item \textbf{\texttt{figures/hyperparameter\_tradeoff\_rf\_woe.png}}: Random Forest tree depth generalization gap and WoE feature retention vs. $C$.
+  \item \textbf{\texttt{figures/economic\_profit\_cutoff\_curve.png}}: Cost-sensitive banking profit optimization curve establishing Score 540 as the profit-maximizing cutoff.
+  \item \textbf{\texttt{figures/fairness\_vs\_cutoff\_frontier.png}}: Demographic disparity frontier across scores 400--750 showing $<5\%$ disparity in the operational credit band.
+\end{enumerate}

@@ -1,0 +1,82 @@
+% -----------------------------------------------------------------------------
+% Chapter 7: Requirements
+% -----------------------------------------------------------------------------
+\chapter{Requirements}
+\label{chap:requirements}
+
+\section{Functional Requirements (FR)}
+The functional capabilities of the CreditTech MVP are specified through 18 formal functional requirements grouped across the credit lifecycle:
+
+\subsection{Consent \& Identity Management}
+\begin{itemize}[leftmargin=2em, label=\textbf{FR-\arabic*.}]
+  \item \textbf{Borrower Consent Ingestion:} The system shall record explicit, time-bounded, purpose-limited digital consent records from rural borrowers, either directly or via an assisted Bank Sakhi.
+  \item \textbf{Cryptographic Hash Chaining:} Every consent record shall generate an immutable SHA-256 hash incorporating the previous record's hash to ensure tamper-evidence.
+  \item \textbf{Consent Revocation:} Borrowers shall have the statutory right to unilaterally revoke active consent, which shall instantaneously prevent any subsequent data aggregation or scoring.
+\end{itemize}
+
+\subsection{Multi-Rail Data Ingestion \& Feature Engineering}
+\begin{itemize}[leftmargin=2em, label=\textbf{FR-\arabic*.}]
+  \setcounter{enumi}{3}
+  \item \textbf{4-Rail Parallel Ingestion:} The platform shall execute parallel asynchronous ingestion across Account Aggregator cashflows, Sentinel-2 satellite indices, utility payment histories, and SHG peer records.
+  \item \textbf{Graceful Degradation:} If an external rail is offline (e.g., satellite cloud cover or Account Aggregator timeout), the system shall continue processing with statistical default priors and flag data completeness.
+  \item \textbf{Feature Snapshot Persistence:} The system shall compute and persist exactly 21 continuous and categorical features structured according to the 5-Cs banking credit risk framework.
+\end{itemize}
+
+\subsection{Credit Risk Scoring \& Explainability}
+\begin{itemize}[leftmargin=2em, label=\textbf{FR-\arabic*.}]
+  \setcounter{enumi}{6}
+  \item \textbf{Standardized Score Generation:} The scoring engine shall map borrower features into a calibrated default probability ($P(\text{Default})$) and transform it into a credit score scaled from 300 to 900 points.
+  \item \textbf{Bilingual Adverse Action Notices:} The system shall generate local Shapley reason codes in both English and Hindi, identifying the top negative drivers for low scores per RBI regulations.
+  \item \textbf{Decision Zone Classification:} Every score shall be categorized into one of three statutory decision zones: Reject ($<550$), Manual Review ($550\text{--}650$), or Approve ($\ge 650$).
+\end{itemize}
+
+\subsection{Underwriting, Overrides \& Regulated Entity Handoff}
+\begin{itemize}[leftmargin=2em, label=\textbf{FR-\arabic*.}]
+  \setcounter{enumi}{9}
+  \item \textbf{Officer Underwriting Interface:} Branch loan officers shall be provided an underwriting portal displaying the applicant's synthesized dossier and SHAP contributions.
+  \item \textbf{Mandatory Dissent Override Logging:} If an officer overrides the algorithmic recommendation, the system shall strictly enforce the submission of an auditable justification reason code and free-text rationale.
+  \item \textbf{RE Handoff Packaging:} Approved loan files shall be compiled into an authenticated JSON package with cryptographic integrity hashes for transmission to partner Core Banking Systems.
+\end{itemize}
+
+\subsection{Governance, Fairness \& Grievance Redressal}
+\begin{itemize}[leftmargin=2em, label=\textbf{FR-\arabic*.}]
+  \setcounter{enumi}{12}
+  \item \textbf{Demographic Parity Audit:} The system shall continuously track approval rate disparities across protected demographic attributes (gender and landholding band).
+  \item \textbf{Automated Fairness Gate:} Challenger models seeking promotion to active production champion shall be evaluated against ratified disparity thresholds ($\le 20\%$ gender disparity, $\le 25\%$ landholding disparity).
+  \item \textbf{Grievance Lifecycle Management:} The system shall support grievance lodgement, assign unique tracking IDs, and enforce a statutory 30-day regulatory SLA countdown clock.
+  \item \textbf{Model Promotion Pipeline:} Administrators shall have the capability to promote validated candidate models, automatically demoting existing champions to retired status.
+  \item \textbf{Auditor CSV Export:} Risk officers and external regulators shall be able to export anonymized fairness logs, officer override distributions, and model performance metrics to CSV.
+  \item \textbf{Persona-Specific UI Rendering:} The frontend shall dynamically render views and controls matching the active caller persona.
+\end{itemize}
+
+\section{Non-Functional Requirements (NFR)}
+To guarantee production-grade engineering quality, the system satisfies 8 rigorous non-functional requirements:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{l p{3.2cm} X}
+  \toprule
+  \textbf{NFR ID} & \textbf{Category} & \textbf{Engineering Specification} \\
+  \midrule
+  \textbf{NFR-01} & \textbf{Inference Latency} & Single-applicant credit scoring inference latency shall not exceed 50\,ms under standard CPU server execution (current champion achieves 0.038\,ms). \\
+  \addlinespace
+  \textbf{NFR-02} & \textbf{API Response Time} & 95th percentile ($P_{95}$) API response time across core endpoints shall remain below 200\,ms under a 60-request concurrent pilot burst. \\
+  \addlinespace
+  \textbf{NFR-03} & \textbf{Data Privacy \& PII} & Direct borrower personal identifiers (Aadhaar number, mobile number) shall be strictly isolated and encrypted; model matrices shall consume only statistical features. \\
+  \addlinespace
+  \textbf{NFR-04} & \textbf{Audit Immutability} & All underwriting decisions, consent events, and grievance records shall be stored in append-only tables guarded by database triggers preventing update or deletion. \\
+  \addlinespace
+  \textbf{NFR-05} & \textbf{Fairness Ceiling} & Algorithmic models shall not exhibit a demographic parity disparity exceeding 20.0\% between gender cohorts or 25.0\% between landholding cohorts. \\
+  \addlinespace
+  \textbf{NFR-06} & \textbf{Reliability \& Uptime} & The core API shall maintain 99.9\% uptime during operational branch hours, surviving single-rail ingestion timeouts without throwing 500-level errors. \\
+  \addlinespace
+  \textbf{NFR-07} & \textbf{Accessibility} & User interfaces shall support high-contrast visual themes, responsive tablet/mobile viewports, and dual-language (Hindi/English) text rendering. \\
+  \addlinespace
+  \textbf{NFR-08} & \textbf{Test Reproducibility} & The complete test suite must be 100\% deterministic, executing locally without live external network dependencies via mock server fixtures. \\
+  \bottomrule
+\end{tabularx}
+\caption{Non-Functional Requirements (NFR) Specifications and Target Benchmarks.}
+\label{tab:nfr_table}
+\end{table}

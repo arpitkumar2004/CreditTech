@@ -1,0 +1,138 @@
+% -----------------------------------------------------------------------------
+% Chapter 8: System Architecture
+% -----------------------------------------------------------------------------
+\chapter{System Architecture}
+\label{chap:system_architecture}
+
+\section{Tiered System Topology}
+CreditTech implements a clean, modular 4-tier microservices-ready architecture designed for high throughput, cryptographic auditability, and strict decoupling of presentation, business logic, and machine learning inference. Figure~\ref{fig:system_architecture_diagram} presents the research block diagram illustrating the end-to-end component topology and communication paths.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  scale=0.86, every node/.style={transform shape},
+  node distance=1.0cm and 0.5cm, auto
+]
+
+  % Tier 1: Clients (Presentation Layer)
+  \node[clientblock, fill=primary!10, draw=primary, text width=2.8cm, minimum height=1.1cm] (borrower_ui) {
+    \textbf{\footnotesize Borrower Web}\\[1pt]
+    \scriptsize Mobile View PWA
+  };
+  \node[clientblock, fill=primary!10, draw=primary, right=0.5cm of borrower_ui, text width=2.8cm, minimum height=1.1cm] (sakhi_ui) {
+    \textbf{\footnotesize Bank Sakhi App}\\[1pt]
+    \scriptsize Assisted Field Tablet
+  };
+  \node[clientblock, fill=primary!10, draw=primary, right=0.5cm of sakhi_ui, text width=2.8cm, minimum height=1.1cm] (officer_ui) {
+    \textbf{\footnotesize Officer Portal}\\[1pt]
+    \scriptsize Underwriting Workstation
+  };
+  \node[clientblock, fill=primary!10, draw=primary, right=0.5cm of officer_ui, text width=2.8cm, minimum height=1.1cm] (admin_ui) {
+    \textbf{\footnotesize Admin / MLOps}\\[1pt]
+    \scriptsize Governance \& Telemetry
+  };
+
+  % Client Group Box
+  \begin{scope}[on background layer]
+    \node[groupbox, fit=(borrower_ui) (sakhi_ui) (officer_ui) (admin_ui)] (client_box) {};
+    \node[above right, font=\scriptsize\bfseries\sffamily\color{primary}] at (client_box.north west) {PRESENTATION LAYER (React 18 + Vite + TypeScript)};
+  \end{scope}
+
+  % Tier 2: Gateway & Security
+  \node[securityblock, below=0.9cm of client_box, text width=13.0cm, minimum height=1.1cm, fill=danger!8, draw=danger] (gateway) {
+    \textbf{API Gateway \& Security Enforcement Middleware (FastAPI)}\\[1pt]
+    \scriptsize Rate Limiter (60\,req/min) $\bullet$ Request-ID Tracing $\bullet$ Body Size Limiter (1\,MB) $\bullet$ RBAC Header Authorization Guard
+  };
+
+  % Tier 3: Core Business Services
+  \node[serviceblock, below=1.35cm of gateway, xshift=-4.85cm, text width=2.9cm, minimum height=1.3cm, fill=accent!10, draw=accent] (consent_svc) {
+    \textbf{\footnotesize Consent Service}\\[1pt]
+    \scriptsize SHA-256 Hash Chain\\
+    \scriptsize DPDP Purpose Filter
+  };
+
+  \node[serviceblock, right=0.4cm of consent_svc, text width=2.9cm, minimum height=1.3cm, fill=accent!10, draw=accent] (ingest_svc) {
+    \textbf{\footnotesize Ingest Orchestrator}\\[1pt]
+    \scriptsize 4-Rail Parallel Fetch\\
+    \scriptsize Graceful Fallback
+  };
+
+  \node[serviceblock, right=0.4cm of ingest_svc, text width=2.9cm, minimum height=1.3cm, fill=accent!10, draw=accent] (scoring_svc) {
+    \textbf{\footnotesize Scoring Service}\\[1pt]
+    \scriptsize 5-Cs Feature Store\\
+    \scriptsize Active Model Inference
+  };
+
+  \node[serviceblock, right=0.4cm of scoring_svc, text width=2.9cm, minimum height=1.3cm, fill=accent!10, draw=accent] (decision_svc) {
+    \textbf{\footnotesize Decision Service}\\[1pt]
+    \scriptsize Officer Override Audit\\
+    \scriptsize RE Partner Handoff
+  };
+
+  % Business Layer Group Box
+  \begin{scope}[on background layer]
+    \node[groupbox, fit=(consent_svc) (ingest_svc) (scoring_svc) (decision_svc)] (service_box) {};
+    \node[above left, font=\scriptsize\bfseries\sffamily\color{accent}] at ($(service_box.north east)+(-0.3,0)$) {BUSINESS APPLICATION SERVICES};
+  \end{scope}
+
+  % Tier 4: Data & Artifact Persistence Layer (Unified Rectangular Baseblock)
+  \node[baseblock, below=1.1cm of service_box, text width=13.0cm, minimum height=1.35cm, fill=primary!8, draw=primary!80!black] (persist) {
+    \textbf{Tier 4: Data Persistence \& ML Model Registry Layer (SQLite / PostgreSQL Engine + Model Registry)}\\[2pt]
+    \scriptsize 10 Schema Tables (Consents, Borrowers, Features, Scores, Decisions, Audit) $\bullet$ Versioned Champion v1.1.0 Artifact Store
+  };
+
+  % Flows
+  \draw[flowline] (client_box) -- (gateway);
+  \draw[flowline] (gateway) -- (service_box);
+
+  % Inter-service pipeline flow
+  \draw[flowline] (consent_svc) -- (ingest_svc);
+  \draw[flowline] (ingest_svc) -- (scoring_svc);
+  \draw[flowline] (scoring_svc) -- (decision_svc);
+
+  % Clean Parallel Vertical Data Connectors (Zero Crossings)
+  \draw[flowline] (consent_svc.south) -- node[right, font=\tiny\sffamily] {Consents} ($(persist.north -| consent_svc.south)$);
+  \draw[flowline] (ingest_svc.south) -- node[right, font=\tiny\sffamily] {4-Rail Raw} ($(persist.north -| ingest_svc.south)$);
+  \draw[bidirline] (scoring_svc.south) -- node[right, font=\tiny\sffamily] {Scores / Models} ($(persist.north -| scoring_svc.south)$);
+  \draw[flowline] (decision_svc.south) -- node[right, font=\tiny\sffamily] {Decisions} ($(persist.north -| decision_svc.south)$);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: 4-Tier System Architecture of the CreditTech Platform.}
+\label{fig:system_architecture_diagram}
+\end{figure}
+
+\section{Component-by-Component Walkthrough}
+
+\subsection{1. Presentation Layer (Frontend Clients)}
+Implemented as a single-page web application (SPA) using React 18, Vite, TypeScript, and TailwindCSS. The presentation layer features dynamic persona-based routing:
+\begin{itemize}
+  \item \textbf{Borrower Portal:} Minimalistic, high-legibility interface presenting the applicant's credit health gauge, bilingual (Hindi/English) positive and negative score factors, and dispute lodgement tools.
+  \item \textbf{Bank Sakhi App:} Field-optimized interface designed for low-resolution tablets, enabling batch entry of SHG peer-thrift passbooks and assisted consent capture.
+  \item \textbf{Loan Officer Workstation:} Comprehensive credit underwriting interface presenting the 21 synthesized features, regional village peer averages, TreeSHAP force plots, and the mandatory override dialogue.
+  \item \textbf{Model Governance Dashboard:} Real-time telemetry station rendering the 13 institutional white-theme decision graphs, PSI drift monitors, and model promotion control panels.
+\end{itemize}
+
+\subsection{2. Gateway \& Security Middleware}
+Every inbound HTTP request must traverse a layered security pipeline implemented using Starlette/FastAPI middleware before reaching application handlers:
+\begin{itemize}
+  \item \textbf{Request-ID Correlation:} Injects a unique UUIDv4 (\texttt{X-Request-Id}) into every request and response header, enabling distributed log correlation across async tasks.
+  \item \textbf{Body Size Limiter:} Prevents denial-of-service memory exhaustion by enforcing a strict 1.0\,MB ceiling on incoming request payloads.
+  \item \textbf{Rate Limiting Middleware:} Token-bucket rate limiter enforcing a 60 requests/minute ceiling per IP address to safeguard external ingestion endpoints.
+  \item \textbf{RBAC Header Dependency:} FastAPI dependency injection verifying caller role headers against the canonical role-permission matrix.
+\end{itemize}
+
+\subsection{3. Core Business Services}
+\begin{itemize}
+  \item \textbf{Consent Engine (\texttt{services.core.consent}):} Enforces the DPDP Act 2023 lifecycle (Granted $\rightarrow$ Expired $\rightarrow$ Revoked). Maintains the cryptographic hash chain ($H_n = \text{SHA256}(H_{n-1} \parallel \text{Payload}_n)$).
+  \item \textbf{Ingestion Orchestrator (\texttt{services.core.ingestion}):} Spawns concurrent asynchronous workers to query the four alternative data rails. Enforces circuit-breaker patterns and graceful fallback defaults when third-party mocks or APIs timeout.
+  \item \textbf{Feature Store \& Scoring Engine (\texttt{services.core.scoring}):} Aggregates raw data into the 21-feature snapshot schema and feeds it to the active model scorecard in memory.
+  \item \textbf{Decisioning \& Handoff Service (\texttt{services.core.decisioning}):} Persists the credit verdict, validates dissent override reasons, and serializes the signed handoff dossier for delivery to partner banks.
+  \item \textbf{Grievance Service (\texttt{services.core.grievance}):} Tracks regulatory complaints, coordinates internal triage notes, and computes remaining days against the statutory 30-day resolution deadline.
+\end{itemize}
+
+\subsection{4. Persistence \& Model Artifact Store}
+The data layer maintains strict separation between operational application state and versioned machine learning artifacts:
+\begin{itemize}
+  \item \textbf{Relational Database:} SQLite for local zero-dependency testing; configured with WAL (Write-Ahead Logging) mode and enforced foreign-key constraints.
+  \item \textbf{ML Registry Store (\texttt{ml/registry/store}):} File-backed model repository storing model artifacts, JSON scorecard definitions, training reports, and plots manifests keyed by semantic version tags.
+\end{itemize}

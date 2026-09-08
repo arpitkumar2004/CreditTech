@@ -1,0 +1,84 @@
+% -----------------------------------------------------------------------------
+% Chapter 17: Testing Strategy
+% -----------------------------------------------------------------------------
+\chapter{Testing Strategy}
+\label{chap:testing_strategy}
+
+\section{The Multi-Layered Testing Pyramid}
+To verify that CreditTech operates with bank-grade reliability, the verification framework is organized as a multi-tier testing pyramid. Figure~\ref{fig:testing_pyramid} depicts the four distinct testing tiers, spanning unit validation, database integration, end-to-end user journeys, and dedicated authorization tripwire security audits.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  scale=0.92, every node/.style={transform shape},
+  node distance=0.55cm, auto
+]
+
+  % Tier 4: End-to-End CUJ (Top)
+  \node[baseblock, text width=7.4cm, minimum height=1.2cm, fill=danger!12, draw=danger, line width=0.9pt] (e2e) {
+    \textbf{Tier 4: End-to-End CUJ (12 Tests)}\\[1pt]
+    \scriptsize Full Workflow: UI $\rightarrow$ Gateway $\rightarrow$ DB $\rightarrow$ RE Handoff
+  };
+
+  % Tier 3: Persona Authorization
+  \node[baseblock, below=0.55cm of e2e, text width=8.8cm, minimum height=1.2cm, fill=warn!12, draw=warn, line width=0.9pt] (auth_tests) {
+    \textbf{Tier 3: Persona Authorization Matrix (35 Tests)}\\[1pt]
+    \scriptsize Persona $\times$ Resource $\times$ Action $\bullet$ Horizontal \& Vertical Tripwires
+  };
+
+  % Tier 2: Integration
+  \node[baseblock, below=0.55cm of auth_tests, text width=10.8cm, minimum height=1.2cm, fill=accent!12, draw=accent, line width=0.9pt] (int_tests) {
+    \textbf{Tier 2: API \& Persistence Integration (52 Tests)}\\[1pt]
+    \scriptsize FastAPI Routes $\rightarrow$ Async SQLAlchemy Engine $\rightarrow$ SQLite Triggers \& Cascades
+  };
+
+  % Tier 1: Unit (Base)
+  \node[baseblock, below=0.55cm of int_tests, text width=12.8cm, minimum height=1.2cm, fill=primary!12, draw=primary, line width=0.9pt] (unit_tests) {
+    \textbf{Tier 1: Unit Tests \& Algorithmic Verification (70 Tests)}\\[1pt]
+    \scriptsize Pure Mathematical Functions $\bullet$ WoE Binning $\bullet$ SHA-256 Chaining $\bullet$ Feature Imputation
+  };
+
+  % Tier Transitions
+  \draw[flowline] (unit_tests) -- (int_tests);
+  \draw[flowline] (int_tests) -- (auth_tests);
+  \draw[flowline] (auth_tests) -- (e2e);
+
+  % Clean Parallel Vertical Side Annotations (Zero Collisions with fill=cardbg)
+  \coordinate (left_bot) at ($(unit_tests.south west)+(-0.55,0)$);
+  \coordinate (left_top) at ($(unit_tests.south west |- e2e.north)+(-0.55,0)$);
+  \draw[dashedflow, line width=1.0pt, danger!80!black] (left_bot) -- (left_top)
+    node[midway, fill=cardbg, inner sep=2pt, rotate=90, font=\scriptsize\bfseries\sffamily\color{danger}] {Increasing System Scope \& Realism $\longrightarrow$};
+
+  \coordinate (right_top) at ($(unit_tests.south east |- e2e.north)+(0.55,0)$);
+  \coordinate (right_bot) at ($(unit_tests.south east)+(0.55,0)$);
+  \draw[dashedflow, line width=1.0pt, success!80!black] (right_top) -- (right_bot)
+    node[midway, fill=cardbg, inner sep=2pt, rotate=-90, font=\scriptsize\bfseries\sffamily\color{success}] {$\longleftarrow$ Increasing Isolation \& Execution Speed};
+
+\end{tikzpicture}
+\caption{Research Block Diagram: 4-Tier Automated Testing Pyramid of the CreditTech Platform (169 Tests Total).}
+\label{fig:testing_pyramid}
+\end{figure}
+
+\section{Tier-by-Tier Testing Methodologies}
+
+\subsection{1. Tier 1: Unit Testing (Algorithm \& Pure Functions)}
+Focuses on verifying algorithmic correctness in total isolation without database or network I/O:
+$$\text{Input Vector } \mathbf{x} \longrightarrow \text{Transformation Function } f(\cdot) \longrightarrow \text{Assert } f(\mathbf{x}) == \mathbf{y}_{\text{expected}}$$
+\begin{itemize}
+  \item \textbf{Scorecard Calibration:} Verifies that input features are mapped monotonically into WoE bins and scaled to the 300--900 integer interval.
+  \item \textbf{Consent Hash Chaining:} Verifies that modifying a single byte in a historical consent record invalidates the entire subsequent SHA-256 chain.
+  \item \textbf{Feature Cleaners:} Validates that missing or corrupted satellite NDVI tiles are imputed with regional median values.
+\end{itemize}
+
+\subsection{2. Tier 2: Integration Testing (API Boundary $\rightarrow$ Relational State)}
+Executes real HTTP requests against the FastAPI application mounted on an in-memory SQLite database:
+$$\text{HTTP Request (Pydantic)} \longrightarrow \text{Gateway \& Routes} \longrightarrow \text{Async SQLAlchemy} \longrightarrow \text{Database Triggers}$$
+Verifies that database foreign keys, unique constraints, and append-only database triggers behave correctly across transactions.
+
+\subsection{3. Tier 3: Persona Authorization Security Testing}
+Systematically executes the entire Persona $\times$ Resource $\times$ Action permission matrix (Table~\ref{tab:permission_matrix}). Every combination of caller identity and endpoint is exercised to confirm that unauthorized operations are blocked with HTTP \texttt{401} or \texttt{403}.
+
+\subsection{4. Tier 4: Critical User Journey (CUJ) End-to-End Testing}
+Simulates complete multi-stakeholder operational workflows from start to finish:
+$$\text{Sakhi Consent Capture} \longrightarrow \text{4-Rail Ingestion} \longrightarrow \text{Scoring} \longrightarrow \text{Officer Decision} \longrightarrow \text{RE Handoff}$$
+Verifies that data flows seamlessly across service boundaries without data loss or state corruption.

@@ -1,0 +1,287 @@
+\documentclass[11pt,a4paper,oneside]{report}
+
+% -----------------------------------------------------------------------------
+% Essential Packages for Universal LaTeX Compatibility (Overleaf / TeX Live)
+% -----------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[colorlinks=true,linkcolor=primary,citecolor=accent,urlcolor=primary]{hyperref}
+\usepackage{cleveref}
+
+% -----------------------------------------------------------------------------
+% Publication & Research Theme Color Palette
+% -----------------------------------------------------------------------------
+\definecolor{primary}{RGB}{30, 58, 138}        % Deep Navy / Classic Academic Blue (#1E3A8A)
+\definecolor{secondary}{RGB}{15, 23, 42}       % Dark Slate Typography (#0F172A)
+\definecolor{accent}{RGB}{15, 118, 110}        % Deep Teal (#0F766E)
+\definecolor{warn}{RGB}{180, 83, 9}            % Rich Amber (#B45309)
+\definecolor{danger}{RGB}{153, 27, 27}         % Crimson Red (#991B1B)
+\definecolor{success}{RGB}{4, 120, 87}         % Emerald Green (#047857)
+\definecolor{slate}{RGB}{100, 116, 139}        % Slate Gray (#64748B)
+\definecolor{cardbg}{RGB}{248, 250, 252}       % Subtle Ice Gray (#F8FAFC)
+\definecolor{cardborder}{RGB}{203, 213, 225}   % Slate Border (#CBD5E1)
+\definecolor{codebg}{RGB}{241, 245, 249}       % Code block background
+
+% Character fallback for Rupee symbol
+\DeclareUnicodeCharacter{20B9}{Rs.\ }
+
+% JSON syntax support for listings
+\lstdefinelanguage{json}{
+  basicstyle=\ttfamily\footnotesize\color{secondary},
+  showstringspaces=false,
+  breaklines=true,
+  stringstyle=\color{warn},
+  literate=
+   *{:}{{{\color{accent}{:}}}}{1}
+    {,}{{{\color{accent}{,}}}}{1}
+    {\{}{{{\color{primary}{\{}}}}{1}
+    {\}}{{{\color{primary}{\}}}}}{1}
+    {[}{{{\color{primary}{[}}}}{1}
+    {]}{{{\color{primary}{]}}}}{1},
+}
+
+% -----------------------------------------------------------------------------
+% Fast & Clean Research Schematic TikZ Styles (No Transparency / Slow Masks)
+% -----------------------------------------------------------------------------
+\tikzset{
+  font=\sffamily\small,
+  node distance=1.2cm and 1.2cm,
+  baseblock/.style={
+    rectangle, rounded corners=4pt, line width=0.8pt,
+    minimum height=2.6em, minimum width=6.5em,
+    align=center
+  },
+  clientblock/.style={baseblock, draw=primary!80!black, fill=primary!8},
+  serviceblock/.style={baseblock, draw=accent!80!black, fill=accent!8},
+  securityblock/.style={baseblock, draw=danger!80!black, fill=danger!8},
+  decisionblock/.style={
+    diamond, draw=warn!90!black, fill=warn!10, line width=0.8pt,
+    aspect=1.8, align=center, font=\sffamily\footnotesize
+  },
+  datablock/.style={
+    cylinder, cylinder uses custom fill,
+    cylinder end fill=primary!20, cylinder body fill=primary!10,
+    draw=primary!80!black, line width=0.8pt, shape border rotate=90,
+    minimum height=3.2em, minimum width=3.2em, align=center
+  },
+  groupbox/.style={
+    rectangle, rounded corners=6pt, draw=cardborder, fill=cardbg,
+    inner sep=10pt, dashed, line width=0.8pt
+  },
+  flowline/.style={
+    draw=secondary!80, -{Latex[length=2.5mm, width=1.5mm]}, line width=0.9pt
+  },
+  bidirline/.style={
+    draw=secondary!80, {Latex[length=2.5mm, width=1.5mm]}-{Latex[length=2.5mm, width=1.5mm]}, line width=0.9pt
+  },
+  dashedflow/.style={
+    draw=secondary!70, -{Latex[length=2.5mm, width=1.5mm]}, line width=0.9pt, dashed
+  }
+}
+
+% -----------------------------------------------------------------------------
+% Code Listing Environment Setup
+% -----------------------------------------------------------------------------
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize\color{secondary},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{accent}\itshape,
+  keywordstyle=\color{primary}\bfseries,
+  stringstyle=\color{warn},
+  frame=single,
+  rulecolor=\color{cardborder},
+  numbers=left,
+  numberstyle=\tiny\color{slate!60!black},
+  numbersep=8pt,
+  showstringspaces=false,
+  tabsize=2
+}
+
+% -----------------------------------------------------------------------------
+% Typography & Header Formatting
+% -----------------------------------------------------------------------------
+\titleformat{\chapter}[display]
+  {\normalfont\sffamily\huge\bfseries\color{primary}}
+  {\chaptertitlename\ \thechapter}{16pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-10pt}{20pt}
+
+\titleformat{\section}
+  {\normalfont\sffamily\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\sffamily\large\bfseries\color{secondary}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\sffamily\normalsize\bfseries\color{accent}}
+  {\thesubsubsection}{1em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{secondary}\nouppercase{\leftmark}}
+\fancyhead[R]{\small\sffamily\color{primary}\textbf{CreditTech MVP Project Report}}
+\fancyfoot[C]{\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\graphicspath{{figures/}{../reports/figures/}}
+
+% -----------------------------------------------------------------------------
+% Custom Alert & Callout Environments
+% -----------------------------------------------------------------------------
+\newtcolorbox{regulatorybox}[1]{
+  colback=primary!4,
+  colframe=primary,
+  fonttitle=\bfseries\sffamily,
+  title=#1,
+  arc=3pt,
+  boxrule=1pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt
+}
+
+\newtcolorbox{tripwirebox}[1]{
+  colback=danger!4,
+  colframe=danger,
+  fonttitle=\bfseries\sffamily,
+  title=#1,
+  arc=3pt,
+  boxrule=1pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt
+}
+
+% -----------------------------------------------------------------------------
+% Document Body
+% -----------------------------------------------------------------------------
+\begin{document}
+
+% 1. Cover Page
+\input{chapters/01_cover}
+
+% Roman Numerals for Front Matter
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+% 2. Executive Summary
+\input{chapters/02_executive_summary}
+
+% Table of Contents, List of Figures, List of Tables
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+% Arabic Numerals for Main Content
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% 3. Problem Statement
+\input{chapters/03_problem_statement}
+
+% 4. Objectives & Scope
+\input{chapters/04_objectives_and_scope}
+
+% 5. User Personas
+\input{chapters/05_user_personas}
+
+% 6. Role & Permission Matrix
+\input{chapters/06_role_permission_matrix}
+
+% 7. Requirements (Functional & Non-Functional)
+\input{chapters/07_requirements}
+
+% 8. System Architecture
+\input{chapters/08_system_architecture}
+
+% 9. Technology Stack & Design Decisions
+\input{chapters/09_technology_stack}
+
+% 10. Data Architecture & ER Diagram
+\input{chapters/10_data_architecture}
+
+% 11. Authentication & Authorization
+\input{chapters/11_authentication_and_authorization}
+
+% 12. Data Access Control & Privacy
+\input{chapters/12_data_access_control}
+
+% 13. Application Workflows
+\input{chapters/13_application_workflows}
+
+% 14. UI/UX Design System
+\input{chapters/14_ui_ux_design}
+
+% 15. Error & Edge-Case Handling
+\input{chapters/15_error_and_edge_cases}
+
+% 16. Synthetic & Benchmark Data Strategy
+\input{chapters/16_synthetic_and_benchmark_data}
+
+% 17. Testing Strategy
+\input{chapters/17_testing_strategy}
+
+% 18. Test Case Matrix
+\input{chapters/18_test_case_matrix}
+
+% 19. Test Environment & Reproducibility
+\input{chapters/19_test_environment}
+
+% 20. Seed Data & Database Reset
+\input{chapters/20_seed_data_and_reset}
+
+% 21. Security Posture
+\input{chapters/21_security_posture}
+
+% 22. Performance & Scalability
+\input{chapters/22_performance_and_scalability}
+
+% 23. Deployment Architecture
+\input{chapters/23_deployment_architecture}
+
+% 24. Monitoring, Observability & MRM
+\input{chapters/24_monitoring_and_mrm}
+
+% 25. Empirical Results & Evaluation
+\input{chapters/25_results_and_evaluation}
+
+% 26. Limitations
+\input{chapters/26_limitations}
+
+% 27. Future Work
+\input{chapters/27_future_work}
+
+% 28. Lessons Learned & Engineering Post-Mortem
+\input{chapters/28_lessons_learned}
+
+% 29. Conclusion
+\input{chapters/29_conclusion}
+
+% Bibliography
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+% 30. Appendix
+\appendix
+\input{chapters/30_appendix}
+
+\end{document}

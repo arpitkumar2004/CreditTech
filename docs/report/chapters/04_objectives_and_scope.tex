@@ -1,0 +1,60 @@
+% -----------------------------------------------------------------------------
+% Chapter 4: Objectives & Scope
+% -----------------------------------------------------------------------------
+\chapter{Objectives \& Scope}
+\label{chap:objectives_scope}
+
+\section{Core Engineering Objectives}
+The CreditTech MVP was conceived and implemented to satisfy six primary engineering and research objectives:
+
+\begin{enumerate}
+  \item \textbf{Objective 1: Multi-Persona Role-Based System Architecture}\\
+  Architect and implement a secure, multi-tenant digital credit origination platform that decouples user interfaces, backend APIs, and data visibility across five distinct operational personas (Borrower, Bank Sakhi, Loan Officer, Risk Officer, and Administrator).
+  
+  \item \textbf{Objective 2: DPDP Act 2023 Compliant Consent Infrastructure}\\
+  Engineer an append-only, tamper-evident consent logging mechanism using cryptographic hash chaining (SHA-256) to ensure that all data ingestion occurs strictly following explicit, time-bounded, purpose-limited borrower authorization.
+
+  \item \textbf{Objective 3: 4-Rail Alternative Rural Signal Fusion}\\
+  Build a robust data pipeline capable of ingesting, validating, and harmonizing four non-traditional rural data rails: (a)~Account Aggregator bank statements, (b)~Earth Observation Sentinel-2 satellite vegetative vigor and weather indices, (c)~rural electricity utility payments, and (d)~SHG/FPO peer-thrift records.
+
+  \item \textbf{Objective 4: Regulatory-Compliant Transparent Credit Scoring}\\
+  Develop and validate a calibrated Weight-of-Evidence (WoE) credit scorecard producing scores on the standardized 300--900 scale, accompanied by exact Shapley-based bilingual adverse action notices satisfying Clause 6.3 of the RBI Digital Lending Guidelines (2022)~\cite{rbi_dlg_2022}.
+
+  \item \textbf{Objective 5: Rigorous Benchmark Evaluation Suite}\\
+  Evaluate the scoring engine across a 5-model benchmark suite (Linear Baseline, WoE Scorecard, Random Forest, Monotonic GBDT, and Stacking Meta-Ensemble) using 5-Fold Spatial GroupKFold Cross-Validation over 22,000 real borrower observations with zero geographic data leakage.
+
+  \item \textbf{Objective 6: Comprehensive Automated Verification \& Test Coverage}\\
+  Establish a comprehensive automated test harness covering unit functions, database integrity, route authorization tripwires, and end-to-end user journeys to guarantee zero regression and verify complete data access isolation.
+\end{enumerate}
+
+\section{Project Scope: Inclusions vs. Exclusions}
+To maintain engineering discipline and prevent false assumptions regarding the readiness of the system for enterprise deployment, Table~\ref{tab:scope_matrix} explicitly delineates what is included within the MVP release versus what has been deliberately excluded or deferred to subsequent production phases.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{p{3.2cm}X X}
+  \toprule
+  \textbf{Dimension} & \textbf{Included in MVP (v1.2.0)} & \textbf{Excluded / Deferred to Pilot (P7)} \\
+  \midrule
+  \textbf{Application Surface} & Responsive Web Application (React 18 + TypeScript + TailwindCSS) supporting desktop and tablet viewports. & Native Android/iOS mobile application with hardware biometric scanner SDKs. \\
+  \addlinespace
+  \textbf{Authentication} & Deterministic HTTP Header-Based Identity Contract (\texttt{X-Borrower-Id}, \texttt{X-Officer-Role}) for automated testing and demonstration. & Production Enterprise Single Sign-On (SSO), OAuth 2.0 / OpenID Connect (OIDC), and hardware mTLS. \\
+  \addlinespace
+  \textbf{Data Ecosystem} & Dual Strategy: (1) 22,000 Real Kaggle Benchmark Records (Home Credit + GMSC), and (2) 15 Pilot Village Synthetic Cohort. & Live production API integration with Setu / Sahamati AA network and UIDAI Aadhaar OTP gateways. \\
+  \addlinespace
+  \textbf{Machine Learning} & 5-Model Benchmark Suite with 5-Fold Spatial Cross-Validation, Hyperparameter Sweeps, and 13 Publication Figures. & Real-time online streaming model retraining and distributed federated learning clusters. \\
+  \addlinespace
+  \textbf{Explainability} & Closed-form WoE point attribution and TreeSHAP bilingual (English/Hindi) reason codes. & Multilingual speech-to-text IVR (Interactive Voice Response) phone bot for non-literate callers. \\
+  \addlinespace
+  \textbf{Data Persistence} & Relational schema with 10 tables, SQLite engine, Alembic migrations, and append-only triggers. & Geo-replicated distributed PostgreSQL database clusters with automated multi-region failover. \\
+  \addlinespace
+  \textbf{Underwriting Flow} & Full officer review dashboard with mandatory override reason capture and audit logging. & Automated real-time disbursement API hookups into National Automated Clearing House (NACH). \\
+  \addlinespace
+  \textbf{Grievance Loop} & Complete 30-day statutory SLA tracking, grievance status state machine, and resolution audit. & Ombudsman appellate integration with the RBI Centralized Receipt and Processing Centre (CRPC). \\
+  \bottomrule
+\end{tabularx}
+\caption{Formal MVP Boundary Matrix: In-Scope Capabilities vs. Production Exclusions.}
+\label{tab:scope_matrix}
+\end{table}

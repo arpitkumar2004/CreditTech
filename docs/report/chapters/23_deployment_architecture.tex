@@ -1,0 +1,98 @@
+% -----------------------------------------------------------------------------
+% Chapter 23: Deployment Architecture
+% -----------------------------------------------------------------------------
+\chapter{Deployment Architecture}
+\label{chap:deployment_architecture}
+
+\section{Current Local Deployment Posture}
+In strict adherence to engineering honesty, the CreditTech MVP is currently deployed and operated as a \textbf{local development and pilot staging environment}. We do not claim to operate a globally distributed multi-region Kubernetes cluster. 
+
+The current deployment topology consists of:
+\begin{enumerate}
+  \item \textbf{Backend Core Service:} Python 3.10 running via the high-performance \texttt{uvicorn} ASGI web server bound to \texttt{127.0.0.1:8000}, orchestrated via a virtual environment.
+  \item \textbf{Frontend Presentation Client:} React 18 single-page application built via Vite 5, served locally via the Vite development server on port \texttt{5173}, and compilable to static optimized HTML/JS/CSS assets via \texttt{npm run build}.
+  \item \textbf{Persistence Layer:} Local embedded SQLite database (\texttt{credittech.db}) running in WAL mode with enforced foreign keys, co-located on the same filesystem.
+  \item \textbf{Local Mock Ecosystem:} Self-contained mock servers simulating Account Aggregator FIU endpoints, electricity boards, and satellite data providers, enabling full functionality without live external internet dependencies.
+\end{enumerate}
+
+\section{Target CI/CD \& Production Pipeline Blueprint}
+Figure~\ref{fig:deployment_pipeline} illustrates the planned continuous integration and continuous deployment (CI/CD) blueprint designed for enterprise regional banking rollout.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 0.8cm, auto]
+
+  % Stage 1: Developer
+  \node[clientblock, fill=cardbg, draw=cardborder, minimum width=3.2cm] (dev) {
+    \textbf{1. Developer / Git}\\
+    \scriptsize Feature Branch\\
+    \scriptsize Commit + Push
+  };
+
+  % Stage 2: GitHub Actions CI
+  \node[serviceblock, right=0.6cm of dev, fill=primary!10, draw=primary, minimum width=3.4cm] (ci) {
+    \textbf{2. GitHub Actions CI}\\
+    \scriptsize Flake8 / Ruff Linting\\
+    \scriptsize Pytest (169 Tests)\\
+    \scriptsize Vite Production Build
+  };
+
+  % Stage 3: Containerization
+  \node[serviceblock, right=0.6cm of ci, fill=accent!10, draw=accent, minimum width=3.4cm] (docker) {
+    \textbf{3. Docker Build}\\
+    \scriptsize Multi-Stage Build\\
+    \scriptsize Security CVE Scan\\
+    \scriptsize Lean Alpine Image
+  };
+
+  % Stage 4: Staging
+  \node[serviceblock, below=0.8cm of docker, fill=warn!10, draw=warn, minimum width=3.4cm] (staging) {
+    \textbf{4. Staging Cluster}\\
+    \scriptsize Smoke Verification\\
+    \scriptsize Fairness Gate Check\\
+    \scriptsize 60-Req Load Burst
+  };
+
+  % Stage 5: Production
+  \node[baseblock, left=0.6cm of staging, fill=success!15, draw=success, minimum width=3.4cm] (prod) {
+    \textbf{5. Bank Production}\\
+    \scriptsize Blue/Green Deploy\\
+    \scriptsize Nginx Reverse Proxy\\
+    \scriptsize PostgreSQL Cluster
+  };
+
+  \draw[flowline] (dev) -- (ci);
+  \draw[flowline] (ci) -- (docker);
+  \draw[flowline] (docker) -- (staging);
+  \draw[flowline] (staging) -- (prod);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: Continuous Integration, Containerization, and Production Staging Pipeline.}
+\label{fig:deployment_pipeline}
+\end{figure}
+
+\section{Docker Multi-Stage Container Blueprint}
+To prepare for containerized staging deployment, the backend is configured for a multi-stage Docker build separating compilation dependencies from runtime artifacts:
+\begin{lstlisting}[language=bash, caption={Production Multi-Stage Dockerfile Blueprint.}]
+# Stage 1: Build & wheels generation
+FROM python:3.10-slim AS builder
+WORKDIR /build
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev
+COPY pyproject.toml .
+RUN pip install --no-cache-dir --upgrade pip wheel && \
+    pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -e ".[ml]"
+
+# Stage 2: Minimal runtime image
+FROM python:3.10-slim AS runtime
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 curl && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/wheels /wheels
+RUN pip install --no-cache-dir /wheels/*
+COPY . .
+USER 1000:1000
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8000/health || exit 1
+CMD ["uvicorn", "services.core.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+\end{lstlisting}
+This multi-stage architecture yields a hardened, non-root Linux container image with zero extraneous compilers, reducing the attack surface and minimizing image size to under 220\,MB.

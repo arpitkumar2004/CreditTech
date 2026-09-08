@@ -1,0 +1,152 @@
+% -----------------------------------------------------------------------------
+% Chapter 13: Application Workflows
+% -----------------------------------------------------------------------------
+\chapter{Application Workflows}
+\label{chap:workflows}
+
+\section{Workflow 1: Assisted Consent Capture \& Onboarding}
+Figure~\ref{fig:workflow_consent} illustrates the sequence of operations when a Bank Sakhi assists a rural borrower in creating an authenticated digital identity and recording tamper-evident consent under the DPDP Act 2023.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 0.8cm, auto]
+  \node[clientblock, fill=primary!10, draw=primary, minimum width=3.4cm] (sakhi) {
+    \textbf{Bank Sakhi / Tablet}\\
+    \scriptsize Collects applicant Aadhaar\\
+    \scriptsize Reads vernacular consent terms
+  };
+
+  \node[clientblock, right=0.8cm of sakhi, fill=primary!15, draw=primary, minimum width=3.2cm] (borrower) {
+    \textbf{Rural Borrower}\\
+    \scriptsize Authorizes 4-rail pull\\
+    \scriptsize Provides mobile OTP / sign
+  };
+
+  \node[serviceblock, right=0.8cm of borrower, fill=accent!10, draw=accent, minimum width=3.6cm] (consent_engine) {
+    \textbf{Consent Engine}\\
+    \scriptsize Validates purpose \& expiry\\
+    \scriptsize Appends SHA-256 Hash
+  };
+
+  \node[datablock, below=1.2cm of consent_engine, minimum width=2.8cm] (ledger) {
+    \textbf{Consent}\\
+    \textbf{Ledger}\\
+    \scriptsize Immutable State
+  };
+
+  \draw[flowline] (sakhi) -- node[above, font=\scriptsize\sffamily] {Present} (borrower);
+  \draw[flowline] (borrower) -- node[above, font=\scriptsize\sffamily] {Authorize} (consent_engine);
+  \draw[flowline] (consent_engine) -- node[right, font=\scriptsize\sffamily] {Append Hash} (ledger);
+\end{tikzpicture}
+\caption{Research Block Diagram: Assisted Borrower Consent Capture and Hash Chaining Workflow.}
+\label{fig:workflow_consent}
+\end{figure}
+
+\section{Workflow 2: 4-Rail Parallel Ingestion \& Feature Fusion}
+Figure~\ref{fig:workflow_ingestion} depicts the asynchronous execution graph of the Ingestion Orchestrator as it queries the four alternative data rails in parallel, enforces timeouts, applies imputation, and constructs the 21-feature credit snapshot.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 1.0cm, auto]
+
+  % Central Orchestrator
+  \node[serviceblock, fill=accent!12, draw=accent, minimum width=4.0cm] (orch) {
+    \textbf{Ingestion Orchestrator}\\
+    \scriptsize \texttt{POST /api/v1/ingest/trigger}\\
+    \scriptsize Spawns 4 Async Tasks
+  };
+
+  % Rail 1: AA
+  \node[baseblock, above right=0.5cm and 1.2cm of orch, fill=cardbg, draw=cardborder, minimum width=3.4cm] (rail_aa) {
+    \textbf{Account Aggregator}\\
+    \scriptsize Inflow/Outflow Volatility\\
+    \scriptsize Average Daily Balance
+  };
+
+  % Rail 2: Satellite
+  \node[baseblock, right=1.2cm of orch, fill=cardbg, draw=cardborder, minimum width=3.4cm] (rail_sat) {
+    \textbf{Sentinel-2 Remote Sensing}\\
+    \scriptsize NDVI Peak / Crop Mean\\
+    \scriptsize Monsoon Rainfall Ratio
+  };
+
+  % Rail 3: Utility
+  \node[baseblock, below right=0.5cm and 1.2cm of orch, fill=cardbg, draw=cardborder, minimum width=3.4cm] (rail_util) {
+    \textbf{Electricity Utility}\\
+    \scriptsize Bill Payment Punctuality\\
+    \scriptsize 12-Month Arrears
+  };
+
+  % Rail 4: SHG
+  \node[baseblock, below=1.0cm of rail_util, fill=cardbg, draw=cardborder, minimum width=3.4cm] (rail_shg) {
+    \textbf{SHG / FPO Peer Thrift}\\
+    \scriptsize Meeting Attendance \%\\
+    \scriptsize Internal Loan Repayment
+  };
+
+  % Synthesis Block
+  \node[serviceblock, right=1.2cm of rail_sat, fill=primary!12, draw=primary, minimum width=3.6cm] (snapshot) {
+    \textbf{5-Cs Feature Store}\\
+    \scriptsize Synthesizes 21 Features\\
+    \scriptsize Computes Completeness \%
+  };
+
+  % Connections
+  \draw[flowline] (orch) |- (rail_aa);
+  \draw[flowline] (orch) -- (rail_sat);
+  \draw[flowline] (orch) |- (rail_util);
+  \draw[flowline] (orch) |- (rail_shg);
+
+  \draw[flowline] (rail_aa) -| (snapshot);
+  \draw[flowline] (rail_sat) -- (snapshot);
+  \draw[flowline] (rail_util) -| (snapshot);
+  \draw[flowline] (rail_shg) -| (snapshot);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: 4-Rail Parallel Alternative Ingestion and Feature Aggregation Pipeline.}
+\label{fig:workflow_ingestion}
+\end{figure}
+
+\section{Workflow 3: Underwriting Review, SHAP Inspection \& Officer Dissent}
+Figure~\ref{fig:workflow_decision} illustrates the underwriter decision flow, highlighting the mandatory override tripwire that forces the entry of a justified reason code whenever a loan officer dissents from the algorithmic recommendation.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 1.0cm, auto]
+  \node[serviceblock, fill=warn!10, draw=warn, minimum width=3.4cm] (score) {
+    \textbf{Scoring Service}\\
+    \scriptsize Score 520 (Manual Review)\\
+    \scriptsize Top Negative: Low NDVI
+  };
+
+  \node[clientblock, right=1.0cm of score, fill=primary!10, draw=primary, minimum width=3.4cm] (officer) {
+    \textbf{Loan Officer Review}\\
+    \scriptsize Evaluates SHAP plots\\
+    \scriptsize Conducts field check
+  };
+
+  \node[decisionblock, right=1.0cm of officer, minimum width=3.2cm, fill=warn!10, draw=warn] (agree) {
+    \textbf{Officer Agrees}\\
+    \textbf{with Model?}
+  };
+
+  \node[baseblock, above right=0.6cm and 1.0cm of agree, fill=success!12, draw=success, minimum width=3.4cm] (standard) {
+    \textbf{Standard Sanction}\\
+    \scriptsize Algorithmic alignment\\
+    \scriptsize Direct RE Dispatch
+  };
+
+  \node[securityblock, below right=0.6cm and 1.0cm of agree, fill=danger!10, draw=danger, minimum width=3.8cm] (override) {
+    \textbf{Mandatory Dissent Dialogue}\\
+    \scriptsize Select reason code (e.g. Borewell)\\
+    \scriptsize Enter supervisor justification note
+  };
+
+  \draw[flowline] (score) -- (officer);
+  \draw[flowline] (officer) -- (agree);
+  \draw[flowline] (agree) |- node[above, font=\scriptsize\sffamily] {Yes} (standard);
+  \draw[flowline] (agree) |- node[below, font=\scriptsize\sffamily] {No (Override)} (override);
+\end{tikzpicture}
+\caption{Research Block Diagram: Loan Underwriter Decisioning and Mandatory Dissent Override Flow.}
+\label{fig:workflow_decision}
+\end{figure}

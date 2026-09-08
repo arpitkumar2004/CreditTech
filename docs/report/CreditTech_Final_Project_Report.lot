@@ -1,0 +1,42 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Formal MVP Boundary Matrix: In-Scope Capabilities vs. Production Exclusions.}}{5}{table.caption.6}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Canonical Role-Based Access Control (RBAC) Matrix across System Resources. Legend: \text {$\mathsurround \z@ \mathchar "458$}= Full Access, $\times $ = Forbidden (HTTP 403), \textbf {OWN} = Restricted to Caller's Authenticated Identity, Eye = Read-Only Aggregated Access.}}{10}{table.caption.8}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Non-Functional Requirements (NFR) Specifications and Target Benchmarks.}}{14}{table.caption.9}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {7.1}{\ignorespaces Comprehensive Technology Stack and Engineering Selection Criteria.}}{18}{table.caption.11}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {8.1}{\ignorespaces Database Schema Entities, Keys, and Relational Constraints.}}{21}{table.caption.13}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {10.1}{\ignorespaces Entity-Level CRUD Permission Boundaries and Immutability Invariants.}}{25}{table.caption.15}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {12.1}{\ignorespaces Screen Catalog and Persona-Specific User Experience Functions.}}{29}{table.caption.19}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {13.1}{\ignorespaces Systemic Error, Exception, and Edge-Case Mitigation Matrix.}}{32}{table.caption.21}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {16.1}{\ignorespaces Representative Security and Functional Test Matrix with Verified Outcomes.}}{39}{table.caption.24}%
+\contentsline {table}{\numberline {16.2}{\ignorespaces Automated Pytest Suite Distribution and Verification Audit.}}{40}{table.caption.25}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {19.1}{\ignorespaces Security Controls Implementation Status Matrix (Implemented vs. Partially Implemented vs. Planned).}}{45}{table.caption.28}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {20.1}{\ignorespaces Technical Bottleneck Identification and Production Engineering Mitigations.}}{47}{table.caption.30}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {23.1}{\ignorespaces Comprehensive Benchmark Performance Comparison across 5 Tuned Architectures under 5-Fold Spatial GroupKFold Cross-Validation on $N=22,000$ Real Records.}}{52}{table.caption.33}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {A.1}{\ignorespaces Complete RESTful API Endpoint Specifications across Platform Services.}}{67}{table.caption.47}%

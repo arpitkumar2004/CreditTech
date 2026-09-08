@@ -1,0 +1,50 @@
+% -----------------------------------------------------------------------------
+% Chapter 21: Security Posture
+% -----------------------------------------------------------------------------
+\chapter{Security Posture}
+\label{chap:security_posture}
+
+\section{Defense-in-Depth Architecture}
+CreditTech treats security and data privacy not as peripheral features, but as fundamental architectural invariants. Because alternative credit scoring handles sensitive citizen data (satellite coordinates, bank statements, utility consumption), the platform implements a \textit{defense-in-depth posture} across every layer of the operating stack. 
+
+To maintain strict engineering integrity, Table~\ref{tab:security_controls_status} explicitly categorizes the implementation status of all security controls as \textbf{Implemented (MVP)}, \textbf{Partially Implemented}, or \textbf{Planned (Production)}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{p{3.2cm} p{3.2cm} X}
+  \toprule
+  \textbf{Security Domain} & \textbf{Current Status} & \textbf{Technical Implementation \& Defensive Control} \\
+  \midrule
+  \textbf{Input Sanitization} & \textbf{IMPLEMENTED} & Pydantic v2 validates all incoming JSON schemas at the gateway; rejects unexpected fields and malformed data types. \\
+  \addlinespace
+  \textbf{Rate Limiting} & \textbf{IMPLEMENTED} & Token-bucket middleware caps request velocity to 60 requests/minute per client IP; prevents automated credential stuffing or scraping. \\
+  \addlinespace
+  \textbf{Payload Size Ceilings} & \textbf{IMPLEMENTED} & Strict 1.0\,MB body size limit enforced by ASGI middleware, preventing memory exhaustion and buffer overflow vectors. \\
+  \addlinespace
+  \textbf{Audit Immutability} & \textbf{IMPLEMENTED} & Database triggers guard \texttt{officer\_decisions} and \texttt{consent\_records}, rejecting \texttt{UPDATE} and \texttt{DELETE} SQL statements. \\
+  \addlinespace
+  \textbf{Consent Integrity} & \textbf{IMPLEMENTED} & SHA-256 cryptographic hash chaining ($H_n = \text{SHA256}(H_{n-1} \parallel \text{Data}_n)$) ensures consent records cannot be retroactively forged. \\
+  \addlinespace
+  \textbf{PII Tokenization} & \textbf{IMPLEMENTED} & Aadhaar numbers are salt-hashed; phone numbers are encrypted at rest with AES-256-GCM; direct PII is isolated from model matrices. \\
+  \addlinespace
+  \textbf{Security Headers} & \textbf{IMPLEMENTED} & Middleware injects \texttt{X-Content-Type-Options: nosniff}, \texttt{X-Frame-Options: DENY}, and \texttt{Strict-Transport-Security}. \\
+  \addlinespace
+  \textbf{Role-Based Access} & \textbf{IMPLEMENTED} & Header contract (\texttt{X-Officer-Role}) verified via FastAPI dependencies; blocks both vertical and horizontal privilege escalations. \\
+  \addlinespace
+  \textbf{Secrets Management} & \textbf{PARTIALLY IMPL.} & Managed via local \texttt{.env} configuration with startup check blocking default insecure keys; Vault integration planned. \\
+  \addlinespace
+  \textbf{Enterprise SSO / OIDC} & \textbf{PLANNED} & Production migration to OAuth 2.0 / OpenID Connect with hardware mTLS tokens for bank branch workstations. \\
+  \addlinespace
+  \textbf{Field Biometric Auth} & \textbf{PLANNED} & Integration with STQC-certified Aadhaar Iris/Fingerprint scanners for Bank Sakhi field tablets. \\
+  \bottomrule
+\end{tabularx}
+\caption{Security Controls Implementation Status Matrix (Implemented vs. Partially Implemented vs. Planned).}
+\label{tab:security_controls_status}
+\end{table}
+
+\section{Cryptographic Append-Only Ledger Verification}
+The consent ledger's integrity can be audited mathematically at any moment. The verification algorithm recomputes the expected hash for every block from genesis:
+$$\hat{H}_0 = \text{SHA256}(\text{Genesis}), \quad \hat{H}_i = \text{SHA256}\left(\hat{H}_{i-1} \parallel \text{borrower\_id}_i \parallel \text{timestamp}_i \parallel \text{purpose}_i\right)$$
+If $\hat{H}_i \neq H_i^{\text{stored}}$ for any row $i$, an immediate tampering alert is raised, and the loan application pipeline halts.

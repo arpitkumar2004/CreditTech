@@ -1,0 +1,56 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Research Block Diagram: Problem-to-Impact Causal Trajectory of the CreditTech Platform.}}{2}{figure.caption.5}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Research Block Diagram: Multi-Tier Authorization Model and Cryptographic Tripwire Boundaries.}}{9}{figure.caption.7}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Research Block Diagram: 4-Tier System Architecture of the CreditTech Platform.}}{15}{figure.caption.10}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {8.1}{\ignorespaces Research Block Diagram: Relational Entity-Relationship (ER) Schema of the CreditTech Database.}}{20}{figure.caption.12}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {9.1}{\ignorespaces Research Block Diagram: Inbound Request Identity Propagation and Resource Authorization Pipeline.}}{22}{figure.caption.14}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {11.1}{\ignorespaces Research Block Diagram: Assisted Borrower Consent Capture and Hash Chaining Workflow.}}{26}{figure.caption.16}%
+\contentsline {figure}{\numberline {11.2}{\ignorespaces Research Block Diagram: 4-Rail Parallel Alternative Ingestion and Feature Aggregation Pipeline.}}{27}{figure.caption.17}%
+\contentsline {figure}{\numberline {11.3}{\ignorespaces Research Block Diagram: Loan Underwriter Decisioning and Mandatory Dissent Override Flow.}}{27}{figure.caption.18}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {12.1}{\ignorespaces Research Block Diagram: Front-End Component Routing and Persona Authorization Hierarchy.}}{30}{figure.caption.20}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {14.1}{\ignorespaces Research Block Diagram: Dual-Track Real Benchmark and Synthetic Pilot Data Architecture.}}{34}{figure.caption.22}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {15.1}{\ignorespaces Research Block Diagram: 4-Tier Automated Testing Pyramid of the CreditTech Platform (169 Tests Total).}}{36}{figure.caption.23}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {17.1}{\ignorespaces Research Block Diagram: Step-by-Step Developer Reproduction and Test Environment Workflow.}}{41}{figure.caption.26}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {18.1}{\ignorespaces Research Block Diagram: Deterministic Database Migration and Seeding Pipeline.}}{42}{figure.caption.27}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {20.1}{\ignorespaces Research Block Diagram: 4-Stage Architectural Scaling Roadmap from MVP to National Rural Deployment.}}{46}{figure.caption.29}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {21.1}{\ignorespaces Research Block Diagram: Continuous Integration, Containerization, and Production Staging Pipeline.}}{48}{figure.caption.31}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {22.1}{\ignorespaces Model Risk Management Telemetry: Population Stability Index (PSI) Breakdown Across 15 Pilot Village Clusters Proving $\text {PSI} < 0.10$ Across All Alternative Data Rails.}}{51}{figure.caption.32}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {23.1}{\ignorespaces Hyperparameter Sensitivity Surface: Monotonic GBDT Validation AUC as a Function of Learning Rate vs. Number of Boosting Iterations (Peak at $\eta =0.09, \text {Trees}=80$).}}{53}{figure.caption.34}%
+\contentsline {figure}{\numberline {23.2}{\ignorespaces Hyperparameter Trade-Off Curves: (Left) Random Forest Train vs. OOF Generalization Gap as a Function of Tree Depth; (Right) WoE Scorecard L1 Regularization ($C$) vs. Active Features.}}{53}{figure.caption.35}%
+\contentsline {figure}{\numberline {23.3}{\ignorespaces Comparative Receiver Operating Characteristic (ROC) Curves for the 5 Evaluated Models under 5-Fold Spatial GroupKFold Cross-Validation.}}{54}{figure.caption.36}%
+\contentsline {figure}{\numberline {23.4}{\ignorespaces Comparative Precision-Recall (PR) Curves Demonstrating Robust Minority Default Capture Under 9.54\% Default Class Prevalence.}}{55}{figure.caption.37}%
+\contentsline {figure}{\numberline {23.5}{\ignorespaces Kolmogorov-Smirnov (KS) Cumulative Distribution Separation for the Active WoE Scorecard Champion (Left, $\text {KS}=0.8208$) and Monotonic GBDT (Right, $\text {KS}=0.8549$).}}{55}{figure.caption.38}%
+\contentsline {figure}{\numberline {23.6}{\ignorespaces Decile Calibration Reliability Curves and Expected Calibration Errors (ECE) Demonstrating Statistical Alignment between Predicted and Empirical Probabilities.}}{56}{figure.caption.39}%
+\contentsline {figure}{\numberline {23.7}{\ignorespaces Normalized Confusion Matrices at Operational Decision Cutoff Score 600.}}{57}{figure.caption.40}%
+\contentsline {figure}{\numberline {23.8}{\ignorespaces Portfolio Density Distributions Mapped Across the Three Institutional Underwriting Decision Zones (Reject, Manual Review, and Approve).}}{57}{figure.caption.41}%
+\contentsline {figure}{\numberline {23.9}{\ignorespaces Multi-Model Feature Attribution: TreeSHAP Mean Absolute Importance (GBDT) vs. Mean Decrease in Impurity / Gini (Random Forest).}}{58}{figure.caption.42}%
+\contentsline {figure}{\numberline {23.10}{\ignorespaces Cost-Sensitive Banking Profit Optimization Curve: Expected Net Portfolio Margin (in Lakhs INR per 10,000 Loan Applicants) across Score Cutoffs.}}{59}{figure.caption.43}%
+\contentsline {figure}{\numberline {23.11}{\ignorespaces Demographic Fairness Parity: Approval Rates across Protected Attributes vs. Statutory Ceiling Limits.}}{59}{figure.caption.44}%
+\contentsline {figure}{\numberline {23.12}{\ignorespaces Demographic Fairness Frontier: Disparity Gaps across the Complete Score Scale Proving Safe Operation Below 5\% Disparity in the Operational Credit Band.}}{60}{figure.caption.45}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

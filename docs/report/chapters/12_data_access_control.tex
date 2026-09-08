@@ -1,0 +1,49 @@
+% -----------------------------------------------------------------------------
+% Chapter 12: Data Access Control & Privacy
+% -----------------------------------------------------------------------------
+\chapter{Data Access Control \& Privacy}
+\label{chap:data_access_control}
+
+\section{Data Ownership Principles}
+CreditTech adheres strictly to the statutory mandates of the \textit{Digital Personal Data Protection (DPDP) Act 2023}~\cite{dpdp_act_2023}. In alignment with the concept of the citizen as a \textit{Data Principal} and the lending entity as a \textit{Data Fiduciary}, our data access architecture is governed by five foundational ownership axioms:
+
+\begin{enumerate}
+  \item \textbf{Borrower Data Sovereignty:} The applicant retains ultimate ownership over all personal, financial, and geographic attributes ingested into the system. The platform maintains no right to process or share data absent an unexpired, active consent token.
+  \item \textbf{Purpose-Bound Ephemerality:} Ingested raw telemetry (e.g., individual bank statement transactions from Account Aggregators or raw Sentinel-2 satellite GeoTIFF tiles) is ephemeral; it is parsed into statistical aggregates (\texttt{FeatureSnapshot}) and purged from memory.
+  \item \textbf{Cryptographic PII Isolation:} Direct personal identity information (Aadhaar numbers, complete mobile numbers) is cryptographically segregated from machine learning feature stores. Feature tables reference anonymized \texttt{borrower\_id} UUIDs.
+  \item \textbf{Zero Administrative Data Destruction:} System administrators and engineers cannot delete or alter historical underwriting decisions, audit records, or settled grievances. The platform enforces an append-only architecture.
+  \item \textbf{Geographic Cluster Partitioning:} Field agents and loan officers operate strictly within designated administrative boundaries (\textit{Gram Panchayats} and rural bank branches). An officer in Chandauli District cannot query applicants residing in Mirzapur District.
+\end{enumerate}
+
+\section{Fine-Grained CRUD Permissions by Entity}
+Table~\ref{tab:crud_matrix} defines the fine-grained data permissions across all system entities, delineating who can create, read, update, or delete records.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{l p{2.8cm} p{3.2cm} p{2.8cm} p{2.2cm}}
+  \toprule
+  \textbf{Entity} & \textbf{Create (C)} & \textbf{Read (R)} & \textbf{Update (U)} & \textbf{Delete (D)} \\
+  \midrule
+  \texttt{borrowers} & Sakhi, Borrower & Borrower (Own), Officer & Sakhi (Assisted) & \textbf{BLOCKED} \\
+  \texttt{consent\_records} & Borrower, Sakhi & Borrower (Own), Officer & Status: Revocation & \textbf{BLOCKED} \\
+  \texttt{feature\_snapshots}& Scoring Engine & Officer, Auditor & \textbf{BLOCKED} (Immutable) & \textbf{BLOCKED} \\
+  \texttt{score\_results} & Scoring Engine & Borrower (Own), Officer & \textbf{BLOCKED} (Versioned) & \textbf{BLOCKED} \\
+  \texttt{officer\_decisions} & Loan Officer & Officer, Auditor, RE & \textbf{BLOCKED} (Immutable) & \textbf{BLOCKED} \\
+  \texttt{grievance\_records}& Borrower, Sakhi & Borrower (Own), Officer & Officer (Triage) & \textbf{BLOCKED} \\
+  \texttt{audit\_events} & System Core & Auditor, Admin & \textbf{BLOCKED} (Append) & \textbf{BLOCKED} \\
+  \texttt{model\_promotions}& MLOps Admin & Auditor, Officer & \textbf{BLOCKED} (Logged) & \textbf{BLOCKED} \\
+  \bottomrule
+\end{tabularx}
+\caption{Entity-Level CRUD Permission Boundaries and Immutability Invariants.}
+\label{tab:crud_matrix}
+\end{table}
+
+\section{Field-Level Masking \& Tokenization}
+To protect sensitive identity attributes, CreditTech enforces field-level masking at the API serialization boundary:
+\begin{itemize}
+  \item \textbf{Aadhaar Numbers:} Never stored in plaintext. Ingested numbers are hashed using salt-hardened SHA-256 (\texttt{aadhaar\_hash}), and displayed across all officer views as masked tokens: \texttt{XXXXXXXX1234}.
+  \item \textbf{Mobile Phone Numbers:} Encrypted at rest using AES-256-GCM. Displayed to loan officers and Sakhis with middle-digit redaction (\texttt{+91 98XXX-XX210}).
+  \item \textbf{Sensitive Demographic Tags:} Gender, religion, and caste attributes are excluded from all feature vectors consumed by credit scoring models, preventing disparate treatment bias at the algorithmic input layer.
+\end{itemize}

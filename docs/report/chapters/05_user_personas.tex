@@ -1,0 +1,123 @@
+% -----------------------------------------------------------------------------
+% Chapter 5: User Personas
+% -----------------------------------------------------------------------------
+\chapter{User Personas}
+\label{chap:user_personas}
+
+A foundational architectural requirement of CreditTech is the strict enforcement of role-based data isolation across all interaction layers. The system serves five distinct human personas, each representing a specific link in the rural digital credit delivery chain.
+
+\section{Persona A: Rural Borrower (Applicant)}
+\noindent\textbf{Representative Identity:} Radhika Devi (Village: Pipri, District: Chandauli)\\
+\textbf{Device / Environment:} Low-cost Android smartphone (Web browser), 4G/2G mobile network.\\
+\textbf{Context \& Profile:} A smallholder farmer cultivating 1.2 acres of paddy. She is an active member of the \textit{Maa Durga SHG} with 3 years of continuous weekly savings, but possesses zero formal bank loan history.
+
+\vspace{0.2cm}
+\noindent\textbf{Primary Goal:} Secure a ₹40,000 agricultural input credit facility at commercial bank rates without pledging physical land deeds or paying bribes to middlemen.
+
+\vspace{0.2cm}
+\noindent\textbf{Permitted Capabilities (``Can''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Grant, view, and unilaterally revoke digital consent for multi-rail data aggregation.
+  \item View her own credit score, credit health band, and bilingual (English/Hindi) Shapley reason codes.
+  \item Lodge formal grievances, dispute incorrect data records, and track statutory 30-day resolution progress.
+  \item Download her sanitized, cryptographic loan application package.
+\end{itemize}
+
+\noindent\textbf{Forbidden Operations (``Cannot''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Access, query, or view any data, credit scores, or applications belonging to other borrowers (horizontal isolation).
+  \item Inspect underlying model coefficients, weights, or admin configuration panels.
+  \item Modify loan underwriting decisions or approve her own application.
+\end{itemize}
+
+\section{Persona B: Bank Sakhi (Field Business Correspondent)}
+\noindent\textbf{Representative Identity:} Sunita Devi (SHG Federation Leader, Chandauli Cluster)\\
+\textbf{Device / Environment:} Field-issued Android tablet, intermittent rural mobile connectivity.\\
+\textbf{Context \& Profile:} A trusted local community member trained under the National Rural Livelihoods Mission. She acts as the assisted-digital interface for non-literate borrowers in her village.
+
+\vspace{0.2cm}
+\noindent\textbf{Primary Goal:} Onboard village women into formal credit, assist them in understanding digital consent, digitize paper SHG meeting registers, and track applications across her assigned cluster.
+
+\vspace{0.2cm}
+\noindent\textbf{Permitted Capabilities (``Can''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Initiate assisted borrower onboarding and record consent on behalf of the applicant with verification.
+  \item Digitize paper SHG peer-thrift passbooks, meeting attendance, and crop cycle details.
+  \item Trigger automated 4-rail alternative data aggregation pipelines.
+  \item View the status and credit scores of borrowers strictly within her assigned village cluster.
+\end{itemize}
+
+\noindent\textbf{Forbidden Operations (``Cannot''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Record final loan credit decisions (\texttt{Approve} / \texttt{Reject}).
+  \item Override underwriting recommendations or modify credit limits.
+  \item View borrower profiles or applications residing in unassigned geographic clusters.
+\end{itemize}
+
+\section{Persona C: Loan Officer (Branch Credit Underwriter)}
+\noindent\textbf{Representative Identity:} Rajesh Kumar (Branch Credit Manager, Regional Rural Bank)\\
+\textbf{Device / Environment:} Branch desktop workstation, high-speed intranet connection.\\
+\textbf{Context \& Profile:} Responsible for branch-level asset quality, non-performing asset (NPA) management, and priority sector lending (PSL) compliance under statutory banking guidelines.
+
+\vspace{0.2cm}
+\noindent\textbf{Primary Goal:} Make fast, defensible, and audited loan underwriting decisions on rural applicants while maintaining a branch default rate below 3.0\%.
+
+\vspace{0.2cm}
+\noindent\textbf{Permitted Capabilities (``Can''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Review complete synthesized credit risk dossiers, including satellite NDVI health and SHG thrift indices.
+  \item Inspect global and local TreeSHAP reason codes explaining model recommendations.
+  \item Render formal underwriting decisions: \texttt{Approve}, \texttt{Reject}, or \texttt{Refer to Supervisor}.
+  \item Enter dissent overrides when local field context contradicts the algorithmic score, with mandatory auditable justification notes.
+  \item Export approved loan files to the Regulated Entity (RE) core banking handoff queue.
+\end{itemize}
+
+\noindent\textbf{Forbidden Operations (``Cannot''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Promote, activate, or retrain machine learning models in the production registry.
+  \item Alter statutory fairness tolerance thresholds or disable demographic parity gates.
+  \item Delete historical decision records or tamper with append-only audit trails.
+\end{itemize}
+
+\section{Persona D: Risk Officer (Institutional Compliance Auditor)}
+\noindent\textbf{Representative Identity:} Priya Sharma (Chief Risk Officer / Model Risk Auditor)\\
+\textbf{Device / Environment:} Corporate desktop workstation, secure VPN access.\\
+\textbf{Context \& Profile:} Oversees portfolio-wide credit risk, regulatory compliance with RBI Digital Lending Guidelines, and demographic fair-lending mandates across all branches.
+
+\vspace{0.2cm}
+\noindent\textbf{Primary Goal:} Ensure that algorithmic credit allocation does not systematically discriminate against marginalized communities, women, or landless tenants, and monitor portfolio drift.
+
+\vspace{0.2cm}
+\noindent\textbf{Permitted Capabilities (``Can''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Inspect portfolio-level Population Stability Index (PSI) and Characteristic Selectivity Index (CSI).
+  \item Audit demographic parity and disparate impact ratios across gender, caste, and landholding bands.
+  \item Execute dry-run evaluations of the automated Fairness Gate against ratified manifests.
+  \item Export cryptographic regulatory compliance packages and auditor CSV logs.
+\end{itemize}
+
+\noindent\textbf{Forbidden Operations (``Cannot''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Originate loans or record credit approval decisions on individual borrower files.
+  \item Access unmasked borrower personal identity attributes (direct PII isolation).
+\end{itemize}
+
+\section{Persona E: System Administrator / MLOps Engineer}
+\noindent\textbf{Representative Identity:} Amit Verma (Lead ML Infrastructure Engineer)\\
+\textbf{Device / Environment:} Secure developer workstation / Terminal CLI.\\
+\textbf{Context \& Profile:} Manages machine learning lifecycle, model promotion pipelines, database migrations, and operational platform uptime.
+
+\vspace{0.2cm}
+\noindent\textbf{Permitted Capabilities (``Can''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Trigger 5-Fold cross-validation benchmark training and hyperparameter optimization sweeps.
+  \item Promote candidate challenger models to Active Champion, subject to automated gate validation.
+  \item Execute database schema migrations and run deterministic seed test fixtures.
+  \item Inspect operational system telemetry, API latency distributions, and error logs.
+\end{itemize}
+
+\noindent\textbf{Forbidden Operations (``Cannot''):}
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+  \item Unilaterally bypass a failed Fairness Gate without explicit multi-party cryptographic sign-off.
+  \item Underwrite loans, disburse funds, or close borrower grievance records.
+\end{itemize}

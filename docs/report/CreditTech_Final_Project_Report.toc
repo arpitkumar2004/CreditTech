@@ -1,0 +1,127 @@
+\contentsline {chapter}{Executive Summary}{i}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Problem Statement}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Macro Context \& Existing Inefficiencies}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Target Demographics Affected}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Systemic Limitations of Existing Alternatives}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}The Causal Problem-Solution Schematic}{2}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Proposed Solution \& Core Hypotheses}{2}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Objectives \& Scope}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Core Engineering Objectives}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Project Scope: Inclusions vs. Exclusions}{4}{section.2.2}%
+\contentsline {chapter}{\numberline {3}User Personas}{6}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Persona A: Rural Borrower (Applicant)}{6}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Persona B: Bank Sakhi (Field Business Correspondent)}{6}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Persona C: Loan Officer (Branch Credit Underwriter)}{7}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Persona D: Risk Officer (Institutional Compliance Auditor)}{7}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Persona E: System Administrator / MLOps Engineer}{8}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Role \& Permission Matrix}{9}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Conceptual Security \& Authorization Hierarchy}{9}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Exhaustive Persona $\times $ Resource $\times $ Action Matrix}{9}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Privilege Escalation Tripwires}{10}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Requirements}{12}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Functional Requirements (FR)}{12}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Consent \& Identity Management}{12}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Multi-Rail Data Ingestion \& Feature Engineering}{12}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Credit Risk Scoring \& Explainability}{12}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.4}Underwriting, Overrides \& Regulated Entity Handoff}{13}{subsection.5.1.4}%
+\contentsline {subsection}{\numberline {5.1.5}Governance, Fairness \& Grievance Redressal}{13}{subsection.5.1.5}%
+\contentsline {section}{\numberline {5.2}Non-Functional Requirements (NFR)}{13}{section.5.2}%
+\contentsline {chapter}{\numberline {6}System Architecture}{15}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Tiered System Topology}{15}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Component-by-Component Walkthrough}{15}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}1. Presentation Layer (Frontend Clients)}{15}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}2. Gateway \& Security Middleware}{16}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}3. Core Business Services}{16}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}4. Persistence \& Model Artifact Store}{16}{subsection.6.2.4}%
+\contentsline {chapter}{\numberline {7}Technology Stack \& Design Decisions}{17}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Architectural Selection Rationale}{17}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Key Design Decisions \& Trade-Offs}{18}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}1. Weight-of-Evidence Scorecard vs. Deep Neural Networks}{18}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}2. Header-Based Identity Contract vs. OAuth 2.0 / JWT for MVP}{19}{subsection.7.2.2}%
+\contentsline {chapter}{\numberline {8}Data Architecture \& Relational Schema}{20}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Relational Entity-Relationship Schematic}{20}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Entity Details \& Integrity Constraints}{20}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Data Lifecycle State Transitions}{21}{section.8.3}%
+\contentsline {chapter}{\numberline {9}Authentication \& Authorization}{22}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Identity Propagation Pipeline}{22}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Defense Against Horizontal Privilege Escalation}{22}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Defense Against Vertical Privilege Escalation}{23}{section.9.3}%
+\contentsline {chapter}{\numberline {10}Data Access Control \& Privacy}{24}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Data Ownership Principles}{24}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Fine-Grained CRUD Permissions by Entity}{24}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Field-Level Masking \& Tokenization}{25}{section.10.3}%
+\contentsline {chapter}{\numberline {11}Application Workflows}{26}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Workflow 1: Assisted Consent Capture \& Onboarding}{26}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Workflow 2: 4-Rail Parallel Ingestion \& Feature Fusion}{26}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Workflow 3: Underwriting Review, SHAP Inspection \& Officer Dissent}{27}{section.11.3}%
+\contentsline {chapter}{\numberline {12}UI/UX Design System}{28}{chapter.12}%
+\contentsline {section}{\numberline {12.1}Design System Principles \& Tokens}{28}{section.12.1}%
+\contentsline {section}{\numberline {12.2}Persona-Tailored Screen Architecture}{28}{section.12.2}%
+\contentsline {section}{\numberline {12.3}Component Routing & State Hierarchy}{29}{section.12.3}%
+\contentsline {chapter}{\numberline {13}Error \& Edge-Case Handling}{31}{chapter.13}%
+\contentsline {section}{\numberline {13.1}Systemic Failure Modes \& Mitigations}{31}{section.13.1}%
+\contentsline {section}{\numberline {13.2}Defensive Degradation Architecture}{32}{section.13.2}%
+\contentsline {chapter}{\numberline {14}Synthetic \& Benchmark Data Strategy}{34}{chapter.14}%
+\contentsline {section}{\numberline {14.1}Dual-Track Data Methodology}{34}{section.14.1}%
+\contentsline {section}{\numberline {14.2}Real Benchmark Fusion \& Rural Feature Mapping}{34}{section.14.2}%
+\contentsline {section}{\numberline {14.3}Controlled Synthetic Early-Adopter Seeding}{35}{section.14.3}%
+\contentsline {chapter}{\numberline {15}Testing Strategy}{36}{chapter.15}%
+\contentsline {section}{\numberline {15.1}The Multi-Layered Testing Pyramid}{36}{section.15.1}%
+\contentsline {section}{\numberline {15.2}Tier-by-Tier Testing Methodologies}{36}{section.15.2}%
+\contentsline {subsection}{\numberline {15.2.1}1. Tier 1: Unit Testing (Algorithm \& Pure Functions)}{36}{subsection.15.2.1}%
+\contentsline {subsection}{\numberline {15.2.2}2. Tier 2: Integration Testing (API Boundary $\rightarrow $ Relational State)}{37}{subsection.15.2.2}%
+\contentsline {subsection}{\numberline {15.2.3}3. Tier 3: Persona Authorization Security Testing}{37}{subsection.15.2.3}%
+\contentsline {subsection}{\numberline {15.2.4}4. Tier 4: Critical User Journey (CUJ) End-to-End Testing}{37}{subsection.15.2.4}%
+\contentsline {chapter}{\numberline {16}Test Case Matrix}{38}{chapter.16}%
+\contentsline {section}{\numberline {16.1}Representative Security \& Functional Test Cases}{38}{section.16.1}%
+\contentsline {section}{\numberline {16.2}Complete Automated Test Suite Audit (169 Tests)}{40}{section.16.2}%
+\contentsline {chapter}{\numberline {17}Test Environment \& Reproducibility}{41}{chapter.17}%
+\contentsline {section}{\numberline {17.1}Deterministic Developer Setup Workflow}{41}{section.17.1}%
+\contentsline {section}{\numberline {17.2}Command-Line Execution Reference}{41}{section.17.2}%
+\contentsline {chapter}{\numberline {18}Seed Data \& Deterministic Database Reset}{42}{chapter.18}%
+\contentsline {section}{\numberline {18.1}The Deterministic Seeding Rationale}{42}{section.18.1}%
+\contentsline {section}{\numberline {18.2}Seeded Entity Profiles}{42}{section.18.2}%
+\contentsline {chapter}{\numberline {19}Security Posture}{44}{chapter.19}%
+\contentsline {section}{\numberline {19.1}Defense-in-Depth Architecture}{44}{section.19.1}%
+\contentsline {section}{\numberline {19.2}Cryptographic Append-Only Ledger Verification}{45}{section.19.2}%
+\contentsline {chapter}{\numberline {20}Performance \& Scalability}{46}{chapter.20}%
+\contentsline {section}{\numberline {20.1}Current Empirical Benchmark Profile}{46}{section.20.1}%
+\contentsline {section}{\numberline {20.2}Scaling Roadmap: 100 to 100,000 Users}{46}{section.20.2}%
+\contentsline {section}{\numberline {20.3}Bottleneck Identification \& Scaling Mitigations}{46}{section.20.3}%
+\contentsline {chapter}{\numberline {21}Deployment Architecture}{48}{chapter.21}%
+\contentsline {section}{\numberline {21.1}Current Local Deployment Posture}{48}{section.21.1}%
+\contentsline {section}{\numberline {21.2}Target CI/CD \& Production Pipeline Blueprint}{48}{section.21.2}%
+\contentsline {section}{\numberline {21.3}Docker Multi-Stage Container Blueprint}{48}{section.21.3}%
+\contentsline {chapter}{\numberline {22}Monitoring, Observability \& MRM}{50}{chapter.22}%
+\contentsline {section}{\numberline {22.1}Application Observability Stack}{50}{section.22.1}%
+\contentsline {section}{\numberline {22.2}Model Risk Management (MRM) \& Drift Tracking}{50}{section.22.2}%
+\contentsline {subsection}{\numberline {22.2.1}Population Stability Index (PSI)}{50}{subsection.22.2.1}%
+\contentsline {section}{\numberline {22.3}Automated Fairness Gating}{51}{section.22.3}%
+\contentsline {chapter}{\numberline {23}Empirical Results \& Model Benchmark Evaluation}{52}{chapter.23}%
+\contentsline {section}{\numberline {23.1}Benchmark Suite Overview}{52}{section.23.1}%
+\contentsline {section}{\numberline {23.2}Systematic Hyperparameter Optimization}{52}{section.23.2}%
+\contentsline {section}{\numberline {23.3}Discriminatory Separation \& Reliability Curves}{54}{section.23.3}%
+\contentsline {section}{\numberline {23.4}Portfolio Score Distributions \& Feature Attribution}{57}{section.23.4}%
+\contentsline {section}{\numberline {23.5}Economic Expected Profit vs. Cutoff Optimization}{58}{section.23.5}%
+\contentsline {section}{\numberline {23.6}Demographic Fairness Parity \& Frontiers}{59}{section.23.6}%
+\contentsline {chapter}{\numberline {24}Limitations}{61}{chapter.24}%
+\contentsline {section}{\numberline {24.1}Authentic Disclosure of MVP Boundaries}{61}{section.24.1}%
+\contentsline {chapter}{\numberline {25}Future Work \& Engineering Roadmap}{62}{chapter.25}%
+\contentsline {section}{\numberline {25.1}Structured 6-Phase Production Roadmap}{62}{section.25.1}%
+\contentsline {chapter}{\numberline {26}Lessons Learned \& Engineering Post-Mortem}{63}{chapter.26}%
+\contentsline {section}{\numberline {26.1}Retrospective Architectural Insights}{63}{section.26.1}%
+\contentsline {chapter}{\numberline {27}Conclusion}{64}{chapter.27}%
+\contentsline {section}{\numberline {27.1}Summary of Engineering Accomplishments}{64}{section.27.1}%
+\contentsline {chapter}{\numberline {A}Appendix}{66}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Mathematical Formulations of Core Metrics}{66}{section.A.1}%
+\contentsline {subsection}{\numberline {A.1.1}Weight of Evidence (WoE) and Information Value (IV)}{66}{subsection.A.1.1}%
+\contentsline {subsection}{\numberline {A.1.2}Standardized Credit Score Scaling Transformation}{66}{subsection.A.1.2}%
+\contentsline {subsection}{\numberline {A.1.3}Kolmogorov-Smirnov (KS) Separation Statistic}{66}{subsection.A.1.3}%
+\contentsline {subsection}{\numberline {A.1.4}Expected Calibration Error (ECE)}{66}{subsection.A.1.4}%
+\contentsline {subsection}{\numberline {A.1.5}Shapley Value Feature Attribution (TreeSHAP)}{66}{subsection.A.1.5}%
+\contentsline {section}{\numberline {A.2}Core API Endpoint Catalog}{67}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Sample JSON Payloads}{67}{section.A.3}%
+\contentsline {subsection}{\numberline {A.3.1}1. Cryptographic Consent Record Payload}{67}{subsection.A.3.1}%
+\contentsline {subsection}{\numberline {A.3.2}2. Credit Scoring Output with Bilingual SHAP Reason Codes}{68}{subsection.A.3.2}%
+\contentsline {subsection}{\numberline {A.3.3}3. Officer Underwriting Dissent Override Record}{68}{subsection.A.3.3}%
+\contentsline {section}{\numberline {A.4}Inventory of Publication Decision Figures}{68}{section.A.4}%

@@ -1,0 +1,90 @@
+% -----------------------------------------------------------------------------
+% Chapter 20: Seed Data & Database Reset
+% -----------------------------------------------------------------------------
+\chapter{Seed Data \& Deterministic Database Reset}
+\label{chap:seed_data}
+
+\section{The Deterministic Seeding Rationale}
+A recurring vulnerability in complex multi-persona web applications is state drift: after manual testing, test databases become polluted with orphan records, half-completed applications, and inconsistent status flags, causing subsequent tests to fail unpredictably. 
+
+To eliminate this fragility, CreditTech implements a deterministic seeding and atomic reset mechanism (\texttt{scripts/seed\_early\_adopters.py}). When triggered with the \texttt{--reset} flag, the script wipes all transient tables, re-executes all schema migrations, and seeds a mathematically reproducible cohort of borrower profiles, consent chains, applications, and officer reviews. Figure~\ref{fig:seed_reset_pipeline} outlines this pipeline.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 1.0cm, auto]
+  \node[securityblock, fill=danger!10, draw=danger, minimum width=3.4cm] (wipe) {
+    \textbf{1. Atomic Purge}\\
+    \scriptsize Drops SQLite tables\\
+    \scriptsize Wipes transient caches
+  };
+
+  \node[serviceblock, right=0.8cm of wipe, fill=primary!10, draw=primary, minimum width=3.4cm] (mig) {
+    \textbf{2. Alembic Migration}\\
+    \scriptsize Recreates 10 schema tables\\
+    \scriptsize Applies triggers \& indices
+  };
+
+  \node[serviceblock, right=0.8cm of mig, fill=accent!10, draw=accent, minimum width=3.4cm] (seed_borrowers) {
+    \textbf{3. Seed Borrowers}\\
+    \scriptsize 4 Core Early Adopters\\
+    \scriptsize Chandauli \& Mirzapur
+  };
+
+  \node[serviceblock, below=1.0cm of seed_borrowers, fill=warn!10, draw=warn, minimum width=3.4cm] (seed_consent) {
+    \textbf{4. Hash-Chain Consent}\\
+    \scriptsize SHA-256 chain links\\
+    \scriptsize Time-bounded validity
+  };
+
+  \node[serviceblock, left=0.8cm of seed_consent, fill=warn!10, draw=warn, minimum width=3.4cm] (seed_features) {
+    \textbf{5. Seed 5-Cs Features}\\
+    \scriptsize 21 features per borrower\\
+    \scriptsize Calibrated agro-ecological priors
+  };
+
+  \node[baseblock, left=0.8cm of seed_features, fill=success!15, draw=success, minimum width=3.4cm] (ready) {
+    \textbf{6. Ready for Testing}\\
+    \scriptsize Deterministic baseline\\
+    \scriptsize Zero flaky test runs
+  };
+
+  \draw[flowline] (wipe) -- (mig);
+  \draw[flowline] (mig) -- (seed_borrowers);
+  \draw[flowline] (seed_borrowers) -- (seed_consent);
+  \draw[flowline] (seed_consent) -- (seed_features);
+  \draw[flowline] (seed_features) -- (ready);
+\end{tikzpicture}
+\caption{Research Block Diagram: Deterministic Database Migration and Seeding Pipeline.}
+\label{fig:seed_reset_pipeline}
+\end{figure}
+
+\section{Seeded Entity Profiles}
+The deterministic seeding pipeline establishes a known testing ground containing four representative rural borrower profiles with diverse risk profiles:
+
+\begin{enumerate}
+  \item \textbf{Radhika Devi (\texttt{BORROWER-A1}):}
+    \begin{itemize}
+      \item \textit{Context:} Progressive farmer in Chandauli District (canal irrigated). Member of \textit{Maa Durga SHG}.
+      \item \textit{Alternative Signals:} 100\% SHG repayment rate, NDVI crop vigor 0.74, zero utility bill arrears.
+      \item \textit{Resulting Score:} 745 / 900 points. Status: \texttt{APPROVED} (Automatic).
+    \end{itemize}
+  \item \textbf{Sita Kumari (\texttt{BORROWER-A2}):}
+    \begin{itemize}
+      \item \textit{Context:} Marginal tenant farmer in Chandauli District. Member of \textit{Radha SHG}.
+      \item \textit{Alternative Signals:} 85\% SHG repayment rate, NDVI 0.58, minor seasonal utility payment delays.
+      \item \textit{Resulting Score:} 630 / 900 points. Status: \texttt{MANUAL REVIEW} (Pending Underwriter).
+    \end{itemize}
+  \item \textbf{Ramu Patel (\texttt{BORROWER-B1}):}
+    \begin{itemize}
+      \item \textit{Context:} Rain-fed smallholder in Mirzapur District. Suffered seasonal drought.
+      \item \textit{Alternative Signals:} Low satellite NDVI (0.32), Score: 510 / 900 points.
+      \item \textit{Officer Override:} Approved via dissent override with note: \textit{``New community solar irrigation borewell energized; Kharif crop risk mitigated.''}
+    \end{itemize}
+  \item \textbf{Meena Verma (\texttt{BORROWER-B2}):}
+    \begin{itemize}
+      \item \textit{Context:} Rural grocery shopkeeper in Mirzapur District.
+      \item \textit{Alternative Signals:} Good SHG savings, but disputed electricity utility bill arrears. Score: 580.
+      \item \textit{Grievance:} Active disputed billing appeal lodged; statutory 30-day resolution countdown active.
+    \end{itemize}
+\end{enumerate}
+Because every test run can re-instantiate this identical state in less than 2.0 seconds, developers can debug edge cases with complete repeatability.

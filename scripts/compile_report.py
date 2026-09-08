@@ -15,6 +15,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 REPORT_DIR = Path("docs/report")
 TEX_FILE = "CreditTech_Final_Project_Report.tex"
 JOB_NAME = "CreditTech_Final_Project_Report"

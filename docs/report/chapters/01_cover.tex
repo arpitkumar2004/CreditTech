@@ -1,0 +1,129 @@
+% -----------------------------------------------------------------------------
+% Chapter 1: Cover Page
+% -----------------------------------------------------------------------------
+\begin{titlepage}
+\centering
+\vspace*{0.5cm}
+
+% Institution Header
+{\scshape\Large Institutional FinTech \& Credit Risk Engineering Project Report \par}
+\vspace{0.8cm}
+
+% Horizontal Divider
+{\color{primary}\rule{\linewidth}{2pt}}\\[0.4cm]
+
+% Title & Subtitle
+{\Huge\bfseries\color{primary} CreditTech \par}
+\vspace{0.3cm}
+{\Large\bfseries\color{secondary} An Alternative Credit Decision-Support Platform \\ for Rural India \par}
+\vspace{0.2cm}
+{\large\itshape Multi-Persona Architecture, Role-Based Access Isolation, Multi-Rail Ingestion, and Explainable Credit Risk Scoring under RBI \& DPDP Regulations \par}
+
+{\color{primary}\rule{\linewidth}{1pt}}\\[1.5cm]
+
+% Meta Information Table
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
+  \begin{flushleft}
+    {\large\textbf{\color{primary}Engineering Team:}}\\[0.25cm]
+    \textbf{\color{secondary}Arpit Kumar}\\
+    {\small\textit{Lead System \& ML Engineer}}\\[0.25cm]
+    \textbf{\color{secondary}Aditya Raj Kaushik}\\
+    {\small\textit{Software \& ML Engineer}}
+  \end{flushleft}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+  \begin{flushright}
+    {\large\textbf{\color{primary}Project Guide:}}\\[0.25cm]
+    \textbf{\color{secondary}Prof. Piyush Kumar Singh}\\
+    {\small\textit{Department of Agricultural Engineering}}\\[0.25cm]
+    {\footnotesize\color{slate}Faculty Advisor \& Research Mentor}
+  \end{flushright}
+\end{minipage}
+
+\vspace{0.8cm}
+
+% Schematic Architectural Block (TikZ Cover Graphic)
+\begin{tikzpicture}[
+  scale=0.89, every node/.style={transform shape},
+  box/.style={
+    rectangle, rounded corners=4pt, line width=0.8pt, align=center,
+    inner sep=5pt, execute at begin node=\hyphenpenalty=10000
+  },
+  grouplayer/.style={
+    rectangle, rounded corners=6pt, draw=cardborder, fill=cardbg,
+    inner sep=7pt, dashed, line width=0.7pt
+  }
+]
+  % Column 1: Ingestion & Field Capture
+  \node[box, draw=primary!80!black, fill=primary!10, text width=4.2cm, minimum height=1.1cm] (c1) {
+    \textbf{\footnotesize Rural Borrower \& Sakhi}\\[2pt]
+    \scriptsize Mobile PWA $\bullet$ Field Enrollment
+  };
+  \node[box, draw=primary!80!black, fill=primary!5, text width=4.2cm, minimum height=1.35cm, below=0.5cm of c1] (c2) {
+    \textbf{\footnotesize 4-Rail Alternative Ingestion}\\[2pt]
+    \scriptsize RBI Account Aggregator (AA)\\
+    \scriptsize Sentinel-2 Satellite Vegetation\\
+    \scriptsize SHG Peer-Thrift $\bullet$ Utility Bills
+  };
+
+  % Column 2: CreditTech Decision Core
+  \node[box, draw=danger!80!black, fill=danger!10, text width=4.8cm, minimum height=1.1cm, right=1.2cm of c1] (e1) {
+    \textbf{\footnotesize DPDP Consent \& Security Guard}\\[2pt]
+    \scriptsize SHA-256 Hash Chain $\bullet$ Immutable Audit
+  };
+  \node[box, draw=accent!80!black, fill=accent!10, text width=4.8cm, minimum height=1.35cm, below=0.5cm of e1] (e2) {
+    \textbf{\footnotesize Monotonic Scorecard Engine}\\[2pt]
+    \scriptsize 5-Cs Alternative Feature Synthesizer\\
+    \scriptsize Weight of Evidence (WoE): 300--900\\
+    \scriptsize TreeSHAP Reason Codes $\bullet$ Fairness Gate
+  };
+
+  % Column 3: Institutional Underwriting & RE
+  \node[box, draw=warn!90!black, fill=warn!12, text width=4.2cm, minimum height=1.1cm, right=1.2cm of e1] (r1) {
+    \textbf{\footnotesize Bank Officer Workstation}\\[2pt]
+    \scriptsize Tiered Credit Decision Zones\\
+    \scriptsize Underwriting Dissent Override
+  };
+  \node[box, draw=success!80!black, fill=success!10, text width=4.2cm, minimum height=1.35cm, below=0.5cm of r1] (r2) {
+    \textbf{\footnotesize Regulated Bank CBS Handoff}\\[2pt]
+    \scriptsize Core Banking (CBS) API Dispatch\\
+    \scriptsize Auditor Demographic Parity Logs
+  };
+
+  % Connectors
+  \draw[flowline] (c1) -- (c2);
+  \draw[flowline] (c1.east) -- node[above, font=\tiny\sffamily, fill=cardbg, inner sep=1.5pt] {Consent Record} (e1.west);
+  \draw[flowline] (c2.east) -- node[above, font=\tiny\sffamily, fill=cardbg, inner sep=1.5pt] {4-Rail Telemetry} (e2.west);
+  \draw[flowline] (e1) -- (e2);
+  \draw[flowline] (e2.east) -- ++(0.55,0) |- node[pos=0.75, above, font=\tiny\sffamily, fill=cardbg, inner sep=1.5pt] {Score + Reasons} (r1.west);
+  \draw[flowline] (r1) -- node[right, font=\tiny\sffamily] {Sanction} (r2);
+
+  % Background Group Boxes
+  \begin{scope}[on background layer]
+    \node[grouplayer, fit=(c1) (c2)] (g1) {};
+    \node[above, font=\tiny\bfseries\sffamily\color{primary}] at (g1.north) {FIELD DATA ACQUISITION};
+
+    \node[grouplayer, fit=(e1) (e2)] (g2) {};
+    \node[above, font=\tiny\bfseries\sffamily\color{accent}] at (g2.north) {CREDITTECH ANALYTICS CORE};
+
+    \node[grouplayer, fit=(r1) (r2)] (g3) {};
+    \node[above, font=\tiny\bfseries\sffamily\color{warn}] at (g3.north) {INSTITUTIONAL UNDERWRITING};
+  \end{scope}
+\end{tikzpicture}
+
+\vspace{0.6cm}
+
+% Version, Status and Date
+\vfill
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{ll}
+  \textbf{Project Phase:} & Minimal Viable Product (MVP v1.2.0) \\
+  \textbf{Target Cohort:} & 22,000 Real Observations (Home Credit + GMSC) + Pilot Village Clusters \\
+  \textbf{Evaluation Scope:} & 5-Model Benchmark Suite + 169 Automated Verification Tests \\
+  \textbf{Date of Release:} & September 2026 \\
+  \textbf{Regulatory Alignment:} & RBI Digital Lending Guidelines (2022) $\cdot$ DPDP Act 2023 $\cdot$ BCBS SR 11-7 \\
+\end{tabular}
+
+\end{titlepage}

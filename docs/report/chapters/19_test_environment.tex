@@ -1,0 +1,62 @@
+% -----------------------------------------------------------------------------
+% Chapter 19: Test Environment & Reproducibility
+% -----------------------------------------------------------------------------
+\chapter{Test Environment \& Reproducibility}
+\label{chap:test_environment}
+
+\section{Deterministic Developer Setup Workflow}
+To guarantee that the CreditTech platform, its machine learning benchmark models, and its 169 automated test suites can be reproduced independently on any clean operating system without non-obvious dependencies, the development lifecycle follows a standardized 8-step pipeline. Figure~\ref{fig:dev_reproduction_flow} illustrates this reproduction process.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.7cm and 0.8cm, auto]
+  \node[baseblock, fill=cardbg, draw=cardborder, minimum width=3.2cm] (s1) {1. Clone Repository\\(\texttt{git clone})};
+  \node[baseblock, right=0.6cm of s1, fill=primary!10, draw=primary, minimum width=3.2cm] (s2) {2. Setup Virtualenv\\(\texttt{python -m venv})};
+  \node[baseblock, right=0.6cm of s2, fill=primary!10, draw=primary, minimum width=3.2cm] (s3) {3. Install Core Deps\\(\texttt{pip install -e .})};
+  \node[baseblock, right=0.6cm of s3, fill=cardbg, draw=cardborder, minimum width=3.2cm] (s4) {4. Configure Env\\(\texttt{.env})};
+
+  \node[serviceblock, below=0.8cm of s4, fill=accent!10, draw=accent, minimum width=3.2cm] (s5) {5. Database Migrations\\(\texttt{alembic upgrade})};
+  \node[serviceblock, left=0.6cm of s5, fill=warn!10, draw=warn, minimum width=3.2cm] (s6) {6. Seed Early Adopters\\(\texttt{python seed...})};
+  \node[serviceblock, left=0.6cm of s6, fill=primary!12, draw=primary, minimum width=3.2cm] (s7) {7. Run Services\\(\texttt{uvicorn / vite})};
+  \node[baseblock, left=0.6cm of s7, fill=success!15, draw=success, minimum width=3.2cm] (s8) {8. Verify Pytest\\(\texttt{pytest -q})};
+
+  \draw[flowline] (s1) -- (s2);
+  \draw[flowline] (s2) -- (s3);
+  \draw[flowline] (s3) -- (s4);
+  \draw[flowline] (s4) -- (s5);
+  \draw[flowline] (s5) -- (s6);
+  \draw[flowline] (s6) -- (s7);
+  \draw[flowline] (s7) -- (s8);
+\end{tikzpicture}
+\caption{Research Block Diagram: Step-by-Step Developer Reproduction and Test Environment Workflow.}
+\label{fig:dev_reproduction_flow}
+\end{figure}
+
+\section{Command-Line Execution Reference}
+The entire application stack and verification harness can be initialized with the following terminal commands:
+
+\begin{lstlisting}[language=bash, caption={Terminal Commands for Full Stack Reproduction.}]
+# 1. Clone repository & create isolated environment
+git clone https://github.com/arpitkumar2004/CreditTech.git
+cd CreditTech
+python -m venv .venv
+source .venv/bin/activate  # Or on Windows: .venv\Scripts\activate
+
+# 2. Install backend dependencies in editable mode
+pip install -e ".[dev,ml,test]"
+
+# 3. Initialize SQLite database & apply schema migrations
+python scripts/seed_early_adopters.py --reset
+
+# 4. Execute the complete automated verification test suite (169 Tests)
+pytest -q
+
+# 5. Launch the FastAPI backend core service (port 8000)
+python -m uvicorn services.core.main:app --host 127.0.0.1 --port 8000 --reload
+
+# 6. In a parallel terminal, launch the React/Vite frontend portal (port 5173)
+cd apps/borrower-app
+npm install
+npm run dev
+\end{lstlisting}
+Once initialized, the unified web portal is accessible at \texttt{http://localhost:5173/}, and the interactive OpenAPI documentation is available at \texttt{http://localhost:8000/docs}.

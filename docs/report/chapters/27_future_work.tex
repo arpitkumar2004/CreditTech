@@ -1,0 +1,28 @@
+% -----------------------------------------------------------------------------
+% Chapter 27: Future Work
+% -----------------------------------------------------------------------------
+\chapter{Future Work \& Engineering Roadmap}
+\label{chap:future_work}
+
+\section{Structured 6-Phase Production Roadmap}
+To transition CreditTech from a validated MVP to a state-wide production system operating across Regional Rural Banks, we have formulated a phased engineering roadmap:
+
+\begin{enumerate}
+  \item \textbf{Phase 1: Live Digital Public Infrastructure (DPI) Integration}\\
+  Execute production contracts with licensed Account Aggregator ecosystem players (e.g., Setu, Sahamati) and acquire production Digital Signature Certificates (DSC). Wire live DigiLocker APIs for land record (\textit{Bhulekh}) verification and implement Aadhaar-based e-Sign via licensed ASP/ESP gateways.
+
+  \item \textbf{Phase 2: Sentinel-1 Synthetic Aperture Radar (SAR) Cloud Penetration}\\
+  Supplement optical Sentinel-2 NDVI with Sentinel-1 C-band SAR dual-polarization (VV/VH) backscatter imagery~\cite{drusch_sentinel2_2012}. Radar signals penetrate heavy monsoon clouds, providing continuous, all-weather soil moisture estimates and flood inundation risk metrics during the critical Kharif sowing window.
+
+  \item \textbf{Phase 3: Distributed Database Migration \& Redis Caching}\\
+  Migrate the persistence layer from local SQLite to a high-availability PostgreSQL 16 cluster with PgBouncer connection pooling. Implement Redis 7 cluster caching for compiled scorecard matrices, village-level aggregate priors, and rate-limiting token buckets.
+
+  \item \textbf{Phase 4: Offline-First Native Mobile Client for Bank Sakhis}\\
+  Develop a native React Native / Kotlin Android application for field Sakhis incorporating an offline-first SQLite database (WatermelonDB). Sakhis can capture SHG meeting data and consent signatures deep in rural hinterlands with zero cellular reception, with cryptographic sync executed automatically upon reaching network range.
+
+  \item \textbf{Phase 5: Privacy-Preserving Federated Learning across RRBs}\\
+  Implement federated learning across distinct Regional Rural Banks using FedAvg/Flower. This allows separate banking institutions to collaboratively train shared credit risk models on their local borrower repayment data without sharing raw customer PII across organizational boundaries.
+
+  \item \textbf{Phase 6: Automated Core Banking Integration \& Real-Time Disbursement}\\
+  Develop ISO 20022 and SFMS (Structured Financial Messaging System) connectors to dispatch approved loan packages directly into Finacle and BaNCS Core Banking Systems, triggering automated instant disbursement via the National Automated Clearing House (NACH).
+\end{enumerate}

@@ -1,0 +1,157 @@
+% -----------------------------------------------------------------------------
+% Chapter 10: Data Architecture & ER Diagram
+% -----------------------------------------------------------------------------
+\chapter{Data Architecture \& Relational Schema}
+\label{chap:data_architecture}
+
+\section{Relational Entity-Relationship Schematic}
+CreditTech models the complete credit origination and governance lifecycle across 10 relational entities. Figure~\ref{fig:er_diagram} provides the research schematic Entity-Relationship (ER) diagram illustrating the structural relationships, foreign-key linkages, and cardinality constraints governing the schema.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  scale=0.90, every node/.style={transform shape},
+  node distance=1.1cm and 1.2cm, auto,
+  every node/.style={font=\sffamily\scriptsize}
+]
+
+  % Column 1: Identity & Consent
+  \node[baseblock, fill=primary!12, draw=primary, text width=3.4cm, align=left] (borrowers) {
+    \textbf{\color{primary}borrowers}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    aadhaar\_hash: String [UK]\\
+    phone\_encrypted: Text\\
+    full\_name: String\\
+    village\_cluster: String\\
+    landholding\_band: String\\
+    created\_at: DateTime
+  };
+
+  \node[baseblock, fill=accent!12, draw=accent, text width=3.4cm, align=left, below=1.2cm of borrowers] (consent) {
+    \textbf{\color{accent}consent\_records}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{borrower\_id: UUID [FK]}\\
+    purpose: String\\
+    status: String\\
+    hash\_chain: String [UK]\\
+    expires\_at: DateTime\\
+    revoked\_at: DateTime
+  };
+
+  \node[baseblock, fill=cardbg, draw=cardborder, text width=3.4cm, align=left, below=1.2cm of consent] (grievances) {
+    \textbf{grievance\_records}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{borrower\_id: UUID [FK]}\\
+    category: String\\
+    status: String\\
+    sla\_deadline: DateTime\\
+    resolved\_at: DateTime
+  };
+
+  % Column 2: Ingestion & Scoring Core
+  \node[baseblock, fill=accent!12, draw=accent, text width=3.5cm, align=left, right=1.3cm of borrowers] (features) {
+    \textbf{\color{accent}feature\_snapshots}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{borrower\_id: UUID [FK]}\\
+    \textbf{consent\_id: UUID [FK]}\\
+    features\_json: JSON\\
+    completeness\_pct: Float\\
+    created\_at: DateTime
+  };
+
+  \node[baseblock, fill=warn!12, draw=warn, text width=3.5cm, align=left, below=1.2cm of features] (scores) {
+    \textbf{\color{warn}score\_results}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{feature\_id: UUID [FK]}\\
+    model\_version: String\\
+    pd\_score: Float\\
+    scaled\_score: Integer\\
+    decision\_zone: String\\
+    shap\_reasons: JSON
+  };
+
+  % Column 3: Origination & Underwriting
+  \node[baseblock, fill=primary!12, draw=primary, text width=3.4cm, align=left, right=1.3cm of features] (apps) {
+    \textbf{\color{primary}applications}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{borrower\_id: UUID [FK]}\\
+    \textbf{score\_id: UUID [FK]}\\
+    loan\_amount: Numeric\\
+    status: String\\
+    created\_at: DateTime
+  };
+
+  \node[baseblock, fill=danger!12, draw=danger, text width=3.4cm, align=left, below=1.2cm of apps] (decisions) {
+    \textbf{\color{danger}officer\_decisions}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    \textbf{application\_id: UUID [FK]}\\
+    officer\_id: String\\
+    final\_verdict: String\\
+    is\_override: Boolean\\
+    override\_reason: String\\
+    decided\_at: DateTime
+  };
+
+  \node[baseblock, fill=cardbg, draw=cardborder, text width=3.4cm, align=left, below=1.2cm of decisions] (audits) {
+    \textbf{audit\_events}\\
+    \underline{\textbf{id: UUID [PK]}}\\
+    event\_type: String\\
+    actor\_id: String\\
+    payload\_hash: String\\
+    timestamp: DateTime
+  };
+
+  % Clean Strictly Orthogonal Non-Overlapping Relational Connectors
+  \draw[flowline] (borrowers) -- node[left, font=\tiny\sffamily] {$1:N$} (consent);
+  \draw[flowline] (borrowers.west) -- ++(-0.35,0) |- node[pos=0.25, left, font=\tiny\sffamily] {$1:N$} (grievances.west);
+
+  \draw[flowline] (borrowers.east) -- node[above, font=\tiny\sffamily] {$1:N$} ($(features.west)+(0,0.35)$);
+  \draw[flowline] (consent.east) -- ++(0.5,0) |- node[pos=0.85, above, font=\tiny\sffamily] {$1:N$} ($(features.west)+(0,-0.35)$);
+
+  \draw[flowline] (features) -- node[right, font=\tiny\sffamily] {$1:1$} (scores);
+  \draw[flowline] (scores.east) -- ++(0.5,0) |- node[pos=0.6, above, font=\tiny\sffamily] {$1:1$} (apps.west);
+
+  \draw[flowline] (apps) -- node[right, font=\tiny\sffamily] {$1:1$} (decisions);
+  \draw[flowline] (decisions) -- node[right, font=\tiny\sffamily] {$1:N$} (audits);
+
+\end{tikzpicture}
+\caption{Research Block Diagram: Relational Entity-Relationship (ER) Schema of the CreditTech Database.}
+\label{fig:er_diagram}
+\end{figure}
+
+\section{Entity Details \& Integrity Constraints}
+Table~\ref{tab:entities_overview} describes the 10 relational entities, their primary/foreign key linkages, and their architectural purpose.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{l p{2.8cm} p{2.5cm} X}
+  \toprule
+  \textbf{Entity Name} & \textbf{Primary Key} & \textbf{Foreign Keys} & \textbf{Integrity Constraints \& Invariants} \\
+  \midrule
+  \texttt{borrowers} & \texttt{id} (UUID) & \textit{None} & \texttt{aadhaar\_hash} is unique; direct PII phone numbers are stored encrypted with AES-256. \\
+  \texttt{consent\_records} & \texttt{id} (UUID) & \texttt{borrower\_id} & Immutable append-only; \texttt{hash\_chain} ensures cryptographic continuity; status in \texttt{\{GRANTED, REVOKED, EXPIRED\}}. \\
+  \texttt{feature\_snapshots} & \texttt{id} (UUID) & \texttt{borrower\_id}, \texttt{consent\_id} & Persists the 21 continuous/categorical features computed at loan application time; never modified. \\
+  \texttt{score\_results} & \texttt{id} (UUID) & \texttt{feature\_id} & \texttt{scaled\_score} bounded to $[300, 900]$; \texttt{decision\_zone} derived from policy thresholds. \\
+  \texttt{applications} & \texttt{id} (UUID) & \texttt{borrower\_id}, \texttt{score\_id} & Unique composite (\texttt{borrower\_id}, \texttt{created\_at}) prevents duplicate open applications. \\
+  \texttt{officer\_decisions} & \texttt{id} (UUID) & \texttt{application\_id} & Append-only table guarded by SQLite trigger preventing update or deletion; requires \texttt{override\_reason} if \texttt{is\_override} is true. \\
+  \texttt{re\_handoffs} & \texttt{id} (UUID) & \texttt{application\_id} & Generates an external reference token and payload SHA-256 digest for Core Banking ingestion. \\
+  \texttt{grievance\_records} & \texttt{id} (UUID) & \texttt{borrower\_id} & \texttt{sla\_deadline} automatically calculated as $\text{created\_at} + 30\,\text{days}$ per statutory mandate. \\
+  \texttt{audit\_events} & \texttt{id} (UUID) & \textit{None} & Immutable event bus logging caller role, endpoint, and hash of payload. \\
+  \texttt{model\_promotions} & \texttt{id} (UUID) & \textit{None} & Logs model promotion timestamps, previous champion, and ratified fairness gate scores. \\
+  \bottomrule
+\end{tabularx}
+\caption{Database Schema Entities, Keys, and Relational Constraints.}
+\label{tab:entities_overview}
+\end{table}
+
+\section{Data Lifecycle State Transitions}
+The lifecycle of an application follows a strictly deterministic directed acyclic graph (DAG):
+\begin{equation*}
+  \begin{aligned}
+    \text{Consent (Granted)} &\longrightarrow \text{Ingestion} \longrightarrow \text{Snapshot} \longrightarrow \text{Scoring} \\
+    &\longrightarrow \text{Officer Review} \longrightarrow \text{Decision (Finalized)} \longrightarrow \text{RE Handoff}
+  \end{aligned}
+\end{equation*}
+If consent is revoked at any stage prior to loan sanctioning, an automatic cancellation cascade terminates the pipeline, purging transient feature vectors while preserving the cryptographic audit event.

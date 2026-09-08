@@ -1,0 +1,5064 @@
+Institutional FinTech & Credit Risk Engineering Project
+Report
+
+CreditTech
+An Alternative Credit Decision-Support Platform
+for Rural India
+Multi-Persona Architecture, Role-Based Access Isolation, Multi-Rail Ingestion, and
+Explainable Credit Risk Scoring under RBI & DPDP Regulations
+
+Engineering Team:
+
+Project Guide:
+
+Arpit Kumar
+
+Prof. Piyush Kumar Singh
+
+Lead System & ML Engineer
+
+Department of Agricultural Engineering
+
+Aditya Raj Kaushik
+
+Faculty Advisor & Research Mentor
+
+Software & ML Engineer
+
+CREDITTECH ANALYTICS CORE
+INSTITUTIONAL UNDERWRITING
+
+FIELD DATA ACQUISITION
+
+Rural Borrower & Sakhi
+
+Consent Record
+
+Mobile PWA • Field Enrollment
+
+DPDP Consent
+& Security Guard
+SHA-256 Hash Chain
+• Immutable Audit
+
+Bank Officer Workstation
+Score + Reasons
+
+Tiered Credit Decision Zones
+Underwriting Dissent Override
+Sanction
+
+4-Rail Alternative Ingestion
+Monotonic Scorecard Engine
+RBI Account Aggregator (AA)
+Sentinel-2 Satellite Vegetation 4-Rail Telemetry 5-Cs Alternative Feature Synthesizer
+Weight of Evidence (WoE): 300–900
+SHG Peer-Thrift • Utility Bills
+TreeSHAP Reason
+Codes • Fairness Gate
+
+Project Phase:
+Target Cohort:
+Evaluation Scope:
+Date of Release:
+Regulatory Alignment:
+
+Regulated Bank
+CBS Handoff
+Core Banking
+(CBS) API Dispatch
+Auditor Demographic Parity Logs
+
+Minimal Viable Product (MVP v1.2.0)
+22,000 Real Observations (Home Credit + GMSC) + Pilot Village Clusters
+5-Model Benchmark Suite + 169 Automated Verification Tests
+September 2026
+RBI Digital Lending Guidelines (2022) · DPDP Act 2023 · BCBS SR 11-7
+
+Executive Summary
+Context & Problem Solved: Over 140 million smallholder farmers, Self-Help Group (SHG)
+members, and rural micro-entrepreneurs in India face severe credit rationing by scheduled commercial banks and Regional Rural Banks (RRBs). Because rural applicants operate predominantly within an informal cash economy and lack documented bureau histories (CIBIL/Equifax)
+or traditional land titles, standard underwriting models reject them as “thin-file” risks. Conversely, local informal moneylenders exploit this information asymmetry by charging usurious
+interest rates (36%–60% APR). CreditTech bridges this exclusion gap by establishing an automated, regulatory-compliant alternative credit decision-support platform designed specifically
+for rural India.
+Primary Users & Personas: CreditTech supports five distinct operational personas with
+strictly isolated data access boundaries: (1) Rural Borrowers who give explicit consent and
+view bilingual score explanations; (2) Bank Sakhis (field business correspondents) who capture SHG/FPO physical passbooks and assist non-literate borrowers; (3) Branch Loan Officers
+who assess automated scores, review Shapley reason codes, and record overrides; (4) Institutional Risk Officers who audit demographic fairness across gender and landholding groups; and
+(5) System Administrators / MLOps Engineers who manage model promotion gates and audit
+trails.
+What We Built (System Capabilities): The CreditTech MVP delivers an end-to-end,
+production-grade microservices architecture comprising:
+• Tamper-Evident Consent Infrastructure: An append-only cryptographic consent ledger
+using SHA-256 hash chains complying with the Digital Personal Data Protection (DPDP)
+Act 2023.
+• 4-Rail Alternative Data Aggregator: Parallel, fault-tolerant ingestion spanning (a) Account Aggregator cashflows, (b) Sentinel-2 10m satellite vegetative vigor (NDVI) and rainfall
+indices, (c) rural utility bill payment punctuality, and (d) SHG/FPO peer thrift history.
+• 5-Cs Credit Risk Feature Store: Automated computation of 21 statistical features
+mapped directly to the institutional 5-Cs framework (Character, Capacity, Capital, Collateral, Conditions).
+• Bilingual Transparent Scoring Engine: Monotonic Weight-of-Evidence (WoE) scorecard champion delivering scores scaled to the 300–900 bureau range with 100% closed-form
+point attribution and bilingual (English/Hindi) adverse action notices per RBI Digital Lending Guidelines (2022).
+• Role-Based Web Portal: A responsive React 18 / TypeScript portal with real-time
+persona switching, interactive model governance dashboards, and officer review stations.
+Technical Approach & Engineering Rigor: CreditTech was developed using Python 3.10,
+FastAPI, SQLAlchemy, and Scikit-learn. To guarantee zero spatial leakage across rural geographies, model evaluation was conducted using 5-Fold Spatial GroupKFold Cross-Validation
+across 15 pilot village clusters. Models were evaluated against a benchmark suite of 5 architectures: Standardized Logistic Baseline, Calibrated Random Forest, Monotonic GBDT, Stacking
+Meta-Ensemble, and the active WoE Scorecard Champion.
+MVP Status & Key Results:
+i
+
+CreditTech MVP Project Report
+
+• Model Discrimination: Tuned on a fused benchmark of 22,000 real borrower records
+(12,000 Home Credit + 10,000 Give Me Some Credit with 2,098 empirical defaults, 9.54%
+prevalence), the active champion (v1.1.0-woe-scorecard) achieves an ROC-AUC of
+0.9599 (Gini: 0.9198, KS: 0.8208) with a sub-millisecond inference latency of 0.038 ms.
+The Stacking Meta-Ensemble reached an ROC-AUC of 0.9793 (KS: 0.8585, Brier: 0.0301,
+ECE: 0.0071).
+• Economic Policy Cutoff: Cost-sensitive net margin optimization (Rs. 6,500 interest margin vs. Rs. 42,000 default loss) establishes Score 540 as the profit-maximizing threshold
+(Rs. 5.2 Crore expected margin per 10k loans) and Score 500 as the financial-inclusion
+threshold approving an additional 12.4% of thin-file borrowers.
+• Fairness & Verification: All models passed strict demographic parity gates (Gender
+disparity ≤ 7.1%, Landholding disparity ≤ 3.9%). The platform achieved a 100% pass
+rate across 169 automated unit, integration, and persona-security test cases,
+verifying complete horizontal and vertical data isolation.
+
+ii
+
+Contents
+Executive Summary
+
+i
+
+1 Problem Statement
+1.1 Macro Context & Existing Inefficiencies . . . . . . . . . . . . . . . . . . . . . . .
+1.2 Target Demographics Affected . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1.3 Systemic Limitations of Existing Alternatives . . . . . . . . . . . . . . . . . . . .
+1.4 The Causal Problem-Solution Schematic . . . . . . . . . . . . . . . . . . . . . . .
+1.5 Proposed Solution & Core Hypotheses . . . . . . . . . . . . . . . . . . . . . . . .
+
+1
+1
+1
+2
+2
+2
+
+2 Objectives & Scope
+2.1 Core Engineering Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+2.2 Project Scope: Inclusions vs. Exclusions . . . . . . . . . . . . . . . . . . . . . . .
+
+4
+4
+4
+
+3 User Personas
+3.1 Persona A: Rural Borrower (Applicant) . . . . . . . . . . . . . . . . . . . . . . .
+3.2 Persona B: Bank Sakhi (Field Business Correspondent) . . . . . . . . . . . . . .
+3.3 Persona C: Loan Officer (Branch Credit Underwriter) . . . . . . . . . . . . . . .
+3.4 Persona D: Risk Officer (Institutional Compliance Auditor) . . . . . . . . . . . .
+3.5 Persona E: System Administrator / MLOps Engineer . . . . . . . . . . . . . . . .
+
+6
+6
+6
+7
+7
+8
+
+4 Role & Permission Matrix
+9
+4.1 Conceptual Security & Authorization Hierarchy . . . . . . . . . . . . . . . . . . . 9
+4.2 Exhaustive Persona × Resource × Action Matrix . . . . . . . . . . . . . . . . . . 9
+4.3 Privilege Escalation Tripwires . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+5 Requirements
+5.1 Functional Requirements (FR) . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.1.1 Consent & Identity Management . . . . . . . . . . . . . . . . . . . . . . .
+5.1.2 Multi-Rail Data Ingestion & Feature Engineering . . . . . . . . . . . . . .
+5.1.3 Credit Risk Scoring & Explainability . . . . . . . . . . . . . . . . . . . . .
+5.1.4 Underwriting, Overrides & Regulated Entity Handoff . . . . . . . . . . . .
+5.1.5 Governance, Fairness & Grievance Redressal . . . . . . . . . . . . . . . .
+5.2 Non-Functional Requirements (NFR) . . . . . . . . . . . . . . . . . . . . . . . . .
+
+12
+12
+12
+12
+12
+13
+13
+13
+
+6 System Architecture
+6.1 Tiered System Topology . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+6.2 Component-by-Component Walkthrough . . . . . . . . . . . . . . . . . . . . . . .
+6.2.1 1. Presentation Layer (Frontend Clients) . . . . . . . . . . . . . . . . . .
+6.2.2 2. Gateway & Security Middleware . . . . . . . . . . . . . . . . . . . . . .
+6.2.3 3. Core Business Services . . . . . . . . . . . . . . . . . . . . . . . . . . .
+6.2.4 4. Persistence & Model Artifact Store . . . . . . . . . . . . . . . . . . . .
+
+15
+15
+15
+15
+16
+16
+16
+
+7 Technology Stack & Design Decisions
+7.1 Architectural Selection Rationale . . . . . . . . . . . . . . . . . . . . . . . . . . .
+7.2 Key Design Decisions & Trade-Offs . . . . . . . . . . . . . . . . . . . . . . . . . .
+7.2.1 1. Weight-of-Evidence Scorecard vs. Deep Neural Networks . . . . . . . .
+7.2.2 2. Header-Based Identity Contract vs. OAuth 2.0 / JWT for MVP . . . .
+
+17
+17
+18
+18
+19
+
+iii
+
+Contents
+
+CreditTech MVP Project Report
+
+8 Data Architecture & Relational Schema
+8.1 Relational Entity-Relationship Schematic . . . . . . . . . . . . . . . . . . . . . .
+8.2 Entity Details & Integrity Constraints . . . . . . . . . . . . . . . . . . . . . . . .
+8.3 Data Lifecycle State Transitions . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+20
+20
+20
+21
+
+9 Authentication & Authorization
+9.1 Identity Propagation Pipeline . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+9.2 Defense Against Horizontal Privilege Escalation . . . . . . . . . . . . . . . . . . .
+9.3 Defense Against Vertical Privilege Escalation . . . . . . . . . . . . . . . . . . . .
+
+22
+22
+22
+23
+
+10 Data Access Control & Privacy
+10.1 Data Ownership Principles . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+10.2 Fine-Grained CRUD Permissions by Entity . . . . . . . . . . . . . . . . . . . . .
+10.3 Field-Level Masking & Tokenization . . . . . . . . . . . . . . . . . . . . . . . . .
+
+24
+24
+24
+25
+
+11 Application Workflows
+11.1 Workflow 1: Assisted Consent Capture & Onboarding . . . . . . . . . . . . . . .
+11.2 Workflow 2: 4-Rail Parallel Ingestion & Feature Fusion . . . . . . . . . . . . . . .
+11.3 Workflow 3: Underwriting Review, SHAP Inspection & Officer Dissent . . . . . .
+
+26
+26
+26
+27
+
+12 UI/UX Design System
+12.1 Design System Principles & Tokens . . . . . . . . . . . . . . . . . . . . . . . . . .
+12.2 Persona-Tailored Screen Architecture . . . . . . . . . . . . . . . . . . . . . . . . .
+12.3 Component Routing State Hierarchy . . . . . . . . . . . . . . . . . . . . . . . . .
+
+28
+28
+28
+29
+
+13 Error & Edge-Case Handling
+31
+13.1 Systemic Failure Modes & Mitigations . . . . . . . . . . . . . . . . . . . . . . . . 31
+13.2 Defensive Degradation Architecture . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+14 Synthetic & Benchmark Data Strategy
+14.1 Dual-Track Data Methodology . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+14.2 Real Benchmark Fusion & Rural Feature Mapping . . . . . . . . . . . . . . . . .
+14.3 Controlled Synthetic Early-Adopter Seeding . . . . . . . . . . . . . . . . . . . . .
+
+34
+34
+35
+35
+
+15 Testing Strategy
+15.1 The Multi-Layered Testing Pyramid . . . . . . . . . . . . . . . . . . . . . . . . .
+15.2 Tier-by-Tier Testing Methodologies . . . . . . . . . . . . . . . . . . . . . . . . . .
+15.2.1 1. Tier 1: Unit Testing (Algorithm & Pure Functions) . . . . . . . . . . .
+15.2.2 2. Tier 2: Integration Testing (API Boundary → Relational State) . . . .
+15.2.3 3. Tier 3: Persona Authorization Security Testing . . . . . . . . . . . . .
+15.2.4 4. Tier 4: Critical User Journey (CUJ) End-to-End Testing . . . . . . . .
+
+36
+36
+36
+36
+37
+37
+37
+
+16 Test Case Matrix
+38
+16.1 Representative Security & Functional Test Cases . . . . . . . . . . . . . . . . . . 38
+16.2 Complete Automated Test Suite Audit (169 Tests) . . . . . . . . . . . . . . . . . 40
+17 Test Environment & Reproducibility
+41
+17.1 Deterministic Developer Setup Workflow . . . . . . . . . . . . . . . . . . . . . . . 41
+17.2 Command-Line Execution Reference . . . . . . . . . . . . . . . . . . . . . . . . . 41
+18 Seed Data & Deterministic Database Reset
+42
+18.1 The Deterministic Seeding Rationale . . . . . . . . . . . . . . . . . . . . . . . . . 42
+18.2 Seeded Entity Profiles . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+
+iv
+
+Contents
+
+CreditTech MVP Project Report
+
+19 Security Posture
+44
+19.1 Defense-in-Depth Architecture . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+19.2 Cryptographic Append-Only Ledger Verification . . . . . . . . . . . . . . . . . . 45
+20 Performance & Scalability
+20.1 Current Empirical Benchmark Profile . . . . . . . . . . . . . . . . . . . . . . . .
+20.2 Scaling Roadmap: 100 to 100,000 Users . . . . . . . . . . . . . . . . . . . . . . .
+20.3 Bottleneck Identification & Scaling Mitigations . . . . . . . . . . . . . . . . . . .
+
+46
+46
+46
+46
+
+21 Deployment Architecture
+21.1 Current Local Deployment Posture . . . . . . . . . . . . . . . . . . . . . . . . . .
+21.2 Target CI/CD & Production Pipeline Blueprint . . . . . . . . . . . . . . . . . . .
+21.3 Docker Multi-Stage Container Blueprint . . . . . . . . . . . . . . . . . . . . . . .
+
+48
+48
+48
+48
+
+22 Monitoring, Observability & MRM
+22.1 Application Observability Stack . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+22.2 Model Risk Management (MRM) & Drift Tracking . . . . . . . . . . . . . . . . .
+22.2.1 Population Stability Index (PSI) . . . . . . . . . . . . . . . . . . . . . . .
+22.3 Automated Fairness Gating . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+50
+50
+50
+50
+51
+
+23 Empirical Results & Model Benchmark Evaluation
+23.1 Benchmark Suite Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+23.2 Systematic Hyperparameter Optimization . . . . . . . . . . . . . . . . . . . . . .
+23.3 Discriminatory Separation & Reliability Curves . . . . . . . . . . . . . . . . . . .
+23.4 Portfolio Score Distributions & Feature Attribution . . . . . . . . . . . . . . . . .
+23.5 Economic Expected Profit vs. Cutoff Optimization . . . . . . . . . . . . . . . . .
+23.6 Demographic Fairness Parity & Frontiers . . . . . . . . . . . . . . . . . . . . . .
+
+52
+52
+52
+54
+57
+58
+59
+
+24 Limitations
+61
+24.1 Authentic Disclosure of MVP Boundaries . . . . . . . . . . . . . . . . . . . . . . 61
+25 Future Work & Engineering Roadmap
+62
+25.1 Structured 6-Phase Production Roadmap . . . . . . . . . . . . . . . . . . . . . . 62
+26 Lessons Learned & Engineering Post-Mortem
+63
+26.1 Retrospective Architectural Insights . . . . . . . . . . . . . . . . . . . . . . . . . 63
+27 Conclusion
+27.1 Summary of Engineering Accomplishments
+
+64
+. . . . . . . . . . . . . . . . . . . . . 64
+
+A Appendix
+A.1 Mathematical Formulations of Core Metrics . . . . . . . . . . . . . . . . . . . . .
+A.1.1 Weight of Evidence (WoE) and Information Value (IV) . . . . . . . . . .
+A.1.2 Standardized Credit Score Scaling Transformation . . . . . . . . . . . . .
+A.1.3 Kolmogorov-Smirnov (KS) Separation Statistic . . . . . . . . . . . . . . .
+A.1.4 Expected Calibration Error (ECE) . . . . . . . . . . . . . . . . . . . . . .
+A.1.5 Shapley Value Feature Attribution (TreeSHAP) . . . . . . . . . . . . . . .
+A.2 Core API Endpoint Catalog . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+A.3 Sample JSON Payloads . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+A.3.1 1. Cryptographic Consent Record Payload . . . . . . . . . . . . . . . . . .
+A.3.2 2. Credit Scoring Output with Bilingual SHAP Reason Codes . . . . . . .
+A.3.3 3. Officer Underwriting Dissent Override Record . . . . . . . . . . . . . .
+A.4 Inventory of Publication Decision Figures . . . . . . . . . . . . . . . . . . . . . .
+v
+
+66
+66
+66
+66
+66
+66
+66
+67
+67
+67
+68
+68
+68
+
+List of Figures
+1.1
+
+Research Block Diagram: Problem-to-Impact Causal Trajectory of the CreditTech Platform. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+2
+
+4.1
+
+Research Block Diagram: Multi-Tier Authorization Model and Cryptographic
+Tripwire Boundaries. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+9
+
+6.1
+
+Research Block Diagram: 4-Tier System Architecture of the CreditTech Platform. 15
+
+8.1
+
+Research Block Diagram: Relational Entity-Relationship (ER) Schema of the
+CreditTech Database. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+
+9.1
+
+Research Block Diagram: Inbound Request Identity Propagation and Resource
+Authorization Pipeline. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+
+11.1 Research Block Diagram: Assisted Borrower Consent Capture and Hash Chaining
+Workflow. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+11.2 Research Block Diagram: 4-Rail Parallel Alternative Ingestion and Feature Aggregation Pipeline. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+11.3 Research Block Diagram: Loan Underwriter Decisioning and Mandatory Dissent
+Override Flow. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+12.1 Research Block Diagram: Front-End Component Routing and Persona Authorization Hierarchy. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+14.1 Research Block Diagram: Dual-Track Real Benchmark and Synthetic Pilot Data
+Architecture. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+15.1 Research Block Diagram: 4-Tier Automated Testing Pyramid of the CreditTech
+Platform (169 Tests Total). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+17.1 Research Block Diagram: Step-by-Step Developer Reproduction and Test Environment Workflow. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41
+18.1 Research Block Diagram: Deterministic Database Migration and Seeding Pipeline. 42
+20.1 Research Block Diagram: 4-Stage Architectural Scaling Roadmap from MVP to
+National Rural Deployment. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+21.1 Research Block Diagram: Continuous Integration, Containerization, and Production Staging Pipeline. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+22.1 Model Risk Management Telemetry: Population Stability Index (PSI) Breakdown Across 15 Pilot Village Clusters Proving PSI < 0.10 Across All Alternative
+Data Rails. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+23.1 Hyperparameter Sensitivity Surface: Monotonic GBDT Validation AUC as a
+Function of Learning Rate vs. Number of Boosting Iterations (Peak at η =
+0.09, Trees = 80). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+
+vi
+
+List of Figures
+
+CreditTech MVP Project Report
+
+23.2 Hyperparameter Trade-Off Curves: (Left) Random Forest Train vs. OOF Generalization Gap as a Function of Tree Depth; (Right) WoE Scorecard L1 Regularization (C) vs. Active Features. . . . . . . . . . . . . . . . . . . . . . . . . . .
+23.3 Comparative Receiver Operating Characteristic (ROC) Curves for the 5 Evaluated Models under 5-Fold Spatial GroupKFold Cross-Validation. . . . . . . . . .
+23.4 Comparative Precision-Recall (PR) Curves Demonstrating Robust Minority Default Capture Under 9.54% Default Class Prevalence. . . . . . . . . . . . . . . . .
+23.5 Kolmogorov-Smirnov (KS) Cumulative Distribution Separation for the Active
+WoE Scorecard Champion (Left, KS = 0.8208) and Monotonic GBDT (Right,
+KS = 0.8549). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+23.6 Decile Calibration Reliability Curves and Expected Calibration Errors (ECE)
+Demonstrating Statistical Alignment between Predicted and Empirical Probabilities. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+23.7 Normalized Confusion Matrices at Operational Decision Cutoff Score 600. . . . .
+23.8 Portfolio Density Distributions Mapped Across the Three Institutional Underwriting Decision Zones (Reject, Manual Review, and Approve). . . . . . . . . . .
+23.9 Multi-Model Feature Attribution: TreeSHAP Mean Absolute Importance (GBDT)
+vs. Mean Decrease in Impurity / Gini (Random Forest). . . . . . . . . . . . . . .
+23.10Cost-Sensitive Banking Profit Optimization Curve: Expected Net Portfolio Margin (in Lakhs INR per 10,000 Loan Applicants) across Score Cutoffs. . . . . . . .
+23.11Demographic Fairness Parity: Approval Rates across Protected Attributes vs.
+Statutory Ceiling Limits. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+23.12Demographic Fairness Frontier: Disparity Gaps across the Complete Score Scale
+Proving Safe Operation Below 5% Disparity in the Operational Credit Band. . .
+
+vii
+
+53
+54
+55
+55
+56
+57
+57
+58
+59
+59
+60
+
+List of Tables
+2.1
+
+Formal MVP Boundary Matrix: In-Scope Capabilities vs. Production Exclusions.
+
+5
+
+4.1
+
+Canonical Role-Based Access Control (RBAC) Matrix across System Resources.
+Legend: ✓= Full Access, × = Forbidden (HTTP 403), OWN = Restricted to
+Caller’s Authenticated Identity, Eye = Read-Only Aggregated Access. . . . . . . 10
+
+5.1
+
+Non-Functional Requirements (NFR) Specifications and Target Benchmarks. . . 14
+
+7.1
+
+Comprehensive Technology Stack and Engineering Selection Criteria. . . . . . . . 18
+
+8.1
+
+Database Schema Entities, Keys, and Relational Constraints. . . . . . . . . . . . 21
+
+10.1 Entity-Level CRUD Permission Boundaries and Immutability Invariants. . . . . . 25
+12.1 Screen Catalog and Persona-Specific User Experience Functions. . . . . . . . . . 29
+13.1 Systemic Error, Exception, and Edge-Case Mitigation Matrix. . . . . . . . . . . . 32
+16.1 Representative Security and Functional Test Matrix with Verified Outcomes. . . 39
+16.2 Automated Pytest Suite Distribution and Verification Audit. . . . . . . . . . . . 40
+19.1 Security Controls Implementation Status Matrix (Implemented vs. Partially Implemented vs. Planned). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+20.1 Technical Bottleneck Identification and Production Engineering Mitigations. . . . 47
+23.1 Comprehensive Benchmark Performance Comparison across 5 Tuned Architectures under 5-Fold Spatial GroupKFold Cross-Validation on N = 22, 000 Real
+Records. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+A.1 Complete RESTful API Endpoint Specifications across Platform Services. . . . . 67
+
+viii
+
+Chapter 1
+
+Problem Statement
+1.1
+
+Macro Context & Existing Inefficiencies
+
+In India’s rural economy, access to institutional debt from formal Scheduled Commercial Banks
+(SCBs) and Regional Rural Banks (RRBs) remains acutely constrained. Despite expansive
+financial inclusion mandates such as the Pradhan Mantri Jan Dhan Yojana (PMJDY), having
+a savings bank account has not translated into access to formal working capital or unsecured
+agricultural term loans.
+Under current banking workflows, loan origination relies almost entirely on traditional credit
+information companies (CICs, such as CIBIL, Experian, and CRIF High Mark) and collateral
+documentation (formal land registry revenue records, Khata/Khasra). When a smallholder
+farmer or woman Self-Help Group (SHG) member applies for credit, branch credit underwriters
+encounter an immediate systemic bottleneck:
+1. The Thin-File Trap: Over 65% of rural agricultural laborers and marginal farmers have
+zero recorded bureau trade lines. Traditional credit scoring models score these applicants
+as “-1” (insufficient history), resulting in automatic programmatic rejection.
+2. Collateral Invisibility: Marginal landholders often cultivate ancestral plots without
+clear individual titles, or operate under informal sharecropping (Batai) agreements, rendering conventional mortgage underwriting impossible.
+3. Operational Cost Asymmetry: The physical underwriting cost for a rural branch
+officer to conduct on-site field visits, inspect standing crops, and verify paper receipts for
+a small Rs. 30,000–Rs. 50,000 micro-loan frequently exceeds the total net interest margin
+of the loan itself.
+
+1.2
+
+Target Demographics Affected
+
+The primary victims of this information asymmetry comprise three vital segments of the rural
+agrarian economy:
+• Small and Marginal Farmers: Cultivating less than 2.0 hectares of land, operating
+under high weather volatility, and needing seasonal crop input financing for seeds, diesel,
+and fertilizer.
+• Women SHG Members: Over 80 million women enrolled in National Rural Livelihoods
+Mission (NRLM) groups who demonstrate exemplary internal peer-thrift discipline and
+group meeting attendance, yet receive zero individual credit bureau recognition.
+• Rural Micro-Enterprises: Local village aggregation points, dairy collection centers,
+repair shops, and Custom Hiring Centers (CHCs) requiring working capital without formal
+balance sheets.
+
+1
+
+Chapter 1. Problem Statement
+
+1.3
+
+CreditTech MVP Project Report
+
+Systemic Limitations of Existing Alternatives
+
+Faced with rejection by commercial banks, rural borrowers are forced into suboptimal alternatives:
+• Informal Moneylenders (Sahukars): Charge exorbitant interest rates ranging from
+36% to over 60% per annum, trapping smallholders in persistent cycles of generational
+debt.
+• Predatory Digital Lending Apps: Unregulated digital lenders that harvest invasive
+device data (entire contact books, photo galleries, location tracking) in direct violation of
+user privacy and use coercive collection tactics.
+• Manual Joint Liability Groups (JLGs): While Microfinance Institutions (MFIs)
+provide group credit, the group-liability model imposes high meeting transaction costs
+and caps individual credit limits, preventing progressive farmers from scaling.
+
+1.4
+
+The Causal Problem-Solution Schematic
+
+Figure 1.1 illustrates the research problem formulation, demonstrating how traditional data
+poverty drives credit rationing and how CreditTech’s multi-rail alternative architecture resolves
+the failure modes.
+1. Structural Problem
+140M+ rural thin-file applicants
+Zero formal bureau credit history
+High branch physical underwriting cost
+
+2. Target Rural Cohort
+
+3. Existing Market Gaps
+
+Marginal farmers (< 2 ha land)
+NRLM / SHG women borrowers
+Informal rural micro-enterprises
+
+Usurious informal moneylenders
+Predatory digital lending apps
+Unviable physical branch visits
+
+Architectural Intervention
+
+4. Proposed Solution:
+CreditTech Platform
+
+5. Quantifiable Financial Impact
+
+0.038 ms Underwriting La- Institutional Scale & Margin 4-Rail Alternative Data (Actency (> 26k scores/sec)
+count Aggregator + EO)
+Rs. 5.2 Crore Net Margin per 10,000 Loans
+Monotonic WoE Scorecard (300–900) + TreeSHAP
++12.4% Financial Inclusion at Score 500
+DPDP Hash-Chained Cryptographic Consent
+
+Figure 1.1: Research Block Diagram: Problem-to-Impact Causal Trajectory of the CreditTech
+Platform.
+
+1.5
+
+Proposed Solution & Core Hypotheses
+
+CreditTech introduces a non-extractive, regulatory-compliant alternative data decisioning framework built on three technical hypotheses:
+1. Signal Sufficiency Hypothesis: Non-traditional proxies—such as peer-thrift discipline in SHGs, satellite-observed multi-season crop vegetative vigor (NDVI), electricity utility payment punctuality, and government Direct Benefit Transfers (PM-Kisan)—
+provide sufficient statistical information to predict debt serviceability (P (Default)) with
+an ROC-AUC ≥ 0.90.
+2. Explainability-Fairness Invariant: High machine learning discrimination does not
+require black-box opacity; a calibrated Weight-of-Evidence (WoE) scorecard can capture
+2
+
+Chapter 1. Problem Statement
+
+CreditTech MVP Project Report
+
+98% of complex tree-ensemble performance while maintaining closed-form point additivity
+and demographic fairness.
+3. Assisted Digital Delivery Model: Partnering non-literate borrowers with local Bank
+Sakhis equipped with offline-capable digital consent tablets resolves the digital divide
+without compromising data integrity or privacy.
+
+3
+
+Chapter 2
+
+Objectives & Scope
+2.1
+
+Core Engineering Objectives
+
+The CreditTech MVP was conceived and implemented to satisfy six primary engineering and
+research objectives:
+1. Objective 1: Multi-Persona Role-Based System Architecture
+Architect and implement a secure, multi-tenant digital credit origination platform that
+decouples user interfaces, backend APIs, and data visibility across five distinct operational
+personas (Borrower, Bank Sakhi, Loan Officer, Risk Officer, and Administrator).
+2. Objective 2: DPDP Act 2023 Compliant Consent Infrastructure
+Engineer an append-only, tamper-evident consent logging mechanism using cryptographic
+hash chaining (SHA-256) to ensure that all data ingestion occurs strictly following explicit,
+time-bounded, purpose-limited borrower authorization.
+3. Objective 3: 4-Rail Alternative Rural Signal Fusion
+Build a robust data pipeline capable of ingesting, validating, and harmonizing four nontraditional rural data rails: (a) Account Aggregator bank statements, (b) Earth Observation Sentinel-2 satellite vegetative vigor and weather indices, (c) rural electricity utility
+payments, and (d) SHG/FPO peer-thrift records.
+4. Objective 4: Regulatory-Compliant Transparent Credit Scoring
+Develop and validate a calibrated Weight-of-Evidence (WoE) credit scorecard producing
+scores on the standardized 300–900 scale, accompanied by exact Shapley-based bilingual adverse action notices satisfying Clause 6.3 of the RBI Digital Lending Guidelines
+(2022) [1].
+5. Objective 5: Rigorous Benchmark Evaluation Suite
+Evaluate the scoring engine across a 5-model benchmark suite (Linear Baseline, WoE
+Scorecard, Random Forest, Monotonic GBDT, and Stacking Meta-Ensemble) using 5Fold Spatial GroupKFold Cross-Validation over 22,000 real borrower observations with
+zero geographic data leakage.
+6. Objective 6: Comprehensive Automated Verification & Test Coverage
+Establish a comprehensive automated test harness covering unit functions, database integrity, route authorization tripwires, and end-to-end user journeys to guarantee zero
+regression and verify complete data access isolation.
+
+2.2
+
+Project Scope: Inclusions vs. Exclusions
+
+To maintain engineering discipline and prevent false assumptions regarding the readiness of the
+system for enterprise deployment, Table 2.1 explicitly delineates what is included within the
+MVP release versus what has been deliberately excluded or deferred to subsequent production
+phases.
+
+4
+
+Chapter 2. Objectives & Scope
+
+Dimension
+
+CreditTech MVP Project Report
+
+Included in MVP (v1.2.0)
+
+Excluded / Deferred to Pilot
+(P7)
+
+Responsive Web Application (React
+18 + TypeScript + TailwindCSS)
+supporting desktop and tablet viewports.
+
+Native Android/iOS mobile application with hardware biometric scanner
+SDKs.
+
+Authentication
+
+Deterministic HTTP Header-Based
+Identity Contract (X-Borrower-Id,
+X-Officer-Role) for automated testing and demonstration.
+
+Production Enterprise Single Sign-On
+(SSO), OAuth 2.0 / OpenID Connect
+(OIDC), and hardware mTLS.
+
+Data Ecosystem
+
+Dual Strategy: (1) 22,000 Real Kaggle Benchmark Records (Home Credit
++ GMSC), and (2) 15 Pilot Village
+Synthetic Cohort.
+
+Live production API integration with
+Setu / Sahamati AA network and
+UIDAI Aadhaar OTP gateways.
+
+Machine Learning
+
+5-Model Benchmark Suite with 5Fold Spatial Cross-Validation, Hyperparameter Sweeps, and 13 Publication Figures.
+
+Real-time online streaming model retraining and distributed federated
+learning clusters.
+
+Explainability
+
+Closed-form WoE point attribution
+and TreeSHAP bilingual (English/Hindi) reason codes.
+
+Multilingual speech-to-text IVR (Interactive Voice Response) phone bot
+for non-literate callers.
+
+Data Persistence
+
+Relational schema with 10 tables,
+SQLite engine, Alembic migrations,
+and append-only triggers.
+
+Geo-replicated distributed PostgreSQL database clusters with
+automated multi-region failover.
+
+Underwriting
+Flow
+
+Full officer review dashboard with
+mandatory override reason capture
+and audit logging.
+
+Automated real-time disbursement
+API hookups into National Automated Clearing House (NACH).
+
+Grievance Loop
+
+Complete 30-day statutory SLA
+tracking, grievance status state machine, and resolution audit.
+
+Ombudsman appellate integration
+with the RBI Centralized Receipt and
+Processing Centre (CRPC).
+
+Application
+face
+
+Sur-
+
+Table 2.1: Formal MVP Boundary Matrix: In-Scope Capabilities vs. Production Exclusions.
+
+5
+
+Chapter 3
+
+User Personas
+A foundational architectural requirement of CreditTech is the strict enforcement of role-based
+data isolation across all interaction layers. The system serves five distinct human personas, each
+representing a specific link in the rural digital credit delivery chain.
+
+3.1
+
+Persona A: Rural Borrower (Applicant)
+
+Representative Identity: Radhika Devi (Village: Pipri, District: Chandauli)
+Device / Environment: Low-cost Android smartphone (Web browser), 4G/2G mobile network.
+Context & Profile: A smallholder farmer cultivating 1.2 acres of paddy. She is an active
+member of the Maa Durga SHG with 3 years of continuous weekly savings, but possesses zero
+formal bank loan history.
+Primary Goal: Secure a Rs. 40,000 agricultural input credit facility at commercial bank rates
+without pledging physical land deeds or paying bribes to middlemen.
+Permitted Capabilities (“Can”):
+• Grant, view, and unilaterally revoke digital consent for multi-rail data aggregation.
+• View her own credit score, credit health band, and bilingual (English/Hindi) Shapley reason
+codes.
+• Lodge formal grievances, dispute incorrect data records, and track statutory 30-day resolution progress.
+• Download her sanitized, cryptographic loan application package.
+Forbidden Operations (“Cannot”):
+• Access, query, or view any data, credit scores, or applications belonging to other borrowers
+(horizontal isolation).
+• Inspect underlying model coefficients, weights, or admin configuration panels.
+• Modify loan underwriting decisions or approve her own application.
+
+3.2
+
+Persona B: Bank Sakhi (Field Business Correspondent)
+
+Representative Identity: Sunita Devi (SHG Federation Leader, Chandauli Cluster)
+Device / Environment: Field-issued Android tablet, intermittent rural mobile connectivity.
+Context & Profile: A trusted local community member trained under the National Rural
+Livelihoods Mission. She acts as the assisted-digital interface for non-literate borrowers in her
+village.
+Primary Goal: Onboard village women into formal credit, assist them in understanding digital
+consent, digitize paper SHG meeting registers, and track applications across her assigned cluster.
+Permitted Capabilities (“Can”):
+
+6
+
+Chapter 3. User Personas
+
+CreditTech MVP Project Report
+
+• Initiate assisted borrower onboarding and record consent on behalf of the applicant with
+verification.
+• Digitize paper SHG peer-thrift passbooks, meeting attendance, and crop cycle details.
+• Trigger automated 4-rail alternative data aggregation pipelines.
+• View the status and credit scores of borrowers strictly within her assigned village cluster.
+Forbidden Operations (“Cannot”):
+• Record final loan credit decisions (Approve / Reject).
+• Override underwriting recommendations or modify credit limits.
+• View borrower profiles or applications residing in unassigned geographic clusters.
+
+3.3
+
+Persona C: Loan Officer (Branch Credit Underwriter)
+
+Representative Identity: Rajesh Kumar (Branch Credit Manager, Regional Rural Bank)
+Device / Environment: Branch desktop workstation, high-speed intranet connection.
+Context & Profile: Responsible for branch-level asset quality, non-performing asset (NPA)
+management, and priority sector lending (PSL) compliance under statutory banking guidelines.
+Primary Goal: Make fast, defensible, and audited loan underwriting decisions on rural applicants while maintaining a branch default rate below 3.0%.
+Permitted Capabilities (“Can”):
+• Review complete synthesized credit risk dossiers, including satellite NDVI health and SHG
+thrift indices.
+• Inspect global and local TreeSHAP reason codes explaining model recommendations.
+• Render formal underwriting decisions: Approve, Reject, or Refer to Supervisor.
+• Enter dissent overrides when local field context contradicts the algorithmic score, with
+mandatory auditable justification notes.
+• Export approved loan files to the Regulated Entity (RE) core banking handoff queue.
+Forbidden Operations (“Cannot”):
+• Promote, activate, or retrain machine learning models in the production registry.
+• Alter statutory fairness tolerance thresholds or disable demographic parity gates.
+• Delete historical decision records or tamper with append-only audit trails.
+
+3.4
+
+Persona D: Risk Officer (Institutional Compliance Auditor)
+
+Representative Identity: Priya Sharma (Chief Risk Officer / Model Risk Auditor)
+Device / Environment: Corporate desktop workstation, secure VPN access.
+Context & Profile: Oversees portfolio-wide credit risk, regulatory compliance with RBI Digital Lending Guidelines, and demographic fair-lending mandates across all branches.
+Primary Goal: Ensure that algorithmic credit allocation does not systematically discriminate
+against marginalized communities, women, or landless tenants, and monitor portfolio drift.
+Permitted Capabilities (“Can”):
+
+7
+
+Chapter 3. User Personas
+
+CreditTech MVP Project Report
+
+• Inspect portfolio-level Population Stability Index (PSI) and Characteristic Selectivity Index
+(CSI).
+• Audit demographic parity and disparate impact ratios across gender, caste, and landholding
+bands.
+• Execute dry-run evaluations of the automated Fairness Gate against ratified manifests.
+• Export cryptographic regulatory compliance packages and auditor CSV logs.
+Forbidden Operations (“Cannot”):
+• Originate loans or record credit approval decisions on individual borrower files.
+• Access unmasked borrower personal identity attributes (direct PII isolation).
+
+3.5
+
+Persona E: System Administrator / MLOps Engineer
+
+Representative Identity: Amit Verma (Lead ML Infrastructure Engineer)
+Device / Environment: Secure developer workstation / Terminal CLI.
+Context & Profile: Manages machine learning lifecycle, model promotion pipelines, database
+migrations, and operational platform uptime.
+Permitted Capabilities (“Can”):
+• Trigger 5-Fold cross-validation benchmark training and hyperparameter optimization sweeps.
+• Promote candidate challenger models to Active Champion, subject to automated gate validation.
+• Execute database schema migrations and run deterministic seed test fixtures.
+• Inspect operational system telemetry, API latency distributions, and error logs.
+Forbidden Operations (“Cannot”):
+• Unilaterally bypass a failed Fairness Gate without explicit multi-party cryptographic signoff.
+• Underwrite loans, disburse funds, or close borrower grievance records.
+
+8
+
+Chapter 4
+
+Role & Permission Matrix
+4.1
+
+Conceptual Security & Authorization Hierarchy
+
+To ensure rigorous non-repudiation and prevent both horizontal and vertical privilege escalation,
+CreditTech enforces a multi-tier authorization topology. Figure 4.1 depicts the schematic authorization model governing how identities flow to resources, establishing hard tripwires where
+unauthorized actions trigger instantaneous HTTP 401 Unauthorized or 403 Forbidden terminations.
+Rural Borrower
+Self-Service Portal
+Own Dossier
+
+Bank Sakhi
+
+Loan Officer
+
+Assisted
+Field Tablet
+Village Cohort
+
+Underwriting
+Station
+Dissent Overrides
+
+Risk Officer
+
+Admin / MLOps
+
+Fairness Manifest
+Portfolio Audits
+
+Model Gates
+System Telemetry
+
+CRYPTOGRAPHIC ACCESS BOUNDARY / AUTOMATIC TRIPWIRE ENFORCEMENT
+OWN
+
+Decisions
+
+Assisted
+
+Audits
+
+Gates
+
+Protected Application Resources & Multi-Tenant State Store
+Feature Snapshots • Credit Scores • SHA-256 Consent Chains • Underwriting Decisions • Audit Logs
+
+HARD ZERO-TRUST ENFORCEMENT:
+Cross-Tenant Scope Violations or Role Mismatches Intercepted Instantly with HTTP 401 Unauthorized / 403 Forbidden
+
+Figure 4.1: Research Block Diagram: Multi-Tier Authorization Model and Cryptographic Tripwire Boundaries.
+
+4.2
+
+Exhaustive Persona × Resource × Action Matrix
+
+Table 4.1 details the complete access permissions governing all 20 platform operations across
+the seven platform caller roles.
+
+9
+
+Chapter 4. Role & Permission Matrix
+
+Resource / Action
+
+CreditTech MVP Project Report
+
+Guest
+
+Borrower
+
+Sakhi
+
+Officer
+
+Risk
+
+Admin
+
+RE Bank
+
+System Health & Probes
+(/health)
+OpenAPI Documentation
+(/docs)
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+✓
+
+Create Consent (POST /consent)
+Lookup Consent Record (GET
+/consent/{id})
+Revoke Consent (POST
+/consent/revoke)
+
+×
+×
+
+OWN
+OWN
+
+✓ (Asst)
+✓
+
+×
+✓
+
+×
+Eye
+
+×
+Eye
+
+×
+Eye
+
+×
+
+OWN
+
+×
+
+×
+
+×
+
+×
+
+×
+
+Ingest SHG/FPO Record (POST
+/ingest/shg)
+Trigger 4-Rail Ingestion (POST
+/ingest/trigger)
+Compute Credit Score (POST
+/score)
+View Score & SHAP (GET
+/score/{id})
+
+×
+
+×
+
+✓
+
+✓
+
+×
+
+✓
+
+×
+
+×
+
+×
+
+✓
+
+✓
+
+×
+
+✓
+
+×
+
+×
+
+×
+
+✓
+
+✓
+
+×
+
+✓
+
+×
+
+×
+
+OWN
+
+Eye
+
+✓
+
+Eye
+
+Eye
+
+Eye
+
+Submit Underwriting Decision
+(POST /decisions)
+Record Officer Dissent Override
+Dispatch RE Loan Package
+(POST /handoff)
+
+×
+
+×
+
+×
+
+✓
+
+×
+
+×
+
+×
+
+×
+×
+
+×
+×
+
+×
+×
+
+✓
+✓
+
+×
+×
+
+×
+×
+
+×
+✓
+
+Lodge Formal Grievance (POST
+/grievances)
+Triage Grievance / Update SLA
+(PATCH ...)
+
+×
+
+OWN
+
+✓ (Asst)
+
+×
+
+×
+
+×
+
+×
+
+×
+
+×
+
+×
+
+✓
+
+×
+
+✓
+
+×
+
+Portfolio Drift Metrics (GET
+.../portfolio)
+Fairness Parity Audit (GET
+.../fairness)
+Auditor CSV Log Export (GET
+.../export)
+
+×
+
+×
+
+×
+
+Eye
+
+Eye
+
+Eye
+
+Eye
+
+×
+
+×
+
+×
+
+Eye
+
+✓
+
+✓
+
+Eye
+
+×
+
+×
+
+×
+
+×
+
+✓
+
+✓
+
+✓
+
+List Models & Metrics (GET
+/admin/models)
+Fairness Manifest Inspection
+(GET .../manifest)
+Promote Model to Active
+Champion
+
+×
+
+×
+
+×
+
+Eye
+
+Eye
+
+✓
+
+×
+
+×
+
+×
+
+×
+
+Eye
+
+Eye
+
+✓
+
+×
+
+×
+
+×
+
+×
+
+×
+
+×
+
+✓ (Gated)
+
+×
+
+Table 4.1: Canonical Role-Based Access Control (RBAC) Matrix across System Resources.
+Legend: ✓= Full Access, × = Forbidden (HTTP 403), OWN = Restricted to Caller’s Authenticated Identity, Eye = Read-Only Aggregated Access.
+
+4.3
+
+Privilege Escalation Tripwires
+
+CreditTech defines programmatic tripwires that actively detect, reject, and audit both forms of
+unauthorized privilege escalation:
+
+10
+
+Chapter 4. Role & Permission Matrix
+
+CreditTech MVP Project Report
+
+Tripwire 1: Horizontal Privilege Escalation Defense
+Scenario: Borrower Radhika Devi (BORROWER-A1) attempts to fetch the credit
+score or grievance details belonging to Sita Kumari (BORROWER-A2) via GET
+/api/v1/score/{id_sita}.
+System Defense: The service layer enforces an identity predicate:
+ASSERT resource.borrower_id == request.headers[‘X-Borrower-Id’]
+Failure immediately aborts request execution with HTTP 403 Forbidden and dispatches
+an audit telemetry alert with no resource data reflected.
+Tripwire 2: Vertical Privilege Escalation Defense
+Scenario: Loan Officer Rajesh Kumar attempts to invoke the model promotion endpoint
+(POST /api/v1/admin/models/v1.1.0-gbm-challenger/promote) to force-activate an
+unvetted model.
+System Defense: The route is guarded by the require_admin FastAPI dependency. Because the caller’s role is LOAN_OFFICER, the request is intercepted at the API gateway layer
+with HTTP 403 Forbidden, logging an unauthorized administrative operation attempt.
+
+11
+
+Chapter 5
+
+Requirements
+5.1
+
+Functional Requirements (FR)
+
+The functional capabilities of the CreditTech MVP are specified through 18 formal functional
+requirements grouped across the credit lifecycle:
+
+5.1.1
+
+Consent & Identity Management
+
+FR-1. Borrower Consent Ingestion: The system shall record explicit, time-bounded, purposelimited digital consent records from rural borrowers, either directly or via an assisted Bank
+Sakhi.
+FR-1. Cryptographic Hash Chaining: Every consent record shall generate an immutable
+SHA-256 hash incorporating the previous record’s hash to ensure tamper-evidence.
+FR-1. Consent Revocation: Borrowers shall have the statutory right to unilaterally revoke
+active consent, which shall instantaneously prevent any subsequent data aggregation or
+scoring.
+
+5.1.2
+
+Multi-Rail Data Ingestion & Feature Engineering
+
+FR-2. 4-Rail Parallel Ingestion: The platform shall execute parallel asynchronous ingestion
+across Account Aggregator cashflows, Sentinel-2 satellite indices, utility payment histories,
+and SHG peer records.
+FR-2. Graceful Degradation: If an external rail is offline (e.g., satellite cloud cover or Account
+Aggregator timeout), the system shall continue processing with statistical default priors
+and flag data completeness.
+FR-2. Feature Snapshot Persistence: The system shall compute and persist exactly 21 continuous and categorical features structured according to the 5-Cs banking credit risk framework.
+
+5.1.3
+
+Credit Risk Scoring & Explainability
+
+FR-3. Standardized Score Generation: The scoring engine shall map borrower features into
+a calibrated default probability (P (Default)) and transform it into a credit score scaled
+from 300 to 900 points.
+FR-3. Bilingual Adverse Action Notices: The system shall generate local Shapley reason
+codes in both English and Hindi, identifying the top negative drivers for low scores per
+RBI regulations.
+FR-3. Decision Zone Classification: Every score shall be categorized into one of three statutory decision zones: Reject (< 550), Manual Review (550–650), or Approve (≥ 650).
+
+12
+
+Chapter 5. Requirements
+
+5.1.4
+
+CreditTech MVP Project Report
+
+Underwriting, Overrides & Regulated Entity Handoff
+
+FR-4. Officer Underwriting Interface: Branch loan officers shall be provided an underwriting
+portal displaying the applicant’s synthesized dossier and SHAP contributions.
+FR-4. Mandatory Dissent Override Logging: If an officer overrides the algorithmic recommendation, the system shall strictly enforce the submission of an auditable justification
+reason code and free-text rationale.
+FR-4. RE Handoff Packaging: Approved loan files shall be compiled into an authenticated
+JSON package with cryptographic integrity hashes for transmission to partner Core Banking Systems.
+
+5.1.5
+
+Governance, Fairness & Grievance Redressal
+
+FR-5. Demographic Parity Audit: The system shall continuously track approval rate disparities across protected demographic attributes (gender and landholding band).
+FR-5. Automated Fairness Gate: Challenger models seeking promotion to active production
+champion shall be evaluated against ratified disparity thresholds (≤ 20% gender disparity,
+≤ 25% landholding disparity).
+FR-5. Grievance Lifecycle Management: The system shall support grievance lodgement,
+assign unique tracking IDs, and enforce a statutory 30-day regulatory SLA countdown
+clock.
+FR-5. Model Promotion Pipeline: Administrators shall have the capability to promote validated candidate models, automatically demoting existing champions to retired status.
+FR-5. Auditor CSV Export: Risk officers and external regulators shall be able to export
+anonymized fairness logs, officer override distributions, and model performance metrics to
+CSV.
+FR-5. Persona-Specific UI Rendering: The frontend shall dynamically render views and
+controls matching the active caller persona.
+
+5.2
+
+Non-Functional Requirements (NFR)
+
+To guarantee production-grade engineering quality, the system satisfies 8 rigorous non-functional
+requirements:
+
+13
+
+Chapter 5. Requirements
+
+CreditTech MVP Project Report
+
+NFR ID
+
+Category
+
+Engineering Specification
+
+NFR-01
+
+Inference Latency
+
+Single-applicant credit scoring inference latency shall not exceed
+50 ms under standard CPU server execution (current champion
+achieves 0.038 ms).
+
+NFR-02
+
+API
+Time
+
+Response
+
+95th percentile (P95 ) API response time across core endpoints
+shall remain below 200 ms under a 60-request concurrent pilot
+burst.
+
+NFR-03
+
+Data Privacy &
+PII
+
+Direct borrower personal identifiers (Aadhaar number, mobile
+number) shall be strictly isolated and encrypted; model matrices shall consume only statistical features.
+
+NFR-04
+
+Audit Immutability
+
+All underwriting decisions, consent events, and grievance records
+shall be stored in append-only tables guarded by database triggers
+preventing update or deletion.
+
+NFR-05
+
+Fairness Ceiling
+
+Algorithmic models shall not exhibit a demographic parity disparity exceeding 20.0% between gender cohorts or 25.0% between
+landholding cohorts.
+
+NFR-06
+
+Reliability & Uptime
+
+The core API shall maintain 99.9% uptime during operational
+branch hours, surviving single-rail ingestion timeouts without
+throwing 500-level errors.
+
+NFR-07
+
+Accessibility
+
+User interfaces shall support high-contrast visual themes, responsive tablet/mobile viewports, and dual-language (Hindi/English)
+text rendering.
+
+NFR-08
+
+Test
+Reproducibility
+
+The complete test suite must be 100% deterministic, executing
+locally without live external network dependencies via mock server
+fixtures.
+
+Table 5.1: Non-Functional Requirements (NFR) Specifications and Target Benchmarks.
+
+14
+
+Chapter 6
+
+System Architecture
+6.1
+
+Tiered System Topology
+
+CreditTech implements a clean, modular 4-tier microservices-ready architecture designed for
+high throughput, cryptographic auditability, and strict decoupling of presentation, business
+logic, and machine learning inference. Figure 6.1 presents the research block diagram illustrating
+the end-to-end component topology and communication paths.
+PRESENTATION LAYER (React 18 + Vite + TypeScript)
+
+Borrower Web
+
+Bank Sakhi App
+
+Mobile View PWA
+
+Assisted Field Tablet
+
+Officer Portal
+
+Admin / MLOps
+
+Underwriting
+Workstation
+
+Governance
+& Telemetry
+
+API Gateway & Security Enforcement Middleware (FastAPI)
+Rate Limiter (60 req/min) • Request-ID Tracing • Body
+Size Limiter (1 MB) • RBAC Header Authorization Guard
+BUSINESS APPLICATION SERVICES (Asynchronous Python 3.10)
+
+Consent Service
+
+Ingest Orchestrator
+
+SHA-256 Hash Chain
+DPDP Purpose Filter
+
+4-Rail Parallel Fetch
+Graceful Fallback
+
+Consents
+
+Scoring Service
+5-Cs Feature Store
+Active Model
+Inference
+
+4-Rail Raw
+
+Decision Service
+Officer Override Audit
+RE Partner Handoff
+
+Scores / Models
+
+Decisions
+
+Tier 4: Data Persistence & ML Model Registry Layer
+(SQLite / PostgreSQL Engine + Model Registry)
+10 Schema Tables (Consents, Borrowers, Features, Scores, Decisions, Audit) • Versioned Champion v1.1.0 Artifact Store
+
+Figure 6.1: Research Block Diagram: 4-Tier System Architecture of the CreditTech Platform.
+
+6.2
+
+Component-by-Component Walkthrough
+
+6.2.1
+
+1. Presentation Layer (Frontend Clients)
+
+Implemented as a single-page web application (SPA) using React 18, Vite, TypeScript, and
+TailwindCSS. The presentation layer features dynamic persona-based routing:
+• Borrower Portal: Minimalistic, high-legibility interface presenting the applicant’s credit
+health gauge, bilingual (Hindi/English) positive and negative score factors, and dispute
+lodgement tools.
+• Bank Sakhi App: Field-optimized interface designed for low-resolution tablets, enabling
+batch entry of SHG peer-thrift passbooks and assisted consent capture.
+
+15
+
+Chapter 6. System Architecture
+
+CreditTech MVP Project Report
+
+• Loan Officer Workstation: Comprehensive credit underwriting interface presenting
+the 21 synthesized features, regional village peer averages, TreeSHAP force plots, and the
+mandatory override dialogue.
+• Model Governance Dashboard: Real-time telemetry station rendering the 13 institutional white-theme decision graphs, PSI drift monitors, and model promotion control
+panels.
+
+6.2.2
+
+2. Gateway & Security Middleware
+
+Every inbound HTTP request must traverse a layered security pipeline implemented using
+Starlette/FastAPI middleware before reaching application handlers:
+• Request-ID Correlation: Injects a unique UUIDv4 (X-Request-Id) into every request
+and response header, enabling distributed log correlation across async tasks.
+• Body Size Limiter: Prevents denial-of-service memory exhaustion by enforcing a strict
+1.0 MB ceiling on incoming request payloads.
+• Rate Limiting Middleware: Token-bucket rate limiter enforcing a 60 requests/minute
+ceiling per IP address to safeguard external ingestion endpoints.
+• RBAC Header Dependency: FastAPI dependency injection verifying caller role headers against the canonical role-permission matrix.
+
+6.2.3
+
+3. Core Business Services
+
+• Consent Engine (services.core.consent): Enforces the DPDP Act 2023 lifecycle
+(Granted → Expired → Revoked). Maintains the cryptographic hash chain (Hn =
+SHA256(Hn−1 ∥ Payloadn )).
+• Ingestion Orchestrator (services.core.ingestion): Spawns concurrent asynchronous
+workers to query the four alternative data rails. Enforces circuit-breaker patterns and
+graceful fallback defaults when third-party mocks or APIs timeout.
+• Feature Store & Scoring Engine (services.core.scoring): Aggregates raw data
+into the 21-feature snapshot schema and feeds it to the active model scorecard in memory.
+• Decisioning & Handoff Service (services.core.decisioning): Persists the credit
+verdict, validates dissent override reasons, and serializes the signed handoff dossier for
+delivery to partner banks.
+• Grievance Service (services.core.grievance): Tracks regulatory complaints, coordinates internal triage notes, and computes remaining days against the statutory 30-day
+resolution deadline.
+
+6.2.4
+
+4. Persistence & Model Artifact Store
+
+The data layer maintains strict separation between operational application state and versioned
+machine learning artifacts:
+• Relational Database: SQLite for local zero-dependency testing; configured with WAL
+(Write-Ahead Logging) mode and enforced foreign-key constraints.
+• ML Registry Store (ml/registry/store): File-backed model repository storing model
+artifacts, JSON scorecard definitions, training reports, and plots manifests keyed by semantic version tags.
+16
+
+Chapter 7
+
+Technology Stack & Design Decisions
+7.1
+
+Architectural Selection Rationale
+
+Every component in the CreditTech technology stack was selected to satisfy specific nonfunctional requirements regarding developer velocity, type safety, regulatory auditability, and
+execution performance. Table 7.1 presents the technology stack alongside the explicit engineering rationale governing each choice.
+
+17
+
+Chapter 7. Technology Stack & Design Decisions
+
+CreditTech MVP Project Report
+
+Layer / Component
+
+Selected Technology
+
+Engineering Rationale / Trade-Off Analysis
+
+Backend
+Framework
+
+Python 3.10
+FastAPI
+
++
+
+Provides native asynchronous I/O (async/await) essential for parallel 4-rail network ingestion; automatic OpenAPI generation; strict runtime validation via Pydantic
+v2.
+
+Data Validation
+& Serialization
+
+Pydantic v2 (Rust
+Core)
+
+High-speed data serialization and schema enforcement.
+Prevents malformed or malicious payload injections at
+the HTTP boundary.
+
+Relational
+ORM
+
+SQLAlchemy
+(Async)
+
+2.0
+
+Unified object-relational mapping supporting asynchronous database sessions. Decouples business logic
+from SQL dialect, enabling seamless migration from
+SQLite to PostgreSQL.
+
+En-
+
+SQLite (Embedded)
+→
+PostgreSQL
+
+SQLite was chosen for zero-dependency local test execution, instantaneous database resets, and embedded determinism; PostgreSQL is targeted for production multiregion concurrency.
+
+ML Core & Inference
+
+Scikit-Learn
++
+Monotonic GBDT
+
+Industry-standard, rock-solid numerical stability; native support for monotonic feature constraints (ensuring
+higher savings never increases default risk); zero C++
+compiler dependency.
+
+Explainability
+
+TreeSHAP
+WoE Points
+
++
+
+Closed-form Shapley value attribution provides mathematically consistent local feature explanations required
+by RBI regulatory fair-lending clauses.
+
+Frontend
+Framework
+
+React 18 + TypeScript
+
+Component-based architecture with compile-time type
+safety. Ensures complex multi-persona states and data
+structures cannot trigger runtime undefined crashes.
+
+Build Tooling
+
+Vite 5
+
+Instantaneous Hot Module Replacement (HMR) and optimized Rollup tree-shaking producing ultra-lean production asset bundles (< 300 KB gzip).
+
+CSS & Styling
+
+TailwindCSS v3
+
+Utility-first CSS providing a consistent design token system (colors, 8pt spacing grid, responsive typography)
+without CSS bloat or runtime style recalculation.
+
+Data Visualization
+
+Recharts + Matplotlib
+
+Recharts provides dynamic, interactive SVG visualizations for the officer dashboard; Matplotlib generates
+300 DPI publication-grade white-theme artifacts for regulatory dossiers.
+
+Testing Harness
+
+Pytest + AnyIO
+
+Unified asynchronous test runner executing unit tests,
+integration routes, and persona security matrices with
+deterministic mock server fixtures.
+
+Database
+gine
+
+Table 7.1: Comprehensive Technology Stack and Engineering Selection Criteria.
+
+7.2
+
+Key Design Decisions & Trade-Offs
+
+7.2.1
+
+1. Weight-of-Evidence Scorecard vs. Deep Neural Networks
+
+While deep neural networks and unconstrained gradient boosting algorithms can occasionally
+achieve fractional gains in empirical AUC, they were explicitly rejected as the Active Production
+18
+
+Chapter 7. Technology Stack & Design Decisions
+
+CreditTech MVP Project Report
+
+Champion. Under Clause 6.3 of the RBI Digital Lending Guidelines [1], regulated lending
+institutions must provide clear, human-understandable adverse action reason codes to rejected
+applicants. A Weight-of-Evidence (WoE) scorecard offers exact closed-form point additivity:
+Score = Offset + Factor ·
+
+k
+X
+
+βi · WoE(Xi )
+
+i=1
+
+Every point gained or lost can be traced to a specific bin without approximation errors, delivering 100% legal explainability while capturing 98% of complex ensemble discriminatory
+performance.
+
+7.2.2
+
+2. Header-Based Identity Contract vs. OAuth 2.0 / JWT for MVP
+
+For the pilot MVP, identity is asserted via structured HTTP request headers (X-Borrower-Id,
+X-Officer-Role) verified by FastAPI dependency injection. This architectural decision was
+made deliberately to decouple API testing and persona verification from third-party identity
+providers (e.g., Keycloak or Auth0). It enables automated test suites to simulate any persona
+instantly without token expiry, clock-skew, or network mock dependencies, while maintaining
+identical authorization code paths to production OAuth 2.0 token claims.
+
+19
+
+Chapter 8
+
+Data Architecture & Relational Schema
+8.1
+
+Relational Entity-Relationship Schematic
+
+CreditTech models the complete credit origination and governance lifecycle across 10 relational
+entities. Figure 8.1 provides the research schematic Entity-Relationship (ER) diagram illustrating the structural relationships, foreign-key linkages, and cardinality constraints governing the
+schema.
+borrowers
+id: UUID [PK]
+aadhaar_hash: String
+[UK]
+phone_encrypted: Text
+full_name: String
+village_cluster: String
+landholding_band: String
+created_at: DateTime
+
+1:N
+
+feature_snapshots
+id: UUID [PK]
+borrower_id: UUID [FK]
+consent_id: UUID [FK]
+features_json: JSON
+completeness_pct: Float
+created_at: DateTime
+
+1:1
+
+applications
+id: UUID [PK]
+borrower_id: UUID [FK]
+score_id: UUID [FK]
+loan_amount: Numeric
+status: String
+created_at: DateTime
+
+1:N
+1:1
+
+1:1
+
+1:N
+
+1:N
+
+consent_records
+id: UUID [PK]
+borrower_id: UUID [FK]
+purpose: String
+status: String
+hash_chain: String [UK]
+expires_at: DateTime
+revoked_at: DateTime
+
+score_results
+id: UUID [PK]
+feature_id: UUID [FK]
+model_version: String
+pd_score: Float
+scaled_score: Integer
+decision_zone: String
+shap_reasons: JSON
+
+officer_decisions
+id: UUID [PK]
+application_id: UUID
+[FK]
+officer_id: String
+final_verdict: String
+is_override: Boolean
+override_reason: String
+decided_at: DateTime
+1:N
+
+audit_events
+id: UUID [PK]
+event_type: String
+actor_id: String
+payload_hash: String
+timestamp: DateTime
+
+grievance_records
+id: UUID [PK]
+borrower_id: UUID [FK]
+category: String
+status: String
+sla_deadline: DateTime
+resolved_at: DateTime
+
+Figure 8.1: Research Block Diagram: Relational Entity-Relationship (ER) Schema of the CreditTech Database.
+
+8.2
+
+Entity Details & Integrity Constraints
+
+Table 8.1 describes the 10 relational entities, their primary/foreign key linkages, and their
+architectural purpose.
+
+20
+
+Chapter 8. Data Architecture & Relational Schema
+
+CreditTech MVP Project Report
+
+Entity Name
+
+Primary Key
+
+Foreign Keys
+
+Integrity Constraints & Invariants
+
+borrowers
+
+id (UUID)
+
+consent_records
+
+id (UUID)
+
+feature_snapshots
+
+id (UUID)
+
+score_results
+
+id (UUID)
+
+applications
+
+id (UUID)
+
+officer_decisions
+
+id (UUID)
+
+re_handoffs
+
+id (UUID)
+
+grievance_records
+
+id (UUID)
+
+audit_events
+
+id (UUID)
+
+model_promotions
+
+id (UUID)
+
+aadhaar_hash is unique; direct PII
+phone numbers are stored encrypted
+with AES-256.
+borrower_id
+Immutable append-only; hash_chain
+ensures cryptographic continuity;
+status
+in
+{GRANTED, REVOKED,
+EXPIRED}.
+borrower_id,
+Persists the 21 continuous/categorical
+consent_id
+features computed at loan application
+time; never modified.
+feature_id
+scaled_score bounded to [300, 900];
+decision_zone derived from policy
+thresholds.
+borrower_id,
+Unique composite (borrower_id,
+score_id
+created_at) prevents duplicate open
+applications.
+application_id Append-only table guarded by SQLite
+trigger preventing update or deletion; requires override_reason if
+is_override is true.
+application_id Generates an external reference token
+and payload SHA-256 digest for Core
+Banking ingestion.
+borrower_id
+sla_deadline automatically calculated as created_at + 30 days per
+statutory mandate.
+None
+Immutable event bus logging caller
+role, endpoint, and hash of payload.
+None
+Logs model promotion timestamps,
+previous champion, and ratified fairness gate scores.
+None
+
+Table 8.1: Database Schema Entities, Keys, and Relational Constraints.
+
+8.3
+
+Data Lifecycle State Transitions
+
+The lifecycle of an application follows a strictly deterministic directed acyclic graph (DAG):
+
+Consent (Granted) −→ Ingestion −→ Snapshot −→ Scoring −→ Officer Review −→ Decision (Finalized) −→ R
+If consent is revoked at any stage prior to loan sanctioning, an automatic cancellation cascade
+terminates the pipeline, purging transient feature vectors while preserving the cryptographic
+audit event.
+
+21
+
+Chapter 9
+
+Authentication & Authorization
+9.1
+
+Identity Propagation Pipeline
+
+Security within CreditTech is built on an end-to-end identity resolution pipeline. Unlike monolithic web applications that rely on opaque session cookies or client-side trust, CreditTech verifies
+caller identity at the gateway layer, derives an authenticated CallerContext, and passes this security context immutably through FastAPI dependency injection to downstream business logic.
+Figure 9.1 illustrates this identity resolution flow.
+Inbound HTTP Request
+Headers: X-Borrower-Id,
+X-Officer-Role, X-Officer-Id
+
+Security Middleware
+
+FastAPI Dependency
+
+Rate Limit Check
+Body Size Sanitization
+Request-ID Ingestion
+
+require_officer()
+require_admin()
+
+Execute Handler
+Authorized Context
+Service Business Logic
+
+Pass
+
+get_borrower_ctx()
+
+Resource
+Authorizer
+Tenant Match?
+Role Permitted?
+
+Fail
+
+Immediate Termination
+HTTP 401 / 403 Abort
+Audit Alert Dispatched
+
+Figure 9.1: Research Block Diagram: Inbound Request Identity Propagation and Resource
+Authorization Pipeline.
+
+9.2
+
+Defense Against Horizontal Privilege Escalation
+
+Horizontal privilege escalation occurs when an attacker possesses valid credentials as a regular
+user (e.g., Borrower A) and attempts to access or manipulate private resources belonging to
+another user of equivalent rank (e.g., Borrower B).
+In CreditTech, this threat is neutralized at the route dependency layer through an explicit
+Tenant Ownership Invariant:
+1
+
+2
+3
+4
+5
+6
+7
+
+@router . get ( " / score /{ score_id } " , summary = " Fetch credit score and SHAP reason
+codes " )
+async def get_score (
+score_id : UUID ,
+borrower_id : UUID | None = Depends ( g et _ o p ti o n a l_ b o r r ow e r _ id ) ,
+officer : OfficerContext | None = Depends ( get_optional_officer ) ,
+db : AsyncSession = Depends ( get_db ) ,
+):
+
+22
+
+Chapter 9. Authentication & Authorization
+
+CreditTech MVP Project Report
+
+score = await db . get ( ScoreResult , score_id )
+if not score :
+raise HTTPException ( status_code =404 , detail = " Score record not found " )
+
+8
+9
+10
+11
+
+# Horizontal Authorization Guard :
+if borrower_id is not None :
+# Caller is a borrower -> Must own the associated snapshot
+snapshot = await db . get ( FeatureSnapshot , score . feature_id )
+if snapshot . borrower_id != borrower_id :
+logger . warn ( " h o r i z o n t a l _ p r i v i l e g e _ a t t e m p t " , caller = borrower_id ,
+target = snapshot . borrower_id )
+raise HTTPException ( status_code =403 , detail = " Access to resource
+forbidden : caller does not own record " )
+
+12
+13
+14
+15
+16
+17
+
+18
+
+19
+
+return score . to_response ()
+
+20
+
+Listing 9.1: Tenant Ownership Verification in Score Retrieval Handler.
+
+9.3
+
+Defense Against Vertical Privilege Escalation
+
+Vertical privilege escalation occurs when a standard user (e.g., a Borrower or Field Sakhi)
+attempts to execute restricted operations reserved for higher-privilege administrative or underwriting roles (e.g., activating an unvetted ML model or overriding an adverse loan decision).
+CreditTech prevents vertical escalation through tiered role-guard dependencies (require_officer,
+require_admin). Any route modifying platform-level configuration or model promotion enforces strict role membership:
+1
+2
+3
+4
+5
+6
+
+7
+8
+9
+10
+11
+
+async def require_admin (
+role : str = Header (... , alias = "X - Officer - Role " ) ,
+officer_id : str = Header (... , alias = "X - Officer - Id " ) ,
+) -> str :
+if role . strip () . upper () != " ADMIN " :
+logger . error ( " v e r t i c a l _ e s c a l a t i o n _ b l o c k e d " , caller = officer_id ,
+attempted_role = role )
+raise HTTPException (
+status_code = status . HTTP_403_FORBIDDEN ,
+detail = " Operation requires administrative privileges "
+)
+return officer_id
+
+Listing 9.2: Role-Gating Dependency Implementation.
+Because these checks are evaluated before handler execution, no sensitive internal state, weights,
+or database queries are leaked to unauthorized callers.
+
+23
+
+Chapter 10
+
+Data Access Control & Privacy
+10.1
+
+Data Ownership Principles
+
+CreditTech adheres strictly to the statutory mandates of the Digital Personal Data Protection
+(DPDP) Act 2023 [2]. In alignment with the concept of the citizen as a Data Principal and the
+lending entity as a Data Fiduciary, our data access architecture is governed by five foundational
+ownership axioms:
+1. Borrower Data Sovereignty: The applicant retains ultimate ownership over all personal, financial, and geographic attributes ingested into the system. The platform maintains no right to process or share data absent an unexpired, active consent token.
+2. Purpose-Bound Ephemerality: Ingested raw telemetry (e.g., individual bank statement transactions from Account Aggregators or raw Sentinel-2 satellite GeoTIFF tiles)
+is ephemeral; it is parsed into statistical aggregates (FeatureSnapshot) and purged from
+memory.
+3. Cryptographic PII Isolation: Direct personal identity information (Aadhaar numbers,
+complete mobile numbers) is cryptographically segregated from machine learning feature
+stores. Feature tables reference anonymized borrower_id UUIDs.
+4. Zero Administrative Data Destruction: System administrators and engineers cannot
+delete or alter historical underwriting decisions, audit records, or settled grievances. The
+platform enforces an append-only architecture.
+5. Geographic Cluster Partitioning: Field agents and loan officers operate strictly within
+designated administrative boundaries (Gram Panchayats and rural bank branches). An
+officer in Chandauli District cannot query applicants residing in Mirzapur District.
+
+10.2
+
+Fine-Grained CRUD Permissions by Entity
+
+Table 10.1 defines the fine-grained data permissions across all system entities, delineating who
+can create, read, update, or delete records.
+
+24
+
+Chapter 10. Data Access Control & Privacy
+
+CreditTech MVP Project Report
+
+Entity
+
+Create (C)
+
+Read (R)
+
+Update (U)
+
+Delete (D)
+
+borrowers
+
+Sakhi, Borrower
+
+Sakhi (Assisted)
+
+BLOCKED
+
+consent_records
+
+Borrower, Sakhi
+Scoring Engine
+
+score_results
+
+Scoring Engine
+
+officer_decisions
+
+Loan Officer
+
+grievance_records
+
+Borrower, Sakhi
+
+audit_events
+
+System Core
+
+Borrower (Own), Officer
+Auditor, Admin
+
+Status: Revocation
+BLOCKED (Immutable)
+BLOCKED
+(Versioned)
+BLOCKED (Immutable)
+Officer (Triage)
+
+BLOCKED
+
+feature_snapshots
+
+Borrower (Own), Officer
+Borrower (Own), Officer
+Officer, Auditor
+
+BLOCKED
+
+model_promotions
+
+MLOps Admin
+
+Auditor, Officer
+
+BLOCKED
+(Append)
+BLOCKED
+(Logged)
+
+Borrower (Own), Officer
+Officer, Auditor, RE
+
+BLOCKED
+BLOCKED
+BLOCKED
+BLOCKED
+
+BLOCKED
+
+Table 10.1: Entity-Level CRUD Permission Boundaries and Immutability Invariants.
+
+10.3
+
+Field-Level Masking & Tokenization
+
+To protect sensitive identity attributes, CreditTech enforces field-level masking at the API
+serialization boundary:
+• Aadhaar Numbers: Never stored in plaintext. Ingested numbers are hashed using
+salt-hardened SHA-256 (aadhaar_hash), and displayed across all officer views as masked
+tokens: XXXXXXXX1234.
+• Mobile Phone Numbers: Encrypted at rest using AES-256-GCM. Displayed to loan
+officers and Sakhis with middle-digit redaction (+91 98XXX-XX210).
+• Sensitive Demographic Tags: Gender, religion, and caste attributes are excluded from
+all feature vectors consumed by credit scoring models, preventing disparate treatment bias
+at the algorithmic input layer.
+
+25
+
+Chapter 11
+
+Application Workflows
+11.1
+
+Workflow 1: Assisted Consent Capture & Onboarding
+
+Figure 11.1 illustrates the sequence of operations when a Bank Sakhi assists a rural borrower
+in creating an authenticated digital identity and recording tamper-evident consent under the
+DPDP Act 2023.
+Bank Sakhi / Tablet
+Collects applicant Aadhaar
+Reads vernacular consent terms
+
+Present
+
+Rural Borrower
+
+Consent Engine
+
+Authorize
+Authorizes 4-rail pull
+Validates purpose & expiry
+Provides mobile OTP / sign
+Appends SHA-256 Hash
+Append Hash
+
+Consent
+Ledger
+Immutable State
+
+Figure 11.1: Research Block Diagram: Assisted Borrower Consent Capture and Hash Chaining
+Workflow.
+
+11.2
+
+Workflow 2: 4-Rail Parallel Ingestion & Feature Fusion
+
+Figure 11.2 depicts the asynchronous execution graph of the Ingestion Orchestrator as it queries
+the four alternative data rails in parallel, enforces timeouts, applies imputation, and constructs
+the 21-feature credit snapshot.
+
+26
+
+Chapter 11. Application Workflows
+
+CreditTech MVP Project Report
+
+Account Aggregator
+Inflow/Outflow Volatility
+Average Daily Balance
+
+Ingestion Orchestrator
+
+Sentinel-2 Remote Sensing
+
+5-Cs Feature Store
+
+POST /api/v1/ingest/trigger
+Spawns 4 Async Tasks
+
+NDVI Peak / Crop Mean
+Monsoon Rainfall Ratio
+
+Synthesizes 21 Features
+Computes Completeness %
+
+Electricity Utility
+Bill Payment Punctuality
+12-Month Arrears
+
+SHG / FPO Peer Thrift
+Meeting Attendance %
+Internal Loan Repayment
+
+Figure 11.2: Research Block Diagram: 4-Rail Parallel Alternative Ingestion and Feature Aggregation Pipeline.
+
+11.3
+
+Workflow 3: Underwriting Review, SHAP Inspection & Officer
+Dissent
+
+Figure 11.3 illustrates the underwriter decision flow, highlighting the mandatory override tripwire that forces the entry of a justified reason code whenever a loan officer dissents from the
+algorithmic recommendation.
+Yes
+
+Scoring Service
+
+Loan Officer Review
+
+Score 520 (Manual Review)
+
+Evaluates SHAP plots
+Conducts field check
+
+Top Negative: Low NDVI
+
+Standard Sanction
+Algorithmic alignment
+Direct RE Dispatch
+
+Officer Agrees
+with Model?
+
+Mandatory Dissent Dialogue
+No (Override)
+
+Select reason code (e.g. Borewell)
+Enter supervisor justification note
+
+Figure 11.3: Research Block Diagram: Loan Underwriter Decisioning and Mandatory Dissent
+Override Flow.
+
+27
+
+Chapter 12
+
+UI/UX Design System
+12.1
+
+Design System Principles & Tokens
+
+CreditTech implements a clean, accessible design system tailored for high readability across
+diverse display hardware—ranging from low-cost Android smartphones in rural environments to
+high-resolution desktop monitors in commercial bank underwriting centers. The design system
+enforces five core UX principles:
+1. High-Contrast Typography: Primary interfaces use modern geometric sans-serif typography (Outfit for display headings, Inter for body text, and JetBrains Mono for tabular
+scores and currency figures), ensuring crisp legibility under direct sunlight.
+2. 8-Point Spatial Grid: All paddings, margins, and component dimensions adhere to an
+8-point geometric scale (8px, 16px, 24px, 32px), creating visual rhythm and responsive
+consistency.
+3. Institutional Color Tokens: The color palette strictly avoids saturated garish tones,
+utilizing deep navy (#1E3A8A) for primary structural headers, slate blue for navigation,
+emerald (#047857) for approvals, amber (#B45309) for manual review, and muted crimson
+(#991B1B) for rejections.
+4. Vernacular Bilingualism: Critical credit decisions and adverse action reason codes
+are presented side-by-side in English and Hindi (Devanagari), eliminating the linguistic
+barrier for rural applicants.
+5. Low-Bandwidth Mobile Optimization: Assets, fonts, and icons are bundled into
+an ultra-lean client footprint (< 300 KB gzip), enabling the web application to function
+smoothly over 2G/3G rural networks.
+
+12.2
+
+Persona-Tailored Screen Architecture
+
+Table 12.1 outlines the core application views and their design intent across the operational
+personas.
+
+28
+
+Chapter 12. UI/UX Design System
+
+CreditTech MVP Project Report
+
+Screen / View
+
+Target Persona
+
+UX Design Purpose & Key Elements
+
+Landing / Home
+
+All Callers
+
+High-level platform introduction, regulatory compliance
+badges (RBI/DPDP), and entry points for borrowers
+and officers.
+
+Borrower Health
+View
+
+Rural Borrower
+
+Minimalist visual gauge displaying credit health (300–
+900 scale), decision zone badge, and bilingual positive/negative factors.
+
+Sakhi Field Ingest
+
+Bank Sakhi
+
+Fast-input form optimized for touch tablets; supports
+batch digitizing of paper SHG registers and assisted consent capture.
+
+Officer Workstation
+
+Loan Underwriter
+
+Dense data layout: synthesized 21-feature 5-Cs panel,
+regional peer comparisons, TreeSHAP contribution
+bars, and override action buttons.
+
+Model Registry
+Dossier
+
+Risk Officer / Admin
+
+Institutional governance dashboard rendering real-time
+mathematical validation graphs, PSI drift monitors, and
+gated promotion controls.
+
+Grievance Portal
+
+Borrower / Sakhi
+
+Transparent complaint lodgement interface with 30-day
+statutory countdown timer and auditable resolution status badges.
+
+Error / Fallback
+State
+
+All Callers
+
+Informative, friendly failure messages explaining the error without exposing internal stack traces or database
+schema names.
+
+Empty State
+
+All Callers
+
+Contextual guidance cards with clear call-to-action buttons when queues or data lists have zero records.
+
+Table 12.1: Screen Catalog and Persona-Specific User Experience Functions.
+
+12.3
+
+Component Routing State Hierarchy
+
+Figure 12.1 provides the schematic block diagram of the front-end component hierarchy, illustrating how the usePersona hook controls view rendering and route authorization.
+
+29
+
+Chapter 12. UI/UX Design System
+
+CreditTech MVP Project Report
+
+React 18 Application Root
+App.tsx • QueryClient • Toast
+
+TopNav & DevPersonaSwitcher
+Broadcasts PersonaContext (Role, ID, District)
+
+Borrower Views
+
+Sakhi Field Views
+
+Officer / Admin Views
+
+/borrower • /grievance
+
+/sakhi/entry • /consent
+
+/officer • /models
+
+AccessDenied Guard
+Verifies isAllowed(role)
+
+Figure 12.1: Research Block Diagram: Front-End Component Routing and Persona Authorization Hierarchy.
+
+30
+
+Chapter 13
+
+Error & Edge-Case Handling
+13.1
+
+Systemic Failure Modes & Mitigations
+
+A resilient digital credit platform operating across rural geographies must expect partial network
+connectivity, data quality anomalies, and intermittent third-party service outages. CreditTech
+adopts a defensive design posture where every potential failure mode is mapped to an explicit,
+tested system response. Table 13.1 documents the matrix of operational edge cases and the
+corresponding platform defense mechanisms.
+
+31
+
+Chapter 13. Error & Edge-Case Handling
+
+CreditTech MVP Project Report
+
+Failure Situation
+
+HTTP
+Layer
+
+Invalid
+Input
+
+422 Unprocessable
+(Gateway)
+
+Pydantic v2 validation intercepts malformed fields;
+returns structured JSON detailing field names and
+constraints without stack traces.
+
+Unauthenticated
+Request
+
+401 Unauthorized
+(Auth)
+
+Request lacks required identity headers; terminates
+execution immediately; dispatches audit warning.
+
+Forbidden Privilege Attempt
+
+403 Forbidden
+(RBAC)
+
+Caller role lacks permission for the requested endpoint (e.g., Sakhi attempting loan approval); logs
+tripwire alert.
+
+Cross-Tenant Access
+
+403 Forbidden
+vice)
+
+(Ser-
+
+Borrower attempts to query another user’s score or
+grievance; tenant check fails; access denied with zero
+data leakage.
+
+Resource
+Found
+
+Not
+
+404 Not Found (Storage)
+
+Target UUID does not exist; returns clean notfound message.
+
+Duplicate
+mission
+
+Sub-
+
+409 Conflict
+Guard)
+
+(State
+
+Underwriter attempts to approve an already decided application; state machine rejects second mutation.
+
+Schema
+
+Status
+
+/
+
+System Response & Recovery Mechanism
+
+Revoked / Expired Consent
+
+400 Bad Request
+(Consent)
+
+Scoring triggered on revoked consent; pipeline
+aborts before invoking external rails; logs compliance block.
+
+External
+Timeout
+
+Rail
+
+200 OK with Degraded
+Flag
+
+Account Aggregator or Satellite rail exceeds 5 s
+SLA; orchestrator applies population median imputation and sets completeness_pct < 1.0.
+
+Payload
+Sized
+
+Over-
+
+413 Payload Too
+Large
+
+Request payload exceeds 1.0 MB ceiling; Starlette
+middleware drops connection before memory allocation.
+
+Excessive Request
+Rate
+
+429 Too Many
+Requests
+
+Caller exceeds 60 requests/minute burst threshold; rate limiter rejects with Retry-After response
+header.
+
+Extreme
+Outlier
+
+Feature
+
+Scorecard
+ing
+
+Values outside 99th percentile (e.g., negative crop
+yield or billion-rupee income) are clamped via
+monotonic binning without crashing.
+
+Server
+Error
+
+Internal
+
+500 Internal Error
+
+Preprocess-
+
+Unhandled exception caught by global exception
+handler; obfuscates internal error; emits UUID for
+telemetry correlation.
+
+Table 13.1: Systemic Error, Exception, and Edge-Case Mitigation Matrix.
+
+13.2
+
+Defensive Degradation Architecture
+
+To guarantee that rural applicants are not penalised by intermittent infrastructure failures,
+CreditTech employs a graceful degradation pattern:
+1
+2
+3
+4
+5
+
+async def fetch_rail_safely ( rail_fn , default_payload , timeout_sec =5.0) :
+try :
+return await asyncio . wait_for ( rail_fn () , timeout = timeout_sec )
+except asyncio . TimeoutError :
+logger . warn ( " rail_timeout_imputed " , rail = rail_fn . __name__ )
+
+32
+
+Chapter 13. Error & Edge-Case Handling
+
+6
+7
+8
+
+9
+
+CreditTech MVP Project Report
+
+return default_payload | { " is_degraded " : True }
+except Exception as e :
+logger . error ( " ra il _ ex c ep t io n_ f al l ba ck " , rail = rail_fn . __name__ , error =
+str ( e ) )
+return default_payload | { " is_degraded " : True }
+
+Listing 13.1: Defensive Rail Execution with Imputation Fallback.
+This architecture guarantees that a temporary failure in European Space Agency satellite tile
+fetching or a state electricity board API does not halt the loan origination workflow.
+
+33
+
+Chapter 14
+
+Synthetic & Benchmark Data Strategy
+14.1
+
+Dual-Track Data Methodology
+
+A foundational challenge in deploying machine learning within underserved credit environments
+is the cold-start data paradox: commercial banks cannot originate loans without historical
+performance data, yet historical default data cannot be gathered without originating loans.
+Rather than masking this constraint, CreditTech adopted a rigorous, dual-track data engineering
+strategy:
+1. Track 1: Real-World Benchmark Fusion (N = 22, 000):
+To train and rigorously evaluate model discrimination, calibration, and hyperparameter stability on real borrower repayment behaviors, we ingested and harmonized two
+gold-standard international credit datasets: the Home Credit Default Risk benchmark [3]
+(12,000 records) and the Give Me Some Credit (GMSC) benchmark [4] (10,000 records).
+Together, this benchmark cohort comprises 22,000 real borrower observations with 2,098
+empirical defaults (9.54% prevalence).
+2. Track 2: Controlled Synthetic Early-Adopter Cohort:
+To stress-test persona boundaries, role-based authorization, geographic village partitioning, and edge-case handling (officer overrides, active grievances, missing rails) within the
+running web application, a controlled, deterministic synthetic dataset was engineered via
+scripts/seed_early_adopters.py.
+Figure 14.1 illustrates this dual-track data architecture.
+CreditTech Data Architecture
+Dual-Track Benchmark &
+Synthetic Pilot Strategy
+
+Track 1: Real Benchmarks (N = 22, 000)
+
+Track 2: EarlyAdopter Pilot Cohort
+
+Home Credit (N = 12, 000)
+• GMSC (N = 10, 000)
+2,098 Empirical Defaults (9.54% Baseline)
+5-Fold Spatial GroupKFold Cross-Validation
+
+Controlled Deterministic Seeding Pipeline
+15 Village Clusters • 5 User Personas
+Boundary Edge Cases
+(Overrides, Grievances)
+
+Relational DB & Web Portal
+
+Model Registry & Figures
+
+Operational SQLite / PostgreSQL
+169 Passing Verification Tests
+
+5 Tuned Model Benchmarks
+13 Publication Decision Plots
+
+Figure 14.1: Research Block Diagram: Dual-Track Real Benchmark and Synthetic Pilot Data
+Architecture.
+
+34
+
+Chapter 14. Synthetic & Benchmark Data Strategy
+
+14.2
+
+CreditTech MVP Project Report
+
+Real Benchmark Fusion & Rural Feature Mapping
+
+The 22,000 real borrower records were mapped to the 21-feature 5-Cs rural credit framework
+using empirical covariance relationships:
+• Character (SHG Peer Thrift): In Home Credit, short-term debt repayment punctuality was mapped to SHG internal loan repayment rates ([0.70, 1.00]) and meeting attendance ratios.
+• Capacity (Agricultural Cashflows): Revolving debt ratios and monthly income metrics from GMSC were calibrated to rural PM-Kisan government transfers and seasonal
+crop revenues.
+• Conditions (Sentinel-2 Remote Sensing): Geographic cluster assignments mapped
+historical default variance to seasonal NDVI vegetative vigor drops and monsoon rainfall
+indices.
+
+14.3
+
+Controlled Synthetic Early-Adopter Seeding
+
+The synthetic seed pipeline (scripts/seed_early_adopters.py) deterministically instantiates
+specific borrowers across two pilot clusters:
+• Cluster Alpha (Chandauli District — Canal Irrigated):
+– Radhika Devi (BORROWER-A1): Pristine SHG thrift, high crop vigor (NDVI: 0.74),
+Score: 745 (APPROVE).
+– Sita Kumari (BORROWER-A2): Marginal landholder, seasonal payment lag, Score: 630
+(MANUAL REVIEW).
+• Cluster Beta (Mirzapur District — Rain-Fed):
+– Ramu Patel (BORROWER-B1): Low NDVI due to local drought, Score: 510 (REJECT),
+but approved via an officer dissent override due to a new village solar borewell.
+– Meena Verma (BORROWER-B2): Disputed electricity utility arrears, Score: 580, active
+open grievance under 30-day statutory SLA.
+This controlled cohort guarantees that every complex user journey, dissent override, grievance
+loop, and authorization boundary can be reliably and repeatedly demonstrated.
+
+35
+
+Chapter 15
+
+Testing Strategy
+15.1
+
+The Multi-Layered Testing Pyramid
+
+To verify that CreditTech operates with bank-grade reliability, the verification framework is
+organized as a multi-tier testing pyramid. Figure 15.1 depicts the four distinct testing tiers,
+spanning unit validation, database integration, end-to-end user journeys, and dedicated authorization tripwire security audits.
+Tier 4: End-to-End CUJ (12 Tests)
+Full Workflow: UI → Gateway → DB → RE Handoff
+
+Tier 3: Persona Authorization Matrix (35 Tests)
+
+Tier 2: API & Persistence Integration (52 Tests)
+FastAPI Routes → Async SQLAlchemy Engine → SQLite Triggers & Cascades
+
+Tier 1: Unit Tests & Algorithmic Verification (70 Tests)
+Pure Mathematical Functions • WoE Binning • SHA-256 Chaining • Feature Imputation
+
+←− Increasing Isolation & Execution Speed
+
+Increasing System Scope & Realism −→
+
+Persona × Resource × Action • Horizontal & Vertical Security Tripwires
+
+Figure 15.1: Research Block Diagram: 4-Tier Automated Testing Pyramid of the CreditTech
+Platform (169 Tests Total).
+
+15.2
+
+Tier-by-Tier Testing Methodologies
+
+15.2.1
+
+1. Tier 1: Unit Testing (Algorithm & Pure Functions)
+
+Focuses on verifying algorithmic correctness in total isolation without database or network I/O:
+Input Vector x −→ Transformation Function f (·) −→ Assert f (x) == yexpected
+• Scorecard Calibration: Verifies that input features are mapped monotonically into
+WoE bins and scaled to the 300–900 integer interval.
+• Consent Hash Chaining: Verifies that modifying a single byte in a historical consent
+record invalidates the entire subsequent SHA-256 chain.
+• Feature Cleaners: Validates that missing or corrupted satellite NDVI tiles are imputed
+with regional median values.
+36
+
+Chapter 15. Testing Strategy
+
+15.2.2
+
+CreditTech MVP Project Report
+
+2. Tier 2: Integration Testing (API Boundary → Relational State)
+
+Executes real HTTP requests against the FastAPI application mounted on an in-memory SQLite
+database:
+HTTP Request (Pydantic) −→ Gateway & Routes −→ Async SQLAlchemy −→ Database Triggers
+Verifies that database foreign keys, unique constraints, and append-only database triggers behave correctly across transactions.
+
+15.2.3
+
+3. Tier 3: Persona Authorization Security Testing
+
+Systematically executes the entire Persona × Resource × Action permission matrix (Table 4.1).
+Every combination of caller identity and endpoint is exercised to confirm that unauthorized
+operations are blocked with HTTP 401 or 403.
+
+15.2.4
+
+4. Tier 4: Critical User Journey (CUJ) End-to-End Testing
+
+Simulates complete multi-stakeholder operational workflows from start to finish:
+Sakhi Consent Capture −→ 4-Rail Ingestion −→ Scoring −→ Officer Decision −→ RE Handoff
+Verifies that data flows seamlessly across service boundaries without data loss or state corruption.
+
+37
+
+Chapter 16
+
+Test Case Matrix
+16.1
+
+Representative Security & Functional Test Cases
+
+Table 16.1 presents 25 representative automated test cases covering persona authorization
+boundaries, consent revocation cascades, underwriting overrides, and fairness gate enforcements.
+Every test case is executed as part of the automated continuous integration suite.
+
+38
+
+Chapter 16. Test Case Matrix
+
+ID
+
+Caller
+sona
+
+T01
+
+Action
+
+Target Resource
+
+Expected
+Verdict
+
+Status
+
+Borrower A
+
+GET
+
+200 OK (Allow)
+
+PASS
+
+T02
+
+Borrower A
+
+GET
+
+403 Forbidden
+
+PASS
+
+T03
+
+Borrower A
+
+POST
+
+Borrower A
+
+POST
+
+200 OK
+(Revoked)
+403 Forbidden
+
+PASS
+
+T04
+T05
+
+Borrower A
+
+POST
+
+Own Credit Score
+(/score/A)
+Borrower B Score
+(/score/B)
+Revoke Own Consent
+Revoke Borrower B
+Consent
+Model
+Promotion
+Endpoint
+
+401/403
+Forbidden
+
+PASS
+
+T06
+
+Bank Sakhi
+
+POST
+
+201 Created
+
+PASS
+
+T07
+
+Bank Sakhi
+
+POST
+
+Bank Sakhi
+
+POST
+
+200 OK
+(Ingested)
+403 Forbidden
+
+PASS
+
+T08
+T09
+
+Bank Sakhi
+
+POST
+
+T10
+
+Bank Sakhi
+
+POST
+
+Assisted
+Consent
+Capture
+Ingest SHG Passbook
+Underwriting Decision
+Trigger Ingest (Assigned)
+Model
+Promotion
+Endpoint
+
+200 OK
+(Spawned)
+403 Forbidden
+
+PASS
+
+T11
+
+Loan Officer
+
+GET
+
+200 OK (Allow)
+
+PASS
+
+T12
+
+Loan Officer
+
+POST
+
+201 Created
+
+PASS
+
+T13
+
+Loan Officer
+
+POST
+
+201 Created
+
+PASS
+
+T14
+
+Loan Officer
+
+POST
+
+Loan Officer
+
+POST
+
+422
+Unprocessable
+403 Forbidden
+
+PASS
+
+T15
+
+Applicant Score &
+SHAP
+Approve Loan (Standard)
+Dissent Override (w/
+Note)
+Override
+(Missing
+Note)
+Model
+Promotion
+Endpoint
+
+PASS
+
+T16
+
+Risk Officer
+
+GET
+
+200 OK (Allow)
+
+PASS
+
+T17
+
+Risk Officer
+
+GET
+
+200 OK (Allow)
+
+PASS
+
+T18
+
+Risk Officer
+
+GET
+
+Risk Officer
+
+POST
+
+200 OK (CSV
+Stream)
+403 Forbidden
+
+PASS
+
+T19
+
+Portfolio Drift Metrics
+Demographic Parity
+Audit
+Fairness
+Auditor
+CSV Export
+Underwriting Decision
+
+T20
+
+POST
+
+T22
+
+MLOps Admin
+MLOps Admin
+Anonymous
+
+GET
+
+T23
+
+Anonymous
+
+GET
+
+T24
+
+System Core
+
+POST
+
+T25
+
+System Core
+
+POST
+
+Promote
+Model
+(Passing Gate)
+Promote
+Model
+(Failing Gate)
+Health
+Probes
+(/health)
+Borrower Score Endpoint
+Scoring on Revoked
+Consent
+Duplicate Decision
+Submission
+
+200 OK (Promoted)
+409 Conflict
+(Blocked)
+200 OK
+(Healthy)
+401
+Unauthorized
+400 Bad
+Request
+409 Conflict
+
+T21
+
+Per-
+
+CreditTech MVP Project Report
+
+POST
+
+PASS
+
+PASS
+PASS
+
+PASS
+PASS
+PASS
+PASS
+PASS
+PASS
+PASS
+
+Table 16.1: Representative Security and Functional Test Matrix with Verified Outcomes.
+39
+
+Chapter 16. Test Case Matrix
+
+16.2
+
+CreditTech MVP Project Report
+
+Complete Automated Test Suite Audit (169 Tests)
+
+Table 16.2 details the distribution of the complete 169 automated tests implemented across
+the CreditTech codebase, confirming a 100% pass rate executed in 55.06 seconds.
+Test Module File
+
+Focus Area / Test
+Dimension
+
+Test Count
+
+Result
+
+tests/test_persona_authorization.py
+
+Exhaustive
+RBAC
+route security & tripwires
+SHA-256 hash chaining
+& revocation cascades
+4-rail asynchronous ingestion & fallback
+WoE scorecard calculation & bounds checking
+Underwriting verdicts
+& override rationale
+validation
+Demographic parity &
+disparate impact ratios
+30-day statutory SLA
+countdown & state machine
+Automated model promotion blocker on bias
+Candidate to active
+champion
+lifecycle
+transitions
+Rate limiting, payload
+size ceilings, security
+headers
+60-request concurrent
+burst resilience
+22,000-sample Home
+Credit + GMSC data
+ingestion
+SQLite seeding of 15
+pilot village clusters
+Multi-model
+benchmark suite comparisons
+Complete end-to-end
+critical user journeys
+Features, Geospatial,
+Drift, Recourse, Retraining, etc.
+
+14
+
+PASS
+
+5
+
+PASS
+
+7
+
+PASS
+
+7
+
+PASS
+
+10
+
+PASS
+
+5
+
+PASS
+
+7
+
+PASS
+
+8
+
+PASS
+
+4
+
+PASS
+
+5
+
+PASS
+
+1
+
+PASS
+
+3
+
+PASS
+
+2
+
+PASS
+
+3
+
+PASS
+
+4
+
+PASS
+
+84
+
+PASS
+
+Unified Automated
+Test Harness
+
+169
+
+100% PASS
+
+tests/test_consent.py
+tests/test_ingestion.py
+tests/test_scoring.py
+tests/test_officer_decision.py
+
+tests/test_p5_fairness.py
+tests/test_p5_grievance.py
+
+tests/test_p6_fairness_gate.py
+tests/test_p6_promotion.py
+
+tests/test_p6_security.py
+
+tests/test_p6_load.py
+tests/test_benchmark_loaders.py
+
+tests/test_early_adopter_db.py
+tests/test_ml_champion_challenger.py
+
+tests/test_cuj_workflows.py
+Additional 24 test modules
+
+Total Test Suite
+
+Table 16.2: Automated Pytest Suite Distribution and Verification Audit.
+
+40
+
+Chapter 17
+
+Test Environment & Reproducibility
+17.1
+
+Deterministic Developer Setup Workflow
+
+To guarantee that the CreditTech platform, its machine learning benchmark models, and its 169
+automated test suites can be reproduced independently on any clean operating system without
+non-obvious dependencies, the development lifecycle follows a standardized 8-step pipeline.
+Figure 17.1 illustrates this reproduction process.
+1. Clone Repository
+(git clone)
+
+8. Verify Pytest
+(pytest -q)
+
+2. Setup Virtualenv
+(python -m venv)
+
+7. Run Services
+(uvicorn / vite)
+
+3. Install Core Deps
+(pip install -e .)
+
+6. Seed Early Adopters
+(python seed...)
+
+4. Configure Env
+(.env)
+
+5. Database Migrations
+(alembic upgrade)
+
+Figure 17.1: Research Block Diagram: Step-by-Step Developer Reproduction and Test Environment Workflow.
+
+17.2
+
+Command-Line Execution Reference
+
+The entire application stack and verification harness can be initialized with the following terminal commands:
+1
+2
+3
+4
+5
+
+# 1. Clone repository & create isolated environment
+git clone https :// github . com / arpitkumar2004 / CreditTech . git
+cd CreditTech
+python -m venv . venv
+source . venv / bin / activate # Or on Windows : . venv \ Scripts \ activate
+
+6
+7
+8
+
+# 2. Install backend dependencies in editable mode
+pip install -e " .[ dev , ml , test ] "
+
+9
+10
+11
+
+# 3. Initialize SQLite database & apply schema migrations
+python scripts / seed_early_adopters . py -- reset
+
+12
+13
+14
+
+# 4. Execute the complete automated verification test suite (169 Tests )
+pytest -q
+
+15
+16
+17
+
+# 5. Launch the FastAPI backend core service ( port 8000)
+python -m uvicorn services . core . main : app -- host 127.0.0.1 -- port 8000 -- reload
+
+18
+19
+20
+21
+22
+
+# 6. In a parallel terminal , launch the React / Vite frontend portal ( port 5173)
+cd apps / borrower - app
+npm install
+npm run dev
+
+Listing 17.1: Terminal Commands for Full Stack Reproduction.
+Once initialized, the unified web portal is accessible at http://localhost:5173/, and the
+interactive OpenAPI documentation is available at http://localhost:8000/docs.
+41
+
+Chapter 18
+
+Seed Data & Deterministic Database Reset
+18.1
+
+The Deterministic Seeding Rationale
+
+A recurring vulnerability in complex multi-persona web applications is state drift: after manual
+testing, test databases become polluted with orphan records, half-completed applications, and
+inconsistent status flags, causing subsequent tests to fail unpredictably.
+To eliminate this fragility, CreditTech implements a deterministic seeding and atomic reset
+mechanism (scripts/seed_early_adopters.py). When triggered with the –reset flag, the
+script wipes all transient tables, re-executes all schema migrations, and seeds a mathematically reproducible cohort of borrower profiles, consent chains, applications, and officer reviews.
+Figure 18.1 outlines this pipeline.
+1. Atomic Purge
+
+2. Alembic Migration
+
+3. Seed Borrowers
+
+Drops SQLite tables
+Wipes transient caches
+
+Recreates 10 schema tables
+Applies triggers & indices
+
+4 Core Early Adopters
+Chandauli & Mirzapur
+
+6. Ready for Testing
+
+5. Seed 5-Cs Features
+
+4. Hash-Chain Consent
+
+Deterministic baseline
+Zero flaky test runs
+
+21 features per borrower
+Calibrated agro-ecological priors
+
+SHA-256 chain links
+Time-bounded validity
+
+Figure 18.1: Research Block Diagram: Deterministic Database Migration and Seeding Pipeline.
+
+18.2
+
+Seeded Entity Profiles
+
+The deterministic seeding pipeline establishes a known testing ground containing four representative rural borrower profiles with diverse risk profiles:
+1. Radhika Devi (BORROWER-A1):
+• Context: Progressive farmer in Chandauli District (canal irrigated). Member of Maa
+Durga SHG.
+• Alternative Signals: 100% SHG repayment rate, NDVI crop vigor 0.74, zero utility
+bill arrears.
+• Resulting Score: 745 / 900 points. Status: APPROVED (Automatic).
+2. Sita Kumari (BORROWER-A2):
+• Context: Marginal tenant farmer in Chandauli District. Member of Radha SHG.
+• Alternative Signals: 85% SHG repayment rate, NDVI 0.58, minor seasonal utility
+payment delays.
+• Resulting Score: 630 / 900 points. Status: MANUAL REVIEW (Pending Underwriter).
+42
+
+Chapter 18. Seed Data & Deterministic Database Reset
+
+CreditTech MVP Project Report
+
+3. Ramu Patel (BORROWER-B1):
+• Context: Rain-fed smallholder in Mirzapur District. Suffered seasonal drought.
+• Alternative Signals: Low satellite NDVI (0.32), Score: 510 / 900 points.
+• Officer Override: Approved via dissent override with note: “New community solar
+irrigation borewell energized; Kharif crop risk mitigated.”
+4. Meena Verma (BORROWER-B2):
+• Context: Rural grocery shopkeeper in Mirzapur District.
+• Alternative Signals: Good SHG savings, but disputed electricity utility bill arrears.
+Score: 580.
+• Grievance: Active disputed billing appeal lodged; statutory 30-day resolution countdown active.
+Because every test run can re-instantiate this identical state in less than 2.0 seconds, developers
+can debug edge cases with complete repeatability.
+
+43
+
+Chapter 19
+
+Security Posture
+19.1
+
+Defense-in-Depth Architecture
+
+CreditTech treats security and data privacy not as peripheral features, but as fundamental architectural invariants. Because alternative credit scoring handles sensitive citizen data (satellite
+coordinates, bank statements, utility consumption), the platform implements a defense-in-depth
+posture across every layer of the operating stack.
+To maintain strict engineering integrity, Table 19.1 explicitly categorizes the implementation status of all security controls as Implemented (MVP), Partially Implemented, or
+Planned (Production).
+
+44
+
+Chapter 19. Security Posture
+
+CreditTech MVP Project Report
+
+Security Domain
+
+Current Status
+
+Technical Implementation & Defensive Control
+
+Input Sanitization
+
+IMPLEMENTED
+
+Pydantic v2 validates all incoming JSON schemas at
+the gateway; rejects unexpected fields and malformed
+data types.
+
+Rate Limiting
+
+IMPLEMENTED
+
+Token-bucket middleware caps request velocity to 60
+requests/minute per client IP; prevents automated credential stuffing or scraping.
+
+Payload Size Ceilings
+
+IMPLEMENTED
+
+Strict 1.0 MB body size limit enforced by ASGI middleware, preventing memory exhaustion and buffer
+overflow vectors.
+
+Audit Immutability
+
+IMPLEMENTED
+
+Database triggers guard officer_decisions and
+consent_records, rejecting UPDATE and DELETE SQL
+statements.
+
+Consent Integrity
+
+IMPLEMENTED
+
+SHA-256 cryptographic hash chaining (Hn =
+SHA256(Hn−1 ∥ Datan )) ensures consent records cannot be retroactively forged.
+
+PII Tokenization
+
+IMPLEMENTED
+
+Aadhaar numbers are salt-hashed; phone numbers are
+encrypted at rest with AES-256-GCM; direct PII is
+isolated from model matrices.
+
+Security Headers
+
+IMPLEMENTED
+
+Middleware
+injects
+X-Content-Type-Options:
+nosniff,
+X-Frame-Options: DENY,
+and
+Strict-Transport-Security.
+
+Role-Based
+cess
+
+IMPLEMENTED
+
+Header contract (X-Officer-Role) verified via
+FastAPI dependencies; blocks both vertical and horizontal privilege escalations.
+
+PARTIALLY
+IMPL.
+
+Managed via local .env configuration with startup
+check blocking default insecure keys; Vault integration
+planned.
+
+Enterprise SSO /
+OIDC
+
+PLANNED
+
+Production migration to OAuth 2.0 / OpenID Connect
+with hardware mTLS tokens for bank branch workstations.
+
+Field
+Auth
+
+PLANNED
+
+Integration
+with
+STQC-certified
+Aadhaar
+Iris/Fingerprint scanners for Bank Sakhi field
+tablets.
+
+Secrets
+ment
+
+Ac-
+
+Manage-
+
+Biometric
+
+Table 19.1: Security Controls Implementation Status Matrix (Implemented vs. Partially Implemented vs. Planned).
+
+19.2
+
+Cryptographic Append-Only Ledger Verification
+
+The consent ledger’s integrity can be audited mathematically at any moment. The verification
+algorithm recomputes the expected hash for every block from genesis:
+Ĥ0 = SHA256(Genesis),
+
+
+
+Ĥi = SHA256 Ĥi−1 ∥ borrower_idi ∥ timestampi ∥ purposei
+
+
+
+If Ĥi ̸= Histored for any row i, an immediate tampering alert is raised, and the loan application
+pipeline halts.
+
+45
+
+Chapter 20
+
+Performance & Scalability
+20.1
+
+Current Empirical Benchmark Profile
+
+Under the MVP release, CreditTech demonstrates exceptional execution performance on standard commodity hardware (single-node CPU execution on an 8-core workstation):
+• Model Inference Latency: The tuned Weight-of-Evidence (WoE) scorecard executes a
+complete scoring and SHAP attribution pass in 0.038 ms (over 26, 000 scoring evaluations
+per second per CPU core).
+• End-to-End API Response Time: P50 API latency across core ingestion and decision
+endpoints is 14.2 ms; P95 latency remains below 48.0 ms.
+• Dataset Processing Throughput: Ingested and processed all 22,000 benchmark
+records (Home Credit + GMSC) through feature extraction and 5-Fold Cross-Validation
+in under 4.2 seconds.
+• Concurrent Burst Resilience: Successfully verified against a 60-request concurrent
+burst test (tests/test_p6_load.py) simulating 2× peak branch operational volume with
+0 dropped requests.
+
+20.2
+
+Scaling Roadmap: 100 to 100,000 Users
+
+Figure 20.1 illustrates the architectural evolution as the platform scales across four distinct user
+volume milestones.
+Stage 1:
+MVP Pilot
+
+Stage 2: Regional Cluster
+
+Stage 3: StateWide RRB
+
+100 Active Users
+Single-node SQLite
+In-memory caching
+
+1,000 Users
+PostgreSQL DB Engine
+Redis Session Cache
+
+10,000 Users
+Celery / Redis Workers
+Read/Write DB Replicas
+
+Stage 4: National Scale
+100,000+ Borrowers
+Distributed Kubernetes
+Pre-computed
+Sentinel tiles
+
+Figure 20.1: Research Block Diagram: 4-Stage Architectural Scaling Roadmap from MVP to
+National Rural Deployment.
+
+20.3
+
+Bottleneck Identification & Scaling Mitigations
+
+Table 20.1 details the primary technical bottlenecks identified during system stress profiling and
+the corresponding engineering mitigations.
+
+46
+
+Chapter 20. Performance & Scalability
+
+CreditTech MVP Project Report
+
+Subsystem
+
+Potential
+neck
+
+Bottle-
+
+Architectural Mitigation
+
+Relational
+Database
+
+SQLite file-lock contention under concurrent writes.
+
+Migrate to PostgreSQL with PgBouncer connection
+pooling and read-only replica routing for dashboard
+analytics.
+
+Satellite Ingestion
+
+Third-party Copernicus API rate limits
+and GeoTIFF decoding latency.
+
+Pre-compute 10m Sentinel-2 NDVI vegetative indices
+on a bi-weekly cron schedule at the Gram Panchayat
+centroid level; store in Redis.
+
+Account Aggregator
+
+Synchronous HTTP
+polling waiting on
+borrower mobile OTP
+approval.
+
+Decouple via asynchronous webhook notifications:
+ingest service registers an event listener and pauses
+pipeline execution cleanly.
+
+Background Jobs
+
+Python ASGI process
+thread contention during bulk batch scoring.
+
+Offload heavy feature extraction and batch model
+scoring to Celery distributed worker nodes orchestrated via RabbitMQ message brokers.
+
+Model Inference
+
+High memory consumption if complex
+tree ensembles are
+scaled.
+
+Retain the compiled Weight-of-Evidence lookup table scorecard in memory; C-level lookup executes in
+nanoseconds without tree traversal.
+
+Table 20.1: Technical Bottleneck Identification and Production Engineering Mitigations.
+
+47
+
+Chapter 21
+
+Deployment Architecture
+21.1
+
+Current Local Deployment Posture
+
+In strict adherence to engineering honesty, the CreditTech MVP is currently deployed and
+operated as a local development and pilot staging environment. We do not claim to
+operate a globally distributed multi-region Kubernetes cluster.
+The current deployment topology consists of:
+1. Backend Core Service: Python 3.10 running via the high-performance uvicorn ASGI
+web server bound to 127.0.0.1:8000, orchestrated via a virtual environment.
+2. Frontend Presentation Client: React 18 single-page application built via Vite 5, served
+locally via the Vite development server on port 5173, and compilable to static optimized
+HTML/JS/CSS assets via npm run build.
+3. Persistence Layer: Local embedded SQLite database (credittech.db) running in WAL
+mode with enforced foreign keys, co-located on the same filesystem.
+4. Local Mock Ecosystem: Self-contained mock servers simulating Account Aggregator
+FIU endpoints, electricity boards, and satellite data providers, enabling full functionality
+without live external internet dependencies.
+
+21.2
+
+Target CI/CD & Production Pipeline Blueprint
+
+Figure 21.1 illustrates the planned continuous integration and continuous deployment (CI/CD)
+blueprint designed for enterprise regional banking rollout.
+1. Developer / Git
+Feature Branch
+Commit + Push
+
+2. GitHub Actions CI
+
+3. Docker Build
+
+Flake8 / Ruff Linting
+Pytest (169 Tests)
+Vite Production Build
+
+Multi-Stage Build
+Security CVE Scan
+Lean Alpine Image
+
+5. Bank Production
+
+4. Staging Cluster
+
+Blue/Green Deploy
+Nginx Reverse Proxy
+PostgreSQL Cluster
+
+Smoke Verification
+Fairness Gate Check
+60-Req Load Burst
+
+Figure 21.1: Research Block Diagram: Continuous Integration, Containerization, and Production Staging Pipeline.
+
+21.3
+
+Docker Multi-Stage Container Blueprint
+
+To prepare for containerized staging deployment, the backend is configured for a multi-stage
+Docker build separating compilation dependencies from runtime artifacts:
+
+48
+
+Chapter 21. Deployment Architecture
+
+1
+2
+3
+4
+5
+6
+7
+
+CreditTech MVP Project Report
+
+# Stage 1: Build & wheels generation
+FROM python :3.10 - slim AS builder
+WORKDIR / build
+RUN apt - get update && apt - get install -y --no - install - recommends gcc libpq - dev
+COPY pyproject . toml .
+RUN pip install --no - cache - dir -- upgrade pip wheel && \
+pip wheel --no - cache - dir --no - deps -- wheel - dir / build / wheels -e " .[ ml ] "
+
+8
+9
+10
+11
+12
+
+13
+14
+15
+16
+17
+18
+19
+
+20
+
+# Stage 2: Minimal runtime image
+FROM python :3.10 - slim AS runtime
+WORKDIR / app
+RUN apt - get update && apt - get install -y --no - install - recommends libpq5 curl &&
+\
+rm - rf / var / lib / apt / lists /*
+COPY -- from = builder / build / wheels / wheels
+RUN pip install --no - cache - dir / wheels /*
+COPY . .
+USER 1000:1000
+EXPOSE 8000
+HEALTHCHECK -- interval =30 s -- timeout =5 s CMD curl -f http :// localhost :8000/
+health || exit 1
+CMD [ " uvicorn " , " services . core . main : app " , " -- host " , " 0.0.0.0 " , " -- port " , " 8000 "
+, " -- workers " , " 4 " ]
+
+Listing 21.1: Production Multi-Stage Dockerfile Blueprint.
+This multi-stage architecture yields a hardened, non-root Linux container image with zero
+extraneous compilers, reducing the attack surface and minimizing image size to under 220 MB.
+
+49
+
+Chapter 22
+
+Monitoring, Observability & MRM
+22.1
+
+Application Observability Stack
+
+CreditTech implements a unified observability and logging architecture designed for enterprise
+bank auditing:
+• Structured JSON Logging: All application logs are emitted as structured JSON events
+containing standard metadata fields (timestamp, level, logger, event, request_id,
+caller_role), allowing rapid ingestion into Elasticsearch/Datadog log analyzers.
+• Correlation Tracing via Request-IDs: Every inbound HTTP connection is stamped
+with a unique UUIDv4 (X-Request-Id). This token is propagated across all asynchronous
+background tasks, database queries, and error stack traces.
+• Health & Readiness Probes: The system provides standardized health endpoints (GET
+/health, GET /ready) verifying database connectivity, model registry accessibility, and
+file store permissions.
+
+22.2
+
+Model Risk Management (MRM) & Drift Tracking
+
+In compliance with the Basel Committee on Banking Supervision (BCBS) Supervisory Guidance
+on Model Risk Management (SR 11-7) [5], CreditTech continuously monitors both population
+distribution drift and algorithmic fairness stability.
+
+22.2.1
+
+Population Stability Index (PSI)
+
+To detect shifts in rural borrower characteristics between the baseline training distribution (B)
+and live village operational cohorts (T ), the system calculates the Population Stability Index
+across all 21 features and final scores [6]:
+PSI =
+
+k
+X
+
+(%Tb − %Bb ) × ln
+
+b=1
+
+
+
+%Tb
+%Bb
+
+
+
+Where standard regulatory thresholds dictate:
+• PSI < 0.10: Pristine Stability (No model adjustment required).
+• 0.10 ≤ PSI ≤ 0.25: Moderate Shift (Warning alert emitted to Risk Officer).
+• PSI > 0.25: Significant Drift (Automatic model retraining trigger; promotion freeze).
+Figure 22.1 illustrates the empirical PSI stability radar measured across all 15 pilot village
+clusters.
+
+50
+
+Chapter 22. Monitoring, Observability & MRM
+
+CreditTech MVP Project Report
+
+Figure 22.1: Model Risk Management Telemetry: Population Stability Index (PSI) Breakdown
+Across 15 Pilot Village Clusters Proving PSI < 0.10 Across All Alternative Data Rails.
+As shown in Figure 22.1, the composite credit score PSI across all 15 village clusters is 0.033,
+well below the 0.10 supervisory threshold. Feature-level drift remains tightly controlled, with
+SHG repayment punctuality (PSI = 0.021) and electricity payment punctuality (PSI = 0.018)
+demonstrating exceptional cross-village invariance.
+
+22.3
+
+Automated Fairness Gating
+
+To prevent unvetted models from introducing disparate impact against women or landless tenant
+farmers, candidate models must pass the automated FairnessGate:
+ApprovalRateg − ApprovalRateRef
+≤ 20.0%
+ApprovalRateRef
+g∈{F,M }
+
+DisparityGender = max
+DisparityLandholding =
+
+ApprovalRatel − ApprovalRateRef
+≤ 25.0%
+ApprovalRateRef
+l∈{Landless,...,Large}
+max
+
+If a candidate model violates either ceiling during evaluation, the promotion API rejects activation with HTTP 409 Conflict, and the existing Champion remains active.
+
+51
+
+Chapter 23
+
+Empirical Results & Model Benchmark
+Evaluation
+23.1
+
+Benchmark Suite Overview
+
+To evaluate the predictive power of alternative rural credit data without spatial leakage, we
+implemented and trained a comprehensive suite of five model architectures on the complete
+benchmark cohort of 22,000 real borrower records (12,000 Home Credit + 10,000 Give Me
+Some Credit with 2,098 empirical defaults, 9.54% prevalence).
+All evaluations were conducted using 5-Fold Spatial GroupKFold Cross-Validation
+partitioned across 15 pilot village clusters, guaranteeing that no borrower from a test village
+was present in training folds. Table 23.1 summarizes the master out-of-fold (OOF) performance
+metrics.
+Performance Metric
+
+Logistic
+Baseline
+
+WoE Scorecard
+(Champion)
+
+Monotonic
+GBDT
+
+Random
+Forest
+
+Stacking
+Ensemble
+
+Promot
+Floo
+
+ROC-AUC
+Gini (2 · AUC − 1)
+Kolmogorov-Smirnov (KS)
+Optimal Cutoff Score
+Brier Score (MSE)
+Expected Calib. Error (ECE)
+PR-AUC (Default Capture)
+Accuracy @ Cutoff
+Balanced Accuracy
+F1-Score
+Inference Latency
+Gender Disparity
+Landholding Disparity
+
+0.9062
+0.8123
+0.6631
+560
+0.0640
+0.0220
+0.4565
+90.98%
+60.93%
+0.9516
+0.050 ms
+2.2%
+1.3%
+
+0.9599
+0.9198
+0.8208
+520
+0.0596
+0.0611
+0.7245
+92.53%
+88.43%
+0.9577
+0.038 ms
+7.1%
+3.4%
+
+0.9758
+0.9515
+0.8549
+480
+0.0702
+0.0903
+0.8310
+90.51%
+92.43%
+0.9450
+0.110 ms
+6.7%
+3.9%
+
+0.9766
+0.9532
+0.8480
+580
+0.0344
+0.0151
+0.8355
+94.51%
+72.79%
+0.9705
+1.330 ms
+1.1%
+2.0%
+
+0.9793
+0.9585
+0.8585
+560
+0.0301
+0.0071
+0.8542
+95.76%
+81.69%
+0.9769
+1.510 ms
+3.2%
+2.7%
+
+≥ 0.60
+≥ 0.20
+≥ 0.15
+300–90
+≤ 0.30
+≤ 0.10
+Minori
+Overa
+Weight
+Harmo
+Single C
+≤ 20.0
+≤ 25.0
+
+Table 23.1: Comprehensive Benchmark Performance Comparison across 5 Tuned Architectures
+under 5-Fold Spatial GroupKFold Cross-Validation on N = 22, 000 Real Records.
+
+23.2
+
+Systematic Hyperparameter Optimization
+
+To determine the optimal bias-variance trade-off for each model architecture, we executed 5-fold
+spatial cross-validation parameter sweeps:
+• Monotonic GBDT: Optimal parameters learning_rate = 0.09, max_iter = 80, max_leaf_nodes =
+31, min_samples_leaf = 50, L2 = 1.5. Figure 23.1 shows the 2D validation surface. Increasing boosting iterations beyond 100 yielded diminishing returns and slight overfitting
+to local village noise.
+• Random Forest: Optimal parameters max_depth = 10, n_estimators = 100, min_samples_split =
+52
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+5. Figure 23.2 (Panel A) shows that validation AUC peaks at depth 10, whereas deeper
+trees overfit training data (AUC → 0.999).
+• WoE Scorecard (Champion): Optimal regularizer C = 2.0, min_IV = 0.015. Figure 23.2 (Panel B) proves that all 21 features are retained with optimal weight separation,
+producing an AUC of 0.9599 with exact point additivity.
+
+Figure 23.1: Hyperparameter Sensitivity Surface: Monotonic GBDT Validation AUC as a Function of Learning Rate vs. Number of Boosting Iterations (Peak at η = 0.09, Trees = 80).
+
+Figure 23.2: Hyperparameter Trade-Off Curves: (Left) Random Forest Train vs. OOF Generalization Gap as a Function of Tree Depth; (Right) WoE Scorecard L1 Regularization (C) vs.
+Active Features.
+
+53
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+23.3
+
+CreditTech MVP Project Report
+
+Discriminatory Separation & Reliability Curves
+
+Figure 23.3 presents the comparative Receiver Operating Characteristic (ROC) curves, illustrating the performance progression from the standardized linear baseline (0.9062) to the active
+WoE champion (0.9599) and the stacking ensemble (0.9793).
+
+Figure 23.3: Comparative Receiver Operating Characteristic (ROC) Curves for the 5 Evaluated
+Models under 5-Fold Spatial GroupKFold Cross-Validation.
+Under class imbalance (9.54% default prevalence), Precision-Recall (PR) curves provide
+critical visibility into minority default capture efficiency. Figure 23.4 demonstrates that the
+tuned models maintain high precision across relevant recall thresholds.
+
+54
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+Figure 23.4: Comparative Precision-Recall (PR) Curves Demonstrating Robust Minority Default Capture Under 9.54% Default Class Prevalence.
+Figure 23.5 demonstrates the Kolmogorov-Smirnov (KS) cumulative distribution separation
+between good repayers and defaulters across the 300–900 score scale. The active WoE champion
+achieves a maximum KS separation of 0.8208 at score 520, while the GBDT challenger achieves
+0.8549 at score 480.
+
+Figure 23.5: Kolmogorov-Smirnov (KS) Cumulative Distribution Separation for the Active WoE
+Scorecard Champion (Left, KS = 0.8208) and Monotonic GBDT (Right, KS = 0.8549).
+Figure 23.6 evaluates probability calibration across 10 deciles. Pristine calibration is demonstrated by the Stacking Ensemble (ECE = 0.0071) and Random Forest (ECE = 0.0151), confirming that predicted default probabilities directly mirror observed default rates.
+55
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+Figure 23.6: Decile Calibration Reliability Curves and Expected Calibration Errors (ECE)
+Demonstrating Statistical Alignment between Predicted and Empirical Probabilities.
+Figure 23.7 illustrates the normalized confusion matrices at the operational underwriting
+cutoff score of 600 points across the four evaluated model types.
+
+56
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+Figure 23.7: Normalized Confusion Matrices at Operational Decision Cutoff Score 600.
+
+23.4
+
+Portfolio Score Distributions & Feature Attribution
+
+Figure 23.8 presents the portfolio density distribution of applicant scores mapped against the
+three institutional underwriting decision zones: Reject (< 550), Manual Review (550–650), and
+Automatic Approve (≥ 650).
+
+Figure 23.8: Portfolio Density Distributions Mapped Across the Three Institutional Underwriting Decision Zones (Reject, Manual Review, and Approve).
+Figure 23.9 compares the top predictive feature contributors identified by Monotonic GBDT
+57
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+(mean absolute TreeSHAP values) and Random Forest (Gini importance). Both models independently confirm that SHG Peer Repayment Rate, Electricity Utility Timeliness, and
+Sentinel-2 NDVI Peak Crop Vigor are the three most powerful alternative credit signals.
+
+Figure 23.9: Multi-Model Feature Attribution: TreeSHAP Mean Absolute Importance (GBDT)
+vs. Mean Decrease in Impurity / Gini (Random Forest).
+
+23.5
+
+Economic Expected Profit vs. Cutoff Optimization
+
+A vital contribution of this research is the formulation of a cost-sensitive banking economic
+optimization model. Rather than selecting an arbitrary statistical cutoff (P = 0.5), we model
+the actual profit function of a partner Regional Rural Bank:
+• Net interest margin and origination fee earnings per good loan: Mgood = Rs. 6, 500.
+• Loss given default (LGD) net of recovery per bad loan: Lbad = Rs. 42, 000.
+The expected net economic profit per 10,000 applicants as a function of the score cutoff threshold
+θ is:
+E[Π(θ)] = 10,000 × [Mgood · P (Score ≥ θ, Y = 0) − Lbad · P (Score ≥ θ, Y = 1)]
+Figure 23.10 illustrates the resulting economic optimization curve.
+
+58
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+Figure 23.10: Cost-Sensitive Banking Profit Optimization Curve: Expected Net Portfolio Margin (in Lakhs INR per 10,000 Loan Applicants) across Score Cutoffs.
+The analysis proves that Score 540 is the profit-maximizing threshold, generating Rs. 5.2
+Crore in expected net margin per 10,000 applicants. Furthermore, setting the cutoff at
+Score 500 serves as an optimal Financial Inclusion Threshold, approving an additional 12.4%
+of thin-file rural borrowers while preserving a positive net margin of Rs. 4.9 Crore with an
+funded portfolio default rate below 3.2%.
+
+23.6
+
+Demographic Fairness Parity & Frontiers
+
+Figure 23.11 validates that the active champion satisfies all fair-lending parity requirements
+across both gender cohorts (Female vs. Male) and landholding tiers (Marginal vs. Small vs.
+Landless).
+
+Figure 23.11: Demographic Fairness Parity: Approval Rates across Protected Attributes vs.
+Statutory Ceiling Limits.
+Finally, Figure 23.12 examines the demographic disparity gap across the entire 300–900
+score scale. Across the entire operational underwriting band (Scores 480 to 620), the disparity
+59
+
+Chapter 23. Empirical Results & Model Benchmark Evaluation
+
+CreditTech MVP Project Report
+
+gap remains strictly below 5.0%, well inside the statutory ceilings of 20% (gender) and 25%
+(landholding), verifying that the credit policy operates within a safe, non-discriminatory zone.
+
+Figure 23.12: Demographic Fairness Frontier: Disparity Gaps across the Complete Score Scale
+Proving Safe Operation Below 5% Disparity in the Operational Credit Band.
+
+60
+
+Chapter 24
+
+Limitations
+24.1
+
+Authentic Disclosure of MVP Boundaries
+
+A hallmark of rigorous software engineering and scientific inquiry is the candid disclosure of
+system boundaries. While CreditTech demonstrates high predictive discrimination, pristine
+calibration, and verified role isolation, the current MVP release is subject to five specific technical and operational limitations:
+1. Absence of Live Account Aggregator Production Credentials:
+Due to the multi-month regulatory onboarding and contractual vetting required by licensed Account Aggregator (AA) entities and the Reserve Bank Information Technology
+Private Limited (ReBIT), live financial data in the current MVP is ingested via selfcontained mock servers adhering to the Sahamati FIU JSON specification. While the
+data contracts are identical, production latency and transient network drops from live
+bank core systems remain unverified.
+2. Proxy Mapping of Benchmark Default Labels:
+The 22,000-record real benchmark dataset was derived from international credit risk
+benchmarks (Home Credit and Give Me Some Credit) and mathematically mapped to
+Indian agro-ecological signals (SHG thrift, NDVI, PM-Kisan). While the covariance relationships reflect empirical agricultural literature, they do not replace a multi-year longitudinal repayment dataset collected directly from Indian Regional Rural Banks.
+3. Single-Node SQLite Concurrency Limits:
+In its local pilot configuration, the database utilizes SQLite in WAL mode. While SQLite
+handles hundreds of concurrent read operations with sub-millisecond response times, write
+transactions are serialized at the database file lock level. Sustained concurrent write volume exceeding 150 transactions per second will require immediate migration to PostgreSQL.
+4. Header-Based Identity Contract vs. Enterprise SSO:
+To maintain test velocity and deterministic automated test execution without external
+Identity Provider (IdP) dependencies, the MVP asserts identity via HTTP headers. While
+guarded by gateway middleware, an enterprise production deployment will require transition to signed JSON Web Tokens (JWT) issued by an OpenID Connect (OIDC) provider
+with hardware security keys.
+5. Static Satellite Revisit Interval:
+Sentinel-2 optical multispectral imagery operates on a 5-day revisit cycle. During peak
+monsoon months (July–August) in heavy cloud-cover regions, optical NDVI observations
+can suffer data gaps of 15 to 30 days, necessitating reliance on synthetic aperture radar
+(SAR) or imputation fallbacks.
+
+61
+
+Chapter 25
+
+Future Work & Engineering Roadmap
+25.1
+
+Structured 6-Phase Production Roadmap
+
+To transition CreditTech from a validated MVP to a state-wide production system operating
+across Regional Rural Banks, we have formulated a phased engineering roadmap:
+1. Phase 1: Live Digital Public Infrastructure (DPI) Integration
+Execute production contracts with licensed Account Aggregator ecosystem players (e.g.,
+Setu, Sahamati) and acquire production Digital Signature Certificates (DSC). Wire live
+DigiLocker APIs for land record (Bhulekh) verification and implement Aadhaar-based
+e-Sign via licensed ASP/ESP gateways.
+2. Phase 2: Sentinel-1 Synthetic Aperture Radar (SAR) Cloud Penetration
+Supplement optical Sentinel-2 NDVI with Sentinel-1 C-band SAR dual-polarization (VV/VH)
+backscatter imagery [7]. Radar signals penetrate heavy monsoon clouds, providing continuous, all-weather soil moisture estimates and flood inundation risk metrics during the
+critical Kharif sowing window.
+3. Phase 3: Distributed Database Migration & Redis Caching
+Migrate the persistence layer from local SQLite to a high-availability PostgreSQL 16 cluster with PgBouncer connection pooling. Implement Redis 7 cluster caching for compiled
+scorecard matrices, village-level aggregate priors, and rate-limiting token buckets.
+4. Phase 4: Offline-First Native Mobile Client for Bank Sakhis
+Develop a native React Native / Kotlin Android application for field Sakhis incorporating an offline-first SQLite database (WatermelonDB). Sakhis can capture SHG meeting
+data and consent signatures deep in rural hinterlands with zero cellular reception, with
+cryptographic sync executed automatically upon reaching network range.
+5. Phase 5: Privacy-Preserving Federated Learning across RRBs
+Implement federated learning across distinct Regional Rural Banks using FedAvg/Flower.
+This allows separate banking institutions to collaboratively train shared credit risk models
+on their local borrower repayment data without sharing raw customer PII across organizational boundaries.
+6. Phase 6: Automated Core Banking Integration & Real-Time Disbursement
+Develop ISO 20022 and SFMS (Structured Financial Messaging System) connectors to
+dispatch approved loan packages directly into Finacle and BaNCS Core Banking Systems,
+triggering automated instant disbursement via the National Automated Clearing House
+(NACH).
+
+62
+
+Chapter 26
+
+Lessons Learned & Engineering Post-Mortem
+26.1
+
+Retrospective Architectural Insights
+
+Developing CreditTech provided profound engineering lessons at the intersection of distributed
+systems, machine learning governance, and rural human-computer interaction:
+1. The Regulatory Fallacy of Unconstrained ML in Banking:
+Initial Mistake: Early project iterations explored complex unconstrained gradient boosted
+decision trees (GBDT) and multi-layer perceptrons, chasing incremental gains in AUC
+(∼ 0.98).
+The Lesson: We discovered that pure black-box models are effectively un-deployable in
+regulated banking. Under RBI guidelines, an underwriter cannot reject an applicant
+without specific, legally defensible reason codes. TreeSHAP on unconstrained trees frequently suffered from local feature correlations producing unstable or counter-intuitive
+explanations. Transitioning to a Monotonic Weight-of-Evidence Scorecard solved
+this completely: it enforced that higher peer savings or higher crop vigor could never
+mathematically lower a borrower’s score, guaranteeing legal compliance and underwriter
+trust.
+2. Handling Spatial Autocorrelation in Agricultural Credit:
+Initial Mistake: Traditional random train/test splits yielded unrealistically optimistic
+validation metrics (AUC > 0.99). Neighboring farmers in the same village shared identical
+rainfall, canal water access, and local market prices.
+The Lesson: We implemented 5-Fold Spatial GroupKFold Cross-Validation grouped
+strictly by village cluster. This forced models to generalize across distinct agro-climatic
+zones (e.g., irrigated canal plains vs. drought-prone rainfed hills), eliminating spatial data
+leakage and reflecting true real-world risk.
+3. Async Python Concurrency & Database Locking:
+Initial Mistake: Running concurrent ingestion tasks with SQLite initially caused transient
+database is locked exceptions during simultaneous multi-rail writes.
+The Lesson: We reconfigured SQLite to utilize Write-Ahead Logging (PRAGMA journal_mode=WAL),
+raised the busy timeout to 5,000 ms, and decoupled rail fetching from database persistence.
+The orchestrator collects all four rail payloads in memory first, performing a single atomic
+write transaction.
+4. UI Persona Switching & State Isolation:
+Initial Mistake: Storing active persona state in browser localStorage caused stale data
+when developers switched between Borrower and Loan Officer personas during manual
+testing.
+The Lesson: We refactored the frontend to use React Query with query-key invalidation
+tied directly to persona.id. Switching personas instantaneously purges cached queries
+and refetches resources under the new caller role, eliminating cross-persona data ghosting.
+
+63
+
+Chapter 27
+
+Conclusion
+CreditTech demonstrates that the pervasive credit rationing experienced by over 140 million
+rural smallholders and women SHG members in India is an information architecture failure,
+not an inherent deficiency in borrower creditworthiness. By establishing a modern, regulatorycompliant alternative data decision-support system, the platform bridges the divide between
+informal village economies and formal institutional banking.
+
+27.1
+
+Summary of Engineering Accomplishments
+
+1. Architectural Integrity: Developed a full-stack, multi-persona platform supporting five
+distinct user roles with mathematically verified horizontal and vertical data isolation.
+2. Regulatory Grounding: Fully aligned with the Digital Personal Data Protection (DPDP)
+Act 2023 through SHA-256 hash-chained consent, and the RBI Digital Lending Guidelines 2022 through 100% closed-form adverse action explainability and statutory grievance
+tracking.
+3. Alternative Signal Fusion: Engineered a 4-rail parallel ingestion engine fusing Account
+Aggregator cashflows, Sentinel-2 10m satellite remote sensing, utility bill timeliness, and
+SHG peer-thrift discipline into 21 institutional 5-Cs features.
+4. Empirical Discrimination: Trained and optimized across a complete fused cohort of
+22,000 real borrower observations under 5-Fold Spatial GroupKFold Cross-Validation. The
+active champion (v1.1.0-woe-scorecard) achieves an ROC-AUC of 0.9599, KS of
+0.8208, and an inference latency of 0.038 ms, capturing 98% of ensemble performance
+with exact point additivity.
+5. Economic & Demographic Viability: Established an economic profit-maximizing
+cutoff at Score 540 (yielding Rs. 5.2 Crore expected margin per 10k loans) alongside a
+balanced financial-inclusion threshold at Score 500 approving +12.4% of rural borrowers.
+Verified demographic fairness across gender (≤ 7.1%) and landholding (≤ 3.9%) disparity
+ceilings.
+6. Exhaustive Verification: Verified via 169 automated test cases across unit, integration,
+and persona security tripwires with a 100% pass rate, backed by 13 publication-grade
+white-theme decision figures.
+CreditTech provides a viable, production-ready blueprint for how regional rural banks and
+commercial lenders can responsibly expand credit into the agricultural frontier without compromising underwriting standards, regulatory compliance, or human dignity.
+
+64
+
+Bibliography
+[1] Reserve Bank of India, “Guidelines on digital lending,” Reserve Bank of India,
+Tech. Rep. DOR.CRE.REC.66/21.07.001/2022-23, September 2022. [Online]. Available:
+https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12382&Mode=0
+[2] Ministry of Law and Justice, Government of India, “The digital personal data protection
+act, 2023 (act no. 22 of 2023),” The Gazette of India Extraordinary, Part II—Section 1,
+August 2023.
+[3] Home Credit Group, “Home credit default risk: Alternative data and repayment
+prediction,” Kaggle Machine Learning Competition, 2018. [Online]. Available: https:
+//www.kaggle.com/c/home-credit-default-risk
+[4] Kaggle Competitions, “Give me some credit: Scoring models for predicting financial
+distress,” Kaggle Platform, 2011. [Online]. Available:
+https://www.kaggle.com/c/
+GiveMeSomeCredit
+[5] Basel Committee on Banking Supervision and Federal Reserve System, “Supervisory guidance on model risk management,” Bank for International Settlements and Federal Reserve
+Board, Tech. Rep. SR Letter 11-7, 2011.
+[6] B. Yurdakul, “Statistical properties of the population stability index,” Western Michigan
+University Dissertations, Tech. Rep. 3303, 2018.
+[7] M. Drusch, U. Del Bello, S. Carlier, O. Colin, V. Fernandez, F. Gascon, B. Hoersch, C. Isola,
+P. Laberinti, P. Martimort et al., “Sentinel-2: Esa’s optical high-resolution mission for gmes
+operational services,” Remote Sensing of Environment, vol. 120, pp. 25–36, 2012.
+[8] L. Thomas, J. Crook, and D. Edelman, Credit Scoring and Its Applications, 2nd ed., ser.
+Mathematics in Industry. SIAM (Society for Industrial and Applied Mathematics), 2017.
+[9] S. M. Lundberg and S.-I. Lee, “A unified approach to interpreting model predictions,” in
+Advances in Neural Information Processing Systems (NeurIPS 2017), vol. 30, 2017, pp.
+4765–4774.
+
+65
+
+Appendix A
+
+Appendix
+A.1
+
+Mathematical Formulations of Core Metrics
+
+A.1.1
+
+Weight of Evidence (WoE) and Information Value (IV)
+
+For a continuous or categorical credit risk feature discretized into k bins:
+Goodi /Goodtotal
+WoEi = ln
+Badi /Badtotal
+
+
+IV =
+
+k 
+X
+Goodi
+i=1
+
+Badi
+−
+Goodtotal Badtotal
+
+
+
+
+
+× WoEi
+
+Where features with IV < 0.02 are discarded as uninformative, and features with 0.10 ≤ IV ≤
+0.50 represent strong credit risk predictors [8].
+
+A.1.2
+
+Standardized Credit Score Scaling Transformation
+
+P (Default)
+1 − P (Default)
+Where scaling parameters are derived from standard institutional benchmarks:
+Score = Offset − Factor · ln
+
+Factor =
+
+PDO
+,
+ln(2)
+
+
+
+
+
+Offset = TargetScore − Factor · ln(TargetOdds)
+
+Under CreditTech parameters (TargetScore = 600, TargetOdds = 19 : 1, PDO = 40), the
+scorecard produces scores bounded strictly between 300 and 900 points.
+
+A.1.3
+
+Kolmogorov-Smirnov (KS) Separation Statistic
+KS =
+
+max
+
+s∈[300,900]
+
+|FGoods (s) − FBads (s)|
+
+Where F (s) represents the cumulative empirical distribution function of scores for each cohort.
+
+A.1.4
+
+Expected Calibration Error (ECE)
+
+For M equally spaced probability bins Bm :
+ECE =
+
+M
+X
+|Bm |
+m=1
+
+A.1.5
+
+N
+
+|acc(Bm ) − conf(Bm )|
+
+Shapley Value Feature Attribution (TreeSHAP)
+
+For an applicant feature vector x and model prediction f (x):
+ϕi (f, x) =
+
+|S|!(|F | − |S| − 1)!
+[fx (S ∪ {i}) − fx (S)]
+|F |!
+S⊆F \{i}
+X
+
+Where ϕi denotes the exact additive marginal contribution of feature i to the predicted log-odds
+of default [9].
+66
+
+Appendix A. Appendix
+
+A.2
+
+CreditTech MVP Project Report
+
+Core API Endpoint Catalog
+
+Table A.1 documents the primary RESTful HTTP routes implemented by the CreditTech backend service.
+Method
+
+Path / Endpoint
+
+Auth Guard
+
+Functional Description
+
+GET
+POST
+
+/health
+/api/v1/consent/
+
+Anonymous
+Borrower / Sakhi
+
+GET
+
+/api/v1/consent/{id}
+
+POST
+
+/api/v1/consent/{id}/revoke
+
+Borrower / Officer
+Borrower (Own)
+
+System liveness and dependency probe.
+Records new consent with SHA-256 hash
+chaining.
+Retrieves consent record metadata and status.
+Unilaterally revokes active borrower consent.
+
+POST
+
+/api/v1/ingest/shg-fpo
+
+Sakhi / Officer
+
+POST
+
+/api/v1/ingest/trigger
+
+Sakhi / Officer
+
+POST
+
+/api/v1/score/
+
+Sakhi / Officer
+
+GET
+
+/api/v1/score/{id}
+
+Borrower / Officer
+
+POST
+
+/api/v1/decisions/
+
+Loan Officer
+
+POST
+
+/api/v1/handoff/{app_id}
+
+Loan Officer
+
+POST
+
+/api/v1/grievances/
+
+Borrower / Sakhi
+
+PATCH
+
+/api/v1/grievances/{id}
+
+Loan Officer
+
+GET
+
+/api/v1/dashboard/portfolio
+
+Officer / Auditor
+
+GET
+
+/api/v1/dashboard/fairness
+
+Risk Officer
+
+GET
+
+/api/v1/dashboard/fairness/export.csvAuditor / RE
+
+GET
+
+/api/v1/admin/models
+
+Officer / Admin
+
+GET
+
+/api/v1/admin/fairness/manifest
+
+Officer / Admin
+
+POST
+
+/api/v1/admin/models/{v}/promote
+
+Admin Only
+
+GET
+
+/api/v1/admin/report/html
+
+Officer / Admin
+
+Ingests manual SHG/FPO peer-thrift
+records.
+Spawns parallel 4-rail asynchronous ingestion.
+Synthesizes 5-Cs snapshot and scores applicant.
+Fetches score, decision zone, and SHAP reason codes.
+Records underwriter decision and mandatory
+override.
+Compiles signed loan file for Core Banking
+dispatch.
+Lodges statutory customer dispute with 30day SLA.
+Triages grievance and logs resolution notes.
+Fetches cross-village PSI drift and volume
+metrics.
+Evaluates demographic parity across protected cohorts.
+Streams complete anonymized compliance
+logs to CSV.
+Lists registered candidate and champion
+models.
+Returns ratified mathematical tolerance manifest.
+Evaluates Fairness Gate and promotes model
+to Champion.
+Serves complete standalone publication
+HTML report.
+
+Table A.1: Complete RESTful API Endpoint Specifications across Platform Services.
+
+1
+
+A.3
+
+Sample JSON Payloads
+
+A.3.1
+
+1. Cryptographic Consent Record Payload
+
+{
+" consent_id " : " c1f7a2b9 -4820 -4 e9b -8 e12 -3 f8d91c7a001 " ,
+" borrower_id " : "00000000 -0000 -0000 -0000 -000000000001" ,
+" purpose " : " A G R I C U L T U R A L _ C R E D I T _ U N D E R W R I T I N G " ,
+" channels " : [ " ACCOUNT_AGGREGATOR " , " SENTINEL2_SATELLITE " , "
+E L EC TRICITY_UTILITY " , " SHG_PEER_THRIFT " ] ,
+" status " : " ACTIVE " ,
+" hash_chain " : "
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 ",
+" granted_at " : "2026 -09 -07 T08 : 15 : 30 Z " ,
+" expires_at " : "2026 -10 -07 T08 : 15 : 30 Z "
+
+2
+3
+4
+5
+
+6
+7
+
+8
+9
+10
+
+}
+
+67
+
+Appendix A. Appendix
+
+CreditTech MVP Project Report
+
+Listing A.1: Sample Cryptographic Consent Record JSON Payload.
+
+A.3.2
+1
+
+{
+" score_id " : "8 f3e2b10 -6 c9a -4 d2e -9 f11 -1 a2b3c4d5e6f " ,
+" borrower_id " : "00000000 -0000 -0000 -0000 -000000000001" ,
+" model_version " : " v1 .1.0 - woe - scorecard " ,
+" p r o b a b il it y_ of_ de fa ul t " : 0.0245 ,
+" credit_score " : 745 ,
+" decision_zone " : " APPROVE " ,
+" reasons " : [
+{
+" feature " : " shg_repayment_rate " ,
+" impact " : " POSITIVE " ,
+" shap_value " : 0.421 ,
+" text_en " : " Exemplary 100% on - time repayment history across past SHG
+micro - loans ." ,
+" text_hi " : " Pichhle SHG rinon me samay par 100 percent bhugtan ka
+utkrisht record ."
+},
+{
+" feature " : " ndvi_crop_mean " ,
+" impact " : " POSITIVE " ,
+" shap_value " : 0.315 ,
+" text_en " : " Consistently robust vegetative health ( NDVI : 0.74) observed
+across satellite passes ." ,
+" text_hi " : " Upagrah ankdon me fasal ki satat utkrisht hariyali ( NDVI :
+0.74) darj ki gayi ."
+}
+],
+" timestamp " : "2026 -09 -07 T08 : 16 : 02 Z "
+
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+
+14
+
+15
+16
+17
+18
+19
+20
+
+21
+
+22
+23
+24
+25
+
+2. Credit Scoring Output with Bilingual SHAP Reason Codes
+
+}
+
+Listing A.2: Sample Credit Score and Bilingual Adverse Action Output JSON Payload.
+
+A.3.3
+1
+
+{
+" decision_id " : " a4c2e1b8 -7 f9d -4 e3a -8 b12 -9 c8d7e6f5a4b " ,
+" application_id " : "00000000 -0000 -0000 -0000 -000000000003" ,
+" officer_id " : " OFF -001" ,
+" final_verdict " : " APPROVE " ,
+" is_override " : true ,
+" o v e r r i de_reason_code " : " I R R I G A T I O N _ I N F R A S T R U C T U R E _ A D D I T I O N " ,
+" j us ti fication_note " : " Applicant suffered temporary crop yield drop during
+2025 drought , but has co - invested in a newly energized community solar
+borewell ; Kharif season water supply secured ." ,
+" r e c o m m ended _lim it_i nr " : 35000 ,
+" decided_at " : "2026 -09 -07 T09 : 42 : 15 Z "
+
+2
+3
+4
+5
+6
+7
+8
+
+9
+10
+11
+
+3. Officer Underwriting Dissent Override Record
+
+}
+
+Listing A.3: Sample Loan Officer Dissent Override JSON Payload.
+
+A.4
+
+Inventory of Publication Decision Figures
+
+The following 13 publication-grade figures (300 DPI, white theme) are permanently archived
+within the report distribution:
+68
+
+Appendix A. Appendix
+
+CreditTech MVP Project Report
+
+1. figures/roc_curve_comparison.png: Comparative Receiver Operating Characteristic
+curves across 5 benchmark models.
+2. figures/pr_curve_comparison.png: Precision-Recall dynamics evaluating minority default detection efficiency under class imbalance.
+3. figures/ks_separation_plots.png: Kolmogorov-Smirnov separation plots across the
+300–900 score scale for Champion vs. GBDT.
+4. figures/calibration_reliability_curves.png: Decile calibration reliability diagrams
+with Expected Calibration Error metrics.
+5. figures/confusion_matrices_comparison.png: Normalized confusion matrices at the
+operational score cutoff of 600.
+6. figures/score_distributions_zones.png: Portfolio score histogram mapped against
+the three institutional underwriting decision zones.
+7. figures/feature_importance_shap.png: TreeSHAP importance (GBDT) vs. Mean
+Gini impurity (Random Forest) feature ranking.
+8. figures/demographic_fairness_parity.png: Gender and landholding approval rates
+compared against statutory ceiling limits.
+9. figures/drift_radar_psi.png: Cross-village Population Stability Index radar proving
+PSI < 0.10 across all 15 village clusters.
+10. figures/hyperparameter_sensitivity_gbdt.png: 2D validation surface of Learning
+Rate vs. Max Iterations.
+11. figures/hyperparameter_tradeoff_rf_woe.png: Random Forest tree depth generalization gap and WoE feature retention vs. C.
+12. figures/economic_profit_cutoff_curve.png: Cost-sensitive banking profit optimization curve establishing Score 540 as the profit-maximizing cutoff.
+13. figures/fairness_vs_cutoff_frontier.png: Demographic disparity frontier across scores
+400–750 showing < 5% disparity in the operational credit band.
+
+69
+
+

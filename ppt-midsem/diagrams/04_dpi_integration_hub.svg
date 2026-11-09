@@ -1,0 +1,79 @@
+<svg viewBox="0 0 980 340" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .hub { fill: #0F172A; stroke: #3B82F6; stroke-width: 3; rx: 50px; }
+    .hub-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #FFFFFF; text-anchor: middle; }
+    .hub-sub { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11px; fill: #93C5FD; text-anchor: middle; }
+    
+    .node-dpi { fill: #EFF6FF; stroke: #2563EB; stroke-width: 2; rx: 10px; }
+    .node-re { fill: #F0FDF4; stroke: #16A34A; stroke-width: 2; rx: 10px; }
+    .node-comm { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 10px; }
+    
+    .node-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 13px; font-weight: 700; fill: #0F172A; text-anchor: middle; }
+    .node-sub { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10px; fill: #475569; text-anchor: middle; }
+    .line-dpi { stroke: #2563EB; stroke-width: 2; stroke-dasharray: 4 4; fill: none; }
+    .line-re { stroke: #16A34A; stroke-width: 2.5; fill: none; marker-end: url(#arrowgreen); }
+    .line-comm { stroke: #D97706; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="arrowgreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#16A34A" />
+    </marker>
+  </defs>
+
+  <!-- Left Side: Ingestion DPIs & Community Signals -->
+  <!-- Node 1: Account Aggregator -->
+  <rect class="node-dpi" x="30" y="20" width="220" height="75" />
+  <text class="node-title" x="140" y="47">Account Aggregator (AA)</text>
+  <text class="node-sub" x="140" y="65">17 licensed NBFC-AAs</text>
+  <text class="node-sub" x="140" y="80">284M+ linked accounts (DEPA)</text>
+
+  <!-- Node 2: Geospatial & Earth Observation -->
+  <rect class="node-dpi" x="30" y="130" width="220" height="75" />
+  <text class="node-title" x="140" y="157">Sentinel-2 / SatSure</text>
+  <text class="node-sub" x="140" y="175">10m multispectral NDVI</text>
+  <text class="node-sub" x="140" y="190">5-day revisit crop vigor &amp; drought</text>
+
+  <!-- Node 3: SHG & e-Shakti / FPO -->
+  <rect class="node-comm" x="30" y="240" width="220" height="75" />
+  <text class="node-title" x="140" y="267">Community Trust (SHG/FPO)</text>
+  <text class="node-sub" x="140" y="285">DAY-NRLM (90.9L SHGs, 96%+ track)</text>
+  <text class="node-sub" x="140" y="300">Peer thrift &amp; attendance records</text>
+
+  <!-- Center Hub: CreditTech Scoring Engine -->
+  <rect class="hub" x="370" y="90" width="240" height="150" />
+  <text class="hub-title" x="490" y="140">CreditTech</text>
+  <text class="hub-title" x="490" y="160">Scoring Engine</text>
+  <text class="hub-sub" x="490" y="185">Pure LSP / TSP Decision Layer</text>
+  <text class="hub-sub" x="490" y="202">(RBI DLG 2022/2026 Compliant)</text>
+  <text class="hub-sub" x="490" y="218">Exact Bilingual SHAP Reasons</text>
+
+  <!-- Connections from Left to Hub -->
+  <path class="line-dpi" d="M250 57 C310 57, 310 135, 370 135" />
+  <path class="line-dpi" d="M250 167 C310 167, 310 165, 370 165" />
+  <path class="line-comm" d="M250 277 C310 277, 310 195, 370 195" />
+
+  <!-- Right Side: Outbound Integrations & Lenders -->
+  <!-- Node 4: Unified Lending Interface (ULI) -->
+  <rect class="node-dpi" x="730" y="30" width="220" height="75" />
+  <text class="node-title" x="840" y="57">Unified Lending Interface</text>
+  <text class="node-sub" x="840" y="75">RBI universal lending gateway</text>
+  <text class="node-sub" x="840" y="90">₹27,000 Cr disbursed (Dec 2024)</text>
+
+  <!-- Node 5: Regulated Lenders (REs) -->
+  <rect class="node-re" x="730" y="140" width="220" height="85" />
+  <text class="node-title" x="840" y="167" fill="#15803D">Regulated Lenders (REs)</text>
+  <text class="node-sub" x="840" y="185">RRBs, PACS, SFBs, NBFC-MFIs</text>
+  <text class="node-sub" x="840" y="200">Ultimate credit-risk &amp; sanction seat</text>
+  <text class="node-sub" x="840" y="215">DLG capped at 5% portfolio</text>
+
+  <!-- Node 6: DPDP Consent Board -->
+  <rect class="node-dpi" x="730" y="250" width="220" height="65" />
+  <text class="node-title" x="840" y="275">Data Protection Board</text>
+  <text class="node-sub" x="840" y="293">DPDP Act 2023 / Rules 2025</text>
+  <text class="node-sub" x="840" y="306">30-day purge &amp; 7-yr consent audit</text>
+
+  <!-- Connections from Hub to Right -->
+  <path class="line-dpi" d="M610 135 C670 135, 670 67, 730 67" />
+  <path class="line-re" d="M610 165 C670 165, 670 182, 725 182" />
+  <path class="line-dpi" d="M610 195 C670 195, 670 282, 730 282" />
+</svg>

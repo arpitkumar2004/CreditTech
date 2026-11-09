@@ -1,0 +1,57 @@
+<svg viewBox="0 0 980 340" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .quad { fill: #F8FAFC; stroke: #E2E8F0; stroke-width: 1.5; rx: 8px; }
+    .quad-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 13px; font-weight: 700; fill: #1E40AF; }
+    .item-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11px; font-weight: 600; fill: #0F172A; }
+    .item-desc { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 9.5px; fill: #64748B; }
+    .center-badge { fill: #0A192F; stroke: #3B82F6; stroke-width: 2; rx: 12px; }
+    .center-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 13px; font-weight: 700; fill: #FFFFFF; text-anchor: middle; }
+    .center-sub { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 9.5px; fill: #93C5FD; text-anchor: middle; }
+  </style>
+
+  <!-- Q1: Demand / Community (Top Left) -->
+  <rect class="quad" x="15" y="15" width="455" height="145" />
+  <text class="quad-title" x="30" y="38">1. Borrowers &amp; Community Anchors (Demand Side)</text>
+  <text class="item-title" x="30" y="62">• Small &amp; Marginal Farmers (0.74 ha avg):</text>
+  <text class="item-desc" x="45" y="77">Need timely, collateral-free Kharif/Rabi crop credit (&lt; 14-day sowing window).</text>
+  <text class="item-title" x="30" y="97">• Self-Help Groups (90.9L SHGs, 10 Cr women):</text>
+  <text class="item-desc" x="45" y="112">Hold &gt;96% repayment track; need individual micro-enterprise graduation loans.</text>
+  <text class="item-title" x="30" y="132">• Farmer Producer Organisations (10k FPOs):</text>
+  <text class="item-desc" x="45" y="147">Aggregate farmer produce; need working capital backed by mandi sales trails.</text>
+
+  <!-- Q2: Regulated Lenders & Apex (Top Right) -->
+  <rect class="quad" x="510" y="15" width="455" height="145" />
+  <text class="quad-title" x="525" y="38">2. Regulated Lenders &amp; Apex Bodies (Capital &amp; Risk)</text>
+  <text class="item-title" x="525" y="62">• Regional Rural Banks (RRBs) &amp; PACS:</text>
+  <text class="item-desc" x="540" y="77">Face high 6.2% agri GNPA; need predictive scoring to reduce underwriting cost.</text>
+  <text class="item-title" x="525" y="97">• Small Finance Banks &amp; NBFC-MFIs:</text>
+  <text class="item-desc" x="540" y="112">Underwrite thin-file borrowers; consume CreditTech scores under RBI DLG.</text>
+  <text class="item-title" x="525" y="132">• NABARD &amp; SIDBI (Apex Development):</text>
+  <text class="item-desc" x="540" y="147">Provide refinance, policy backing, and pilot sponsor governance oversight.</text>
+
+  <!-- Center Hub -->
+  <rect class="center-badge" x="375" y="135" width="230" height="70" />
+  <text class="center-title" x="490" y="163">CreditTech Platform</text>
+  <text class="center-sub" x="490" y="180">Pure LSP / TSP Scoring Bridge</text>
+  <text class="center-sub" x="490" y="194">(Unbundled Digital Lending)</text>
+
+  <!-- Q3: DPI & Tech Infrastructure (Bottom Left) -->
+  <rect class="quad" x="15" y="180" width="455" height="145" />
+  <text class="quad-title" x="30" y="203">3. Digital Public Infrastructure &amp; Data Rails</text>
+  <text class="item-title" x="30" y="227">• Sahamati &amp; Account Aggregator (AA):</text>
+  <text class="item-desc" x="45" y="242">17 licensed AAs; provide consent-based, encrypted banking cashflow trails.</text>
+  <text class="item-title" x="30" y="262">• RBI Unified Lending Interface (ULI):</text>
+  <text class="item-desc" x="45" y="277">Universal gateway for land registries, milk federations, and lender hand-off.</text>
+  <text class="item-title" x="30" y="297">• Sentinel-2 &amp; ISRO Earth Observation:</text>
+  <text class="item-desc" x="45" y="312">10m multispectral satellite imagery providing objective crop vigor and yield proxies.</text>
+
+  <!-- Q4: Regulators & Governance (Bottom Right) -->
+  <rect class="quad" x="510" y="180" width="455" height="145" />
+  <text class="quad-title" x="525" y="203">4. Regulators, Civil Society &amp; Independent Auditors</text>
+  <text class="item-title" x="525" y="227">• Reserve Bank of India (RBI):</text>
+  <text class="item-desc" x="540" y="242">Enforces Digital Lending Guidelines (2022/2026) and 5% DLG guarantee cap.</text>
+  <text class="item-title" x="525" y="262">• Data Protection Board of India (DPDP 2023):</text>
+  <text class="item-desc" x="540" y="277">Mandates explicit purpose limitation, 30-day retention purge, and consent audit.</text>
+  <text class="item-title" x="525" y="297">• Academic &amp; Civil Society Auditors (IIT Kharagpur):</text>
+  <text class="item-desc" x="540" y="312">Executes third-party demographic fairness audits (DIR ≥ 0.80) across gender &amp; land.</text>
+</svg>

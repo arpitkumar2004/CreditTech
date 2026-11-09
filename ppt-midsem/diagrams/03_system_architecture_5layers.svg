@@ -1,0 +1,101 @@
+<svg viewBox="0 0 980 440" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .layer-card { fill: #FFFFFF; stroke: #E2E8F0; stroke-width: 1.5; rx: 8px; }
+    .layer-header { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11px; font-weight: 700; fill: #1E40AF; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pill { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1; rx: 6px; }
+    .pill-highlight { fill: #EFF6FF; stroke: #93C5FD; stroke-width: 1.2; rx: 6px; }
+    .pill-title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11px; font-weight: 600; fill: #0F172A; text-anchor: middle; }
+    .pill-desc { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 9px; fill: #64748B; text-anchor: middle; }
+  </style>
+
+  <!-- Layer 1: Identity & Consent -->
+  <rect class="layer-card" x="15" y="10" width="950" height="74" />
+  <text class="layer-header" x="30" y="28">Layer 1 · Identity, Authentication &amp; Consent Management</text>
+  <rect class="pill" x="30" y="36" width="215" height="38" />
+  <text class="pill-title" x="137" y="52">Aadhaar e-KYC / DigiLocker</text>
+  <text class="pill-desc" x="137" y="66">Statutory biometric &amp; OTP ID verification</text>
+
+  <rect class="pill-highlight" x="260" y="36" width="220" height="38" />
+  <text class="pill-title" x="370" y="52">DPDP Cryptographic Consent Ledger</text>
+  <text class="pill-desc" x="370" y="66">SHA-256 hash-chained immutable audit trail</text>
+
+  <rect class="pill" x="495" y="36" width="220" height="38" />
+  <text class="pill-title" x="605" y="52">Account Aggregator (AA) Consent</text>
+  <text class="pill-desc" x="605" y="66">Purpose-limited, time-bound financial pull</text>
+
+  <rect class="pill" x="730" y="36" width="220" height="38" />
+  <text class="pill-title" x="840" y="52">Assisted Omnichannel Capture</text>
+  <text class="pill-desc" x="840" y="66">Bank Sakhi tablet PWA + bilingual prompts</text>
+
+  <!-- Layer 2: Data Ingestion (4 Rails) -->
+  <rect class="layer-card" x="15" y="94" width="950" height="74" />
+  <text class="layer-header" x="30" y="112">Layer 2 · Multi-Rail Ingestion Engine (Graceful Degradation)</text>
+  <rect class="pill-highlight" x="30" y="120" width="215" height="38" />
+  <text class="pill-title" x="137" y="136">Rail 1: Account Aggregator</text>
+  <text class="pill-desc" x="137" y="150">Bank cashflows, UPI inflows, ADB patterns</text>
+
+  <rect class="pill-highlight" x="260" y="120" width="220" height="38" />
+  <text class="pill-title" x="370" y="136">Rail 2: Geospatial &amp; Climate</text>
+  <text class="pill-desc" x="370" y="150">Sentinel-2 10m NDVI &amp; IMD drought risk</text>
+
+  <rect class="pill-highlight" x="495" y="120" width="220" height="38" />
+  <text class="pill-title" x="605" y="136">Rail 3: Community &amp; SHG</text>
+  <text class="pill-desc" x="605" y="150">e-Shakti records, peer savings, FPO sales</text>
+
+  <rect class="pill-highlight" x="730" y="120" width="220" height="38" />
+  <text class="pill-title" x="840" y="136">Rail 4: Bureau &amp; Land Registry</text>
+  <text class="pill-desc" x="840" y="150">CIBIL thin-file check + ULI state land records</text>
+
+  <!-- Layer 3: Intelligence & Scoring Engine -->
+  <rect class="layer-card" x="15" y="178" width="950" height="92" />
+  <text class="layer-header" x="30" y="196">Layer 3 · Intelligence &amp; Responsible AI Scoring Engine</text>
+  <rect class="pill" x="30" y="206" width="215" height="52" />
+  <text class="pill-title" x="137" y="224">Domain Feature Store</text>
+  <text class="pill-desc" x="137" y="238">21 features mapped to 5 Cs of credit</text>
+  <text class="pill-desc" x="137" y="250">Monotonic WoE binning + Laplace smoothing</text>
+
+  <rect class="pill-highlight" x="260" y="206" width="220" height="52" />
+  <text class="pill-title" x="370" y="224">Champion / Challenger Models</text>
+  <text class="pill-desc" x="370" y="238">Champion: Monotonic WoE Scorecard (AUC 0.96)</text>
+  <text class="pill-desc" x="370" y="250">Challenger: Monotonic LightGBM (AUC 0.98)</text>
+
+  <rect class="pill" x="495" y="206" width="220" height="52" />
+  <text class="pill-title" x="605" y="224">Explainability &amp; SHAP Engine</text>
+  <text class="pill-desc" x="605" y="238">Exact closed-form point attribution</text>
+  <text class="pill-desc" x="605" y="250">Top-5 adverse action codes (Hindi &amp; English)</text>
+
+  <rect class="pill" x="730" y="206" width="220" height="52" />
+  <text class="pill-title" x="840" y="224">Fairness &amp; Drift Monitor</text>
+  <text class="pill-desc" x="840" y="238">DIR ≥ 0.80 Four-Fifths parity gate</text>
+  <text class="pill-desc" x="840" y="250">PSI tracking across 15 agro-climatic clusters</text>
+
+  <!-- Layer 4: Decisioning & Orchestration -->
+  <rect class="layer-card" x="15" y="280" width="950" height="74" />
+  <text class="layer-header" x="30" y="298">Layer 4 · Decisioning, Policy &amp; Orchestration Gateway</text>
+  <rect class="pill" x="30" y="306" width="280" height="38" />
+  <text class="pill-title" x="170" y="322">OCEN 4.0 LSP Orchestration Gateway</text>
+  <text class="pill-desc" x="170" y="336">Standardized loan request &amp; sanction contract</text>
+
+  <rect class="pill" x="330" y="306" width="290" height="38" />
+  <text class="pill-title" x="475" y="322">Rules Engine &amp; Statutory Cutoffs</text>
+  <text class="pill-desc" x="475" y="336">Auto-Decline (&lt;500) | Review (500–620) | Sanction (&gt;620)</text>
+
+  <rect class="pill" x="640" y="306" width="310" height="38" />
+  <text class="pill-title" x="795" y="322">ULI Document &amp; Score Dispatch</text>
+  <text class="pill-desc" x="795" y="336">Frictionless hand-off to Core Banking Systems</text>
+
+  <!-- Layer 5: Channel & Servicing -->
+  <rect class="layer-card" x="15" y="364" width="950" height="66" />
+  <text class="layer-header" x="30" y="380">Layer 5 · Delivery Channels, Governance &amp; Servicing</text>
+  <rect class="pill" x="30" y="388" width="280" height="34" />
+  <text class="pill-title" x="170" y="403">Bank Sakhi Tablet PWA</text>
+  <text class="pill-desc" x="170" y="415">React 19 touch-first, offline-tolerant ledger entry</text>
+
+  <rect class="pill" x="330" y="388" width="290" height="34" />
+  <text class="pill-title" x="475" y="403">Loan Officer Cockpit</text>
+  <text class="pill-desc" x="475" y="415">SHAP waterfall charts + mandatory dissent audit</text>
+
+  <rect class="pill" x="640" y="388" width="310" height="34" />
+  <text class="pill-title" x="795" y="403">Closed-Loop MLOps &amp; Grievance</text>
+  <text class="pill-desc" x="795" y="415">Repayment feedback for retraining + RBI dispute SLA</text>
+</svg>

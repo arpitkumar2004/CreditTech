@@ -1,0 +1,89 @@
+<svg viewBox="0 0 980 320" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .card { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8px; }
+    .card-header { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 12px; font-weight: 700; fill: #1E40AF; text-anchor: middle; }
+    .card-badge { fill: #EFF6FF; stroke: #93C5FD; stroke-width: 1; rx: 4px; }
+    .badge-text { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #1D4ED8; text-anchor: middle; }
+    .card-txt { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10px; fill: #334155; }
+    .kpi-box { fill: #F8FAFC; stroke: #E2E8F0; stroke-width: 1.2; rx: 6px; }
+    .kpi-num { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 16px; font-weight: 800; fill: #1E40AF; text-anchor: middle; }
+    .kpi-lbl { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 9.5px; fill: #64748B; text-anchor: middle; }
+  </style>
+
+  <!-- Site 1: Irrigated / KCC Dense -->
+  <rect class="card" x="15" y="15" width="180" height="200" />
+  <rect class="card-badge" x="35" y="25" width="140" height="22" />
+  <text class="badge-text" x="105" y="40">SITE A: IRRIGATED</text>
+  <text class="card-header" x="105" y="66">Uttar Pradesh / RJ</text>
+  <text class="card-txt" x="25" y="90"><tspan font-weight="700">Crop:</tspan> Cotton / Wheat</text>
+  <text class="card-txt" x="25" y="108"><tspan font-weight="700">DPI Rail:</tspan> High KCC, ULI</text>
+  <text class="card-txt" x="25" y="126"><tspan font-weight="700">Sample:</tspan> 200 Borrowers</text>
+  <text class="card-txt" x="25" y="150"><tspan font-weight="700">Core Test:</tspan></text>
+  <text class="card-txt" x="25" y="166">Speed and credit limit</text>
+  <text class="card-txt" x="25" y="182">adequacy uplift vs CIBIL.</text>
+
+  <!-- Site 2: Rainfed / Climate-Exposed -->
+  <rect class="card" x="208" y="15" width="180" height="200" />
+  <rect class="card-badge" x="228" y="25" width="140" height="22" />
+  <text class="badge-text" x="298" y="40">SITE B: RAINFED</text>
+  <text class="card-header" x="298" y="66">Maharashtra / MP</text>
+  <text class="card-txt" x="218" y="90"><tspan font-weight="700">Crop:</tspan> Soybean / Millets</text>
+  <text class="card-txt" x="218" y="108"><tspan font-weight="700">DPI Rail:</tspan> Sentinel-2, IMD</text>
+  <text class="card-txt" x="218" y="126"><tspan font-weight="700">Sample:</tspan> 200 Borrowers</text>
+  <text class="card-txt" x="218" y="150"><tspan font-weight="700">Core Test:</tspan></text>
+  <text class="card-txt" x="218" y="166">Drought exposure index</text>
+  <text class="card-txt" x="218" y="182">&amp; covariate shock resilience.</text>
+
+  <!-- Site 3: SHG-Dense Southern Model -->
+  <rect class="card" x="400" y="15" width="180" height="200" />
+  <rect class="card-badge" x="420" y="25" width="140" height="22" />
+  <text class="badge-text" x="490" y="40">SITE C: SHG-DENSE</text>
+  <text class="card-header" x="490" y="66">AP / Telangana</text>
+  <text class="card-txt" x="410" y="90"><tspan font-weight="700">Profile:</tspan> Women SHG</text>
+  <text class="card-txt" x="410" y="108"><tspan font-weight="700">DPI Rail:</tspan> e-Shakti, AA</text>
+  <text class="card-txt" x="410" y="126"><tspan font-weight="700">Sample:</tspan> 250 Borrowers</text>
+  <text class="card-txt" x="410" y="150"><tspan font-weight="700">Core Test:</tspan></text>
+  <text class="card-txt" x="410" y="166">Peer social collateral</text>
+  <text class="card-txt" x="410" y="182">&amp; micro-enterprise graduation.</text>
+
+  <!-- Site 4: Allied / Dairy -->
+  <rect class="card" x="592" y="15" width="180" height="200" />
+  <rect class="card-badge" x="612" y="25" width="140" height="22" />
+  <text class="badge-text" x="682" y="40">SITE D: DAIRY / ALLIED</text>
+  <text class="card-header" x="682" y="66">Gujarat / Odisha</text>
+  <text class="card-txt" x="602" y="90"><tspan font-weight="700">Profile:</tspan> Dairy / Fisheries</text>
+  <text class="card-txt" x="602" y="108"><tspan font-weight="700">DPI Rail:</tspan> Coop Pouring Data</text>
+  <text class="card-txt" x="602" y="126"><tspan font-weight="700">Sample:</tspan> 200 Borrowers</text>
+  <text class="card-txt" x="602" y="150"><tspan font-weight="700">Core Test:</tspan></text>
+  <text class="card-txt" x="602" y="166">High-frequency cashflow</text>
+  <text class="card-txt" x="602" y="182">predicting debt service capacity.</text>
+
+  <!-- Site 5: Low-Bandwidth / Tribal -->
+  <rect class="card" x="785" y="15" width="180" height="200" />
+  <rect class="card-badge" x="805" y="25" width="140" height="22" />
+  <text class="badge-text" x="875" y="40">SITE E: LOW-BANDWIDTH</text>
+  <text class="card-header" x="875" y="66">Jharkhand / CG</text>
+  <text class="card-txt" x="795" y="90"><tspan font-weight="700">Profile:</tspan> Tribal Smallholders</text>
+  <text class="card-txt" x="795" y="108"><tspan font-weight="700">DPI Rail:</tspan> Bank Sakhi PWA</text>
+  <text class="card-txt" x="795" y="126"><tspan font-weight="700">Sample:</tspan> 150 Borrowers</text>
+  <text class="card-txt" x="795" y="150"><tspan font-weight="700">Core Test:</tspan></text>
+  <text class="card-txt" x="795" y="166">Graceful degradation &amp;</text>
+  <text class="card-txt" x="795" y="182">assisted rural onboarding.</text>
+
+  <!-- Bottom KPI Summary Row -->
+  <rect class="kpi-box" x="15" y="230" width="225" height="75" />
+  <text class="kpi-num" x="127" y="260">&lt; 1 Hour</text>
+  <text class="kpi-lbl" x="127" y="282">Median TAT (vs 10–15d As-Is)</text>
+
+  <rect class="kpi-box" x="260" y="230" width="225" height="75" />
+  <text class="kpi-num" x="372" y="260">+20% to +30%</text>
+  <text class="kpi-lbl" x="372" y="282">Approval Uplift (Thin-File)</text>
+
+  <rect class="kpi-box" x="505" y="230" width="225" height="75" />
+  <text class="kpi-num" x="617" y="260">PAR90 ≤ 2.0%</text>
+  <text class="kpi-lbl" x="617" y="282">Portfolio Risk (vs 6.2% GNPA)</text>
+
+  <rect class="kpi-box" x="750" y="230" width="215" height="75" />
+  <text class="kpi-num" x="857" y="260">DIR ≥ 0.80</text>
+  <text class="kpi-lbl" x="857" y="282">Gender &amp; Land Fairness Floor</text>
+</svg>

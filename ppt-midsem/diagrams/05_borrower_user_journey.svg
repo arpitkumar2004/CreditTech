@@ -1,0 +1,52 @@
+<svg viewBox="0 0 980 230" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .circle-node { fill: #FFFFFF; stroke: #2563EB; stroke-width: 2.5; }
+    .circle-node-done { fill: #EFF6FF; stroke: #1D4ED8; stroke-width: 3; }
+    .num { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 20px; font-weight: 800; fill: #1D4ED8; text-anchor: middle; }
+    .title { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #0F172A; text-anchor: middle; }
+    .desc { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10.5px; fill: #475569; text-anchor: middle; }
+    .sla { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #16A34A; text-anchor: middle; }
+    .line { stroke: #93C5FD; stroke-width: 3; stroke-dasharray: 6 6; }
+  </style>
+
+  <!-- Connecting Lines -->
+  <line class="line" x1="180" y1="85" x2="295" y2="85" />
+  <line class="line" x1="425" y1="85" x2="540" y2="85" />
+  <line class="line" x1="670" y1="85" x2="785" y2="85" />
+
+  <!-- Step 1: Apply -->
+  <circle class="circle-node-done" cx="115" cy="85" r="55" />
+  <text class="num" x="115" y="77">1</text>
+  <text class="title" x="115" y="98">Apply</text>
+  <text class="desc" x="115" y="160">Farmer / SHG Applicant</text>
+  <text class="desc" x="115" y="176">Android PWA / Bank Sakhi</text>
+  <text class="desc" x="115" y="192">Bilingual Voice / Text</text>
+  <text class="sla" x="115" y="212">SLA: &lt; 5 Minutes</text>
+
+  <!-- Step 2: Consent -->
+  <circle class="circle-node-done" cx="360" cy="85" r="55" />
+  <text class="num" x="360" y="77">2</text>
+  <text class="title" x="360" y="98">Consent</text>
+  <text class="desc" x="360" y="160">Aadhaar e-KYC Verification</text>
+  <text class="desc" x="360" y="176">AA Consent Artifact (DEPA)</text>
+  <text class="desc" x="360" y="192">SHA-256 Ledger Hash</text>
+  <text class="sla" x="360" y="212">SLA: &lt; 5 Minutes</text>
+
+  <!-- Step 3: Score -->
+  <circle class="circle-node-done" cx="605" cy="85" r="55" />
+  <text class="num" x="605" y="77">3</text>
+  <text class="title" x="605" y="98">Score</text>
+  <text class="desc" x="605" y="160">4-Rail Parallel Ingestion</text>
+  <text class="desc" x="605" y="176">300–900 Credit Score</text>
+  <text class="desc" x="605" y="192">Bilingual SHAP Reasons</text>
+  <text class="sla" x="605" y="212">SLA: &lt; 3 Minutes</text>
+
+  <!-- Step 4: Decision -->
+  <circle class="circle-node-done" cx="850" cy="85" r="55" />
+  <text class="num" x="850" y="77">4</text>
+  <text class="title" x="850" y="98">Sanction</text>
+  <text class="desc" x="850" y="160">Loan Officer Review</text>
+  <text class="desc" x="850" y="176">Bank Sanction &amp; ULI Disbursal</text>
+  <text class="desc" x="850" y="192">Automated PII 30-Day Purge</text>
+  <text class="sla" x="850" y="212">SLA: Same Working Day</text>
+</svg>

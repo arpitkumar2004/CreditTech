@@ -23,6 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.core.shared.models import Borrower, FeatureSnapshot, Village
 
+pytestmark = pytest.mark.load
+
+
 # 2x pilot peak per plan §9 P6 DoD
 BURST_SIZE = 60
 # System SLA per §2.2 — score generation < 2 min

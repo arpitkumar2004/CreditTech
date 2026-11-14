@@ -82,7 +82,11 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short -m 'not load'"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "load: marks tests as heavy load harnesses (deselect with '-m \"not load\"')",
+]
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]

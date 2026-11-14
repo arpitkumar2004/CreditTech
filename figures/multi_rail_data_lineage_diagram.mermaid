@@ -1,0 +1,49 @@
+flowchart TD
+    subgraph S1["Raw Ingestion Data Rails (Join key: borrower_id)"]
+        direction TB
+        RA["Table A: A_borrowers (20k rows)<br/>• Village code, age, literacy<br/>• Bureau lines (65% thin-file)"]
+        RB["Table B: B_household_land_crop (20k rows)<br/>• Owned / leased ha (76.9% &lt;1ha)<br/>• Irrigation source &amp; asset index"]
+        RC["Table C: C_aa_monthly (240k rows)<br/>• 12m cashflow credits &amp; debits<br/>• Daily balance, UPI count, DBT credits"]
+        RD["Table D: D_shg_ledger (20k rows)<br/>• 400 SHGs: meetings, attendance %<br/>• Internal repayment rate, savings corpus"]
+        RE["Table E: E_utility_digital (20k rows)<br/>• Metered electricity on-time ratio<br/>• 12m arrears, mobile recharge regularity"]
+        RF["Table F: F_satellite_weather (20k rows)<br/>• Sentinel-2 10m NDVI peak / mean<br/>• IMD rainfall % normal, dry spells"]
+        RG["Table G: G_govt_social (20k rows)<br/>• PM-Kisan tranches (Rs 6,000/yr)<br/>• MGNREGA days (mean 35), PMJDY"]
+    end
+
+    subgraph S2["5-Cs Alternative Feature Synthesizer (features.py)"]
+        direction TB
+        C1["Character<br/>• shg_repayment_rate (0.0–1.0)<br/>• shg_attendance_pct (0–100%)<br/>• utility_on_time_ratio<br/>• recharge_regularity"]
+        C2["Capacity<br/>• avg_monthly_inflow (~Rs 10,218)<br/>• inflow_cv &amp; inflow_outflow_ratio<br/>• foir (&lt;= 0.85)<br/>• govt_transfer_share"]
+        C3["Capital<br/>• avg_daily_balance<br/>• shg_savings_corpus<br/>• livestock_value_inr"]
+        C4["Collateral<br/>• effective_land_ha (owned + 0.5*leased)<br/>• irrigated_share (0.0–1.0)<br/>• asset_index (0–100)"]
+        C5["Conditions<br/>• ndvi_peak_mean (0.28–0.82)<br/>• rainfall_pct_normal<br/>• crop_insurance_flag (PMFBY)"]
+    end
+
+    subgraph S3["Decision & Regulatory Core"]
+        direction TB
+        MFS["modeling_features.csv<br/>21 Core + 7 Extensions<br/>4 Audit Attributes (Gender, Caste)"]
+        SC["Monotonic WoE Scorecard Engine<br/>Scaled Score: 300 to 900 Points<br/>Bilingual TreeSHAP Adverse Reasons"]
+        OUT["Decision Zones<br/>• Reject (&lt; 550)<br/>• Manual Review (550–650)<br/>• Auto-Approve (&gt;= 650)"]
+    end
+
+    RA --> C1
+    RD --> C1
+    RE --> C1
+    RC --> C2
+    RG --> C2
+    RC --> C3
+    RD --> C3
+    RB --> C3
+    RB --> C4
+    RF --> C5
+    RB --> C5
+
+    C1 --> MFS
+    C2 --> MFS
+    C3 --> MFS
+    C4 --> MFS
+    C5 --> MFS
+
+    MFS --> SC
+    SC --> OUT
+

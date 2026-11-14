@@ -1,0 +1,7 @@
+rail_configuration,num_features,roc_auc,auc_lift_pts,ks_stat,pr_auc
+Rail 1: Bureau Proxy Only,1,0.562,0.0,0.1187,0.0982
+Rail 2: + Account Aggregator,6,0.6994,13.74,0.3066,0.1627
+Rail 3: + SHG Peer-Thrift,10,0.7438,18.18,0.3783,0.1956
+Rail 4: + Utility Telemetry,12,0.7913,22.93,0.4558,0.2712
+Rail 5: + Satellite & Weather,15,0.809,24.7,0.4821,0.3026
+Rail 6: All Rails (5-Cs Core),21,0.817,25.5,0.4957,0.2928

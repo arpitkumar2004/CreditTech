@@ -1,0 +1,31 @@
+quantity,target_value,unit,source_reference,validation_tolerance_pct,notes
+mean_monthly_income_agri_hh,10218,INR,NSS 77th Round (2018-19) Situation Assessment of Agricultural Households,10,Average monthly income across all agricultural households
+income_share_wages,4063,INR,NSS 77th Round (2018-19),15,Wages and salaries (39.8%)
+income_share_crop,3798,INR,NSS 77th Round (2018-19),15,Net receipt from crop production (37.2%)
+income_share_livestock,1582,INR,NSS 77th Round (2018-19),15,Net receipt from farming of animal resources (15.5%)
+income_share_nonfarm,641,INR,NSS 77th Round (2018-19),15,Net receipt from non-farm business (6.3%)
+income_share_leasing,134,INR,NSS 77th Round (2018-19),15,Net receipt from leasing out of land (1.3%)
+indebted_agri_households_share,50.2,Percent,NSS 77th Round (2018-19),10,Share of agricultural households reporting outstanding loan
+avg_outstanding_loan_per_hh,74121,INR,NSS 77th Round (2018-19),15,Average outstanding debt among indebted agricultural households
+institutional_debt_share,66.0,Percent,NSS 77th Round (2018-19),10,Share of cash debt from commercial banks/RRBs/cooperatives
+landholding_under_1ha_share,75.0,Percent,NSS 77th Round (2018-19) Land & Livestock Holdings,10,Target range 70% to 83% under 1 hectare
+social_mix_obc_share,45.8,Percent,NSS 77th Round (2018-19),10,Other Backward Classes
+social_mix_sc_share,15.9,Percent,NSS 77th Round (2018-19),10,Scheduled Caste
+social_mix_st_share,14.2,Percent,NSS 77th Round (2018-19),10,Scheduled Tribe
+social_mix_others_share,24.1,Percent,NSS 77th Round (2018-19),10,General and others
+rural_literacy_rate,73.0,Percent,NSS 77th Round (2018-19) / Census 2011,10,Rural population aged 7+ literacy
+shg_avg_bank_loan_outstanding,270000,INR,NABARD Status of Microfinance 2022-23,15,Average loan outstanding per credit-linked SHG
+shg_gross_npa_rate,1.7,Percent,NABARD / Ministry of Rural Development 2023-24,20,National average SHG NPA (higher in weak states)
+thin_file_share,65.0,Percent,CreditTech Rural Survey / TransUnion CIBIL Rural Report,10,Borrowers with zero credit bureau tradelines
+pm_kisan_annual_entitlement,6000,INR,Government of India PM-KISAN Scheme,0,Three equal instalments of Rs 2000 per year
+overall_default_rate,8.2,Percent,CreditTech Target Architecture,15,Expected 12-month 90+ DPD default rate (8% to 9%)
+marginal_farmer_default_rate,10.0,Percent,CreditTech Segment Target,15,Target default rate for marginal farmers
+small_farmer_default_rate,7.0,Percent,CreditTech Segment Target,15,Target default rate for small farmers
+tenant_farmer_default_rate,13.0,Percent,CreditTech Segment Target,15,Target default rate for tenant farmers
+shg_member_default_rate,4.0,Percent,CreditTech Segment Target,15,Target default rate for SHG women members
+microenterprise_default_rate,11.0,Percent,CreditTech Segment Target,15,Target default rate for rural micro-enterprises
+target_roc_auc_min,0.75,ROC-AUC,CreditTech Honest Model Floor,0,Lower bound for honest predictive discrimination
+target_roc_auc_max,0.82,ROC-AUC,CreditTech Honest Model Ceiling,0,Upper bound; values >0.90 indicate leakage
+target_ks_stat_min,0.35,KS,CreditTech Target Architecture,0,Separation statistic target
+target_ks_stat_max,0.50,KS,CreditTech Target Architecture,0,Separation statistic target
+

@@ -14,6 +14,7 @@ def test_all_models_reexported():
         "Score",
         "ReasonCode",
         "LoanApplication",
+        "OfficerDecision",
         "OfficerDecisionLog",
         "RepaymentRecord",
         "FairnessAuditLog",

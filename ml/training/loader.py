@@ -48,12 +48,24 @@ def load_scorecard_model(artifact_path: str | Path, model_type: str | None = Non
                 from ml.training.ensemble_scorecard import StackingEnsembleScorecard
                 return StackingEnsembleScorecard.from_artifact(path)
 
-            if model_type == "rf_scorecard_v1":
+            if (
+                model_type == "rf_scorecard_v1"
+                or "calibrator_x" in loaded
+                or "rf" in str(loaded.get("model_version", "")).lower()
+            ):
                 from ml.training.rf_scorecard import RandomForestScorecard
                 return RandomForestScorecard.from_artifact(path)
 
-            from ml.training.logistic_baseline import LogisticBaselineScorecard
-            return LogisticBaselineScorecard.from_artifact(path)
+            if (
+                model_type in ("logistic_baseline_v1", "logistic_scorecard_v1")
+                or "means" in loaded
+                or "logistic" in str(loaded.get("model_version", "")).lower()
+                or "classifier" in loaded
+            ):
+                from ml.training.logistic_baseline import LogisticBaselineScorecard
+                return LogisticBaselineScorecard.from_artifact(path)
+
+            raise TypeError(f"Unrecognized scorecard dictionary structure in pickled artifact: {path}")
 
         raise TypeError(f"Unrecognized pickled model artifact type: {type(loaded)}")
 

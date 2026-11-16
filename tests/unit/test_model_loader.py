@@ -1,7 +1,5 @@
 """Unit tests for the unified model loader and BaseScorecard protocol."""
 
-from pathlib import Path
-import pytest
 from ml.registry import ModelRegistry
 from ml.training.base import BaseScorecard
 from ml.training.loader import load_scorecard_model

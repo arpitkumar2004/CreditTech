@@ -10,21 +10,32 @@ services:
     environment:
       - APP_ENV=development
       - APP_DEBUG=true
-      - DATABASE_URL=postgresql+asyncpg://credittech:credittech_dev@db:5432/credittech
+      - DATABASE_URL=postgresql+asyncpg://credittech:credittech_dev@pgbouncer:6432/credittech
+      - DATABASE_STATEMENT_CACHE_SIZE=0
       - SECRET_KEY=development_secret_key_64_characters_long_for_testing_purposes
       - JWT_ALGORITHM=HS256
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
       - LOG_LEVEL=DEBUG
       - LOG_FORMAT=console
     depends_on:
-      db:
-        condition: service_healthy
+      - pgbouncer
     command: >
       sh -c "alembic upgrade head &&
              uvicorn services.core.main:app --host 0.0.0.0 --port 8000 --reload"
 
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.22.1
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./config/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./config/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     ports:
       - "5432:5432"
     environment:

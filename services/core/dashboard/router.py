@@ -6,13 +6,13 @@ NABARD stakeholder both consume from these endpoints (§17.2).
 
 from __future__ import annotations
 
-import uuid
+import uuid  # noqa: TC003
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession  # noqa: TC002
 
-from services.core.database import get_db
+from services.core.database import get_read_db
 from services.core.decisioning.auth import require_officer
 from services.core.monitoring.service import FairnessAuditor
 
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/dashboard", tags=["Institutional Dashboard"])
 @router.get("/portfolio", summary="Portfolio metrics (aggregate, non-PII)")
 async def portfolio(
     officer_id: str = Depends(require_officer),  # noqa: ARG001
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> dict:
     return await DashboardService(db).portfolio_metrics()
 
@@ -35,7 +35,7 @@ async def dashboard_charts(
     persona: str = Query(default="admin", description="Target persona: admin, officer, or borrower"),
     model_version: str | None = Query(default=None, description="Optional model version filter"),
     borrower_id: uuid.UUID | None = Query(default=None, description="Optional borrower UUID"),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> dict:
     return await DashboardService(db).get_persona_charts(
         persona=persona,
@@ -48,7 +48,7 @@ async def dashboard_charts(
 async def fairness(
     period: str | None = Query(default=None),
     officer_id: str = Depends(require_officer),  # noqa: ARG001
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> dict:
     return await DashboardService(db).fairness_latest(period=period)
 
@@ -61,7 +61,7 @@ async def fairness(
 async def fairness_export(
     period: str | None = Query(default=None),
     officer_id: str = Depends(require_officer),  # noqa: ARG001
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> Response:
     csv_data = await FairnessAuditor(db).export_csv(period=period)
     return Response(
@@ -87,7 +87,7 @@ async def score_report(
     score_id: uuid.UUID,
     partner_re_id: str | None = Query(default=None),
     officer_id: str = Depends(require_officer),  # noqa: ARG001
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> HTMLResponse:
     try:
         html = await DashboardService(db).render_score_report_html(
@@ -107,7 +107,7 @@ async def score_report_pdf(
     score_id: uuid.UUID,
     partner_re_id: str | None = Query(default=None),
     officer_id: str = Depends(require_officer),  # noqa: ARG001
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
 ) -> Response:
     try:
         html_str = await DashboardService(db).render_score_report_html(

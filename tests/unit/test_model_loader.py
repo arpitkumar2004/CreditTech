@@ -22,3 +22,4 @@ def test_load_all_registered_models():
         score_100, score_900 = scorecard.calibrate_score(prob)
         assert 0.0 <= score_100 <= 100.0
         assert 300 <= score_900 <= 900
+

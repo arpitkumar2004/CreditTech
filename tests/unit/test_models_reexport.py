@@ -22,3 +22,4 @@ def test_all_models_reexported():
     ]
     for name in expected_models:
         assert hasattr(models, name), f"Missing model {name} in services.core.shared.models"
+

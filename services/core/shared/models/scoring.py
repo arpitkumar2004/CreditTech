@@ -80,3 +80,4 @@ class ReasonCode(Base):
 
     # Relationships
     score: Mapped[Score] = relationship(back_populates="reason_codes")
+

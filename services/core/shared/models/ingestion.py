@@ -87,3 +87,4 @@ class FeatureSnapshot(Base):
 
     # Relationships
     borrower: Mapped[Borrower] = relationship(back_populates="feature_snapshots")
+

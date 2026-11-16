@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import pickle
-from typing import Any
+from pathlib import Path
 
 from ml.training.base import BaseScorecard
 
@@ -32,12 +31,12 @@ def load_scorecard_model(artifact_path: str | Path, model_type: str | None = Non
             magic = f.read(2)
             if magic.startswith(b"\x80"):
                 is_pickle = True
-    except Exception:
+    except OSError:
         pass
 
     if path.suffix == ".pkl" or is_pickle:
         with open(path, "rb") as f:
-            loaded = pickle.load(f)
+            loaded = pickle.load(f)  # noqa: S301
 
         # If it's already an instantiated BaseScorecard (e.g. MonotonicGBMScorecard)
         if isinstance(loaded, BaseScorecard):
@@ -71,3 +70,4 @@ def load_scorecard_model(artifact_path: str | Path, model_type: str | None = Non
 
     from ml.training.scorecard import LogisticScorecard
     return LogisticScorecard.from_dict(data)
+

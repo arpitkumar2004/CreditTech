@@ -147,3 +147,4 @@ class ConsentAuditLog(Base):
 
     # Relationships
     consent: Mapped[ConsentRecord] = relationship(back_populates="audit_logs")
+

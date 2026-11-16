@@ -101,3 +101,4 @@ class Borrower(Base):
     data_pulls: Mapped[list[DataPull]] = relationship(back_populates="borrower")
     feature_snapshots: Mapped[list[FeatureSnapshot]] = relationship(back_populates="borrower")
     scores: Mapped[list[Score]] = relationship(back_populates="borrower")
+

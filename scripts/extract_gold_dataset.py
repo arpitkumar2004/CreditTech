@@ -238,7 +238,13 @@ def export_dataset(
     meta_file = out_dir / f"credit_train_{timestamp}_metadata.json"
 
     if fmt == "parquet":
-        df.to_parquet(data_file, engine="pyarrow", index=False)
+        try:
+            df.to_parquet(data_file, engine="pyarrow", index=False)
+        except (ImportError, ModuleNotFoundError):
+            fmt = "csv"
+            data_file = out_dir / f"credit_train_{timestamp}.csv"
+            df.to_csv(data_file, index=False)
+            metadata["format_fallback"] = "csv (pyarrow unavailable)"
     else:
         df.to_csv(data_file, index=False)
 

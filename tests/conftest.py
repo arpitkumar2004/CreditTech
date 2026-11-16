@@ -11,7 +11,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from services.core.config import Settings, get_settings
-from services.core.database import Base, get_db
+from services.core.database import Base, get_db, get_read_db
 from services.core.main import app
 
 # Use SQLite in-memory database for fast testing
@@ -82,6 +82,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_read_db] = override_get_db
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://testserver"

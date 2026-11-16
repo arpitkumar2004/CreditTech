@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ml.evaluation.explain import ScorecardSHAPExplainer
 from ml.registry import ModelRegistry
+from ml.training.base import BaseScorecard
+from ml.training.loader import load_scorecard_model
 from ml.training.scorecard import LogisticScorecard
 from services.core.explainability.service import ExplainabilityService
 from services.core.shared.logging import get_logger
@@ -17,7 +19,7 @@ from .schemas import ScoreRequest
 logger = get_logger("scoring.service")
 
 
-def _load_scorecard_from_registry(model_version: str | None) -> tuple[Any, dict | None]:
+def _load_scorecard_from_registry(model_version: str | None) -> tuple[BaseScorecard, dict | None]:
     """Prefer a registered artifact; fall back to the built-in default scorecard.
 
     Returns (scorecard, feature_means_or_none). feature_means is used as SHAP
@@ -32,34 +34,10 @@ def _load_scorecard_from_registry(model_version: str | None) -> tuple[Any, dict 
     if artifact is None or not artifact.exists():
         return LogisticScorecard(), None
 
-    import json
-    scorecard = None
-
-    # Check if artifact is a pickle (e.g. MonotonicGBMScorecard)
-    is_pickle = False
-    try:
-        with open(artifact, "rb") as f:
-            magic = f.read(2)
-            if magic.startswith(b"\x80"):
-                is_pickle = True
-    except Exception:
-        pass
-
-    if is_pickle or artifact.suffix == ".pkl" or (artifact.parent / "scorecard.pkl").exists() and not artifact.exists():
-        from ml.training.gbm_challenger import MonotonicGBMScorecard
-        pkl_path = artifact if is_pickle else (artifact.parent / "scorecard.pkl")
-        scorecard = MonotonicGBMScorecard.from_artifact(pkl_path)
-    else:
-        with open(artifact, encoding="utf-8") as f:
-            data = json.load(f)
-
-        if "woe_transformer" in data:
-            from ml.training.woe_scorecard import WoEScorecard
-            scorecard = WoEScorecard.from_dict(data)
-        else:
-            scorecard = LogisticScorecard.from_dict(data)
+    scorecard = load_scorecard_model(artifact, model_type=record.model_type)
 
     # Pull the training-set feature means from the report if present.
+    import json
     report_path = artifact.parent / "training_report.json"
     feature_means: dict | None = None
     if report_path.exists():

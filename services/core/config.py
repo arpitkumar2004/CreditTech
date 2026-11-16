@@ -1,15 +1,18 @@
 """CreditTech application configuration via pydantic-settings."""
 
+import os
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_env = os.getenv("APP_ENV", "development").lower()
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables / .env file."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", f".env.{_env}"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -26,6 +29,14 @@ class Settings(BaseSettings):
     # ── Database ─────────────────────────────────────────────
     database_url: str = "sqlite+aiosqlite:///./credittech.db"
     database_echo: bool = False
+    database_pool_size: int = 5
+    database_max_overflow: int = 10
+    database_statement_cache_size: int = 0  # 0 disables statement cache for PgBouncer transaction mode
+
+    # ── Database Read Replica (Analytics / Dashboards) ───────
+    database_read_url: str | None = None
+    database_read_pool_size: int = 5
+    database_read_max_overflow: int = 10
 
     # ── Security ─────────────────────────────────────────────
     secret_key: str = "CHANGE_ME_TO_A_RANDOM_64_CHAR_STRING"

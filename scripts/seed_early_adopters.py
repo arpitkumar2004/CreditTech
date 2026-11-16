@@ -34,7 +34,7 @@ except ImportError:
 
 from sqlalchemy import select
 from services.core.config import get_settings
-from services.core.database import async_session_factory, engine, init_db
+from services.core.database import async_session_factory, init_db
 from services.core.shared.models import (
     Borrower,
     ConsentAuditLog,
@@ -50,7 +50,6 @@ from services.core.shared.models import (
     Village,
 )
 from services.core.shared.test_personas import (
-    BORROWER_RADHIKA_ID,
     VILLAGE_ALPHA_ID,
     VILLAGE_ALPHA_NAME,
     VILLAGE_BETA_ID,
@@ -369,7 +368,6 @@ async def seed_early_adopters() -> None:
 
         borrowers_to_add = []
         consents_to_add = []
-        audits_to_add = []
         snapshots_to_add = []
         scores_to_add = []
         reasons_to_add = []
@@ -529,13 +527,13 @@ async def seed_early_adopters() -> None:
             tenure = 18 if profile["amt"] <= 50000 else (24 if profile["amt"] <= 80000 else 36)
 
             # Decision distribution: 65% APPROVED, 20% MORE_INFO_REQUIRED, 15% REJECTED
-            if calibrated_score >= 640:
+            if calibrated_score_900 >= 640:
                 decision = "APPROVED"
                 approved_amt = float(profile["amt"])
                 recom = "APPROVE"
                 override = False
                 ov_reason = None
-            elif calibrated_score >= 540:
+            elif calibrated_score_900 >= 540:
                 decision = "MORE_INFO_REQUIRED" if (idx % 2 == 0) else "APPROVED"
                 approved_amt = float(profile["amt"] * 0.85) if decision == "APPROVED" else None
                 recom = "REVIEW"

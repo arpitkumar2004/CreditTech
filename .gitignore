@@ -14,6 +14,7 @@ pip-wheel-metadata/
 .env
 .env.*
 !.env.example
+!.env.*.example
 .venv/
 venv/
 env/
@@ -25,8 +26,18 @@ coverage.xml
 htmlcov/
 *.log
 local_settings.py
+# Databases & SQLite
+*.db
+*.sqlite3
+*.sqlite3-journal
 db.sqlite3
 db.sqlite3-journal
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Superpowers scratch
+.superpowers/
 
 # Flask stuff:
 instance/
